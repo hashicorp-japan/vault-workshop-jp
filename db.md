@@ -33,6 +33,32 @@ Success! Enabled the database secrets engine at: database/
 	* Time to Live
 * クライアントからVaultに対してシークレットの発行を依頼する
 
+ローカルでMySQLを起動してください。
+```console
+$ sudo mysql.server start
+Password:
+Starting MySQL
+.Logging to '/usr/local/var/mysql/Takayukis-MacBook-Pro.local.err'.
+ SUCCESS!
+ ```
+
+
+> rootユーザのパスワードが設定されていない場合、以下のコマンドで変更してください。
+> ```console
+> $ vault mysql -u root
+> ```
+> 
+> ```mysql
+> mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'rooooot';
+> Query OK, 0 rows affected (0.00 sec)
+> 
+> mysql> exit
+> ```
+> 
+> ```console
+> $ vault sudo mysql.server restart
+> ```
+
 
 
 ## 参考リンク
