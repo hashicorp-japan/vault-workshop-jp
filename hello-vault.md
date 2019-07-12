@@ -14,7 +14,7 @@ chmod +x /usr/local/bin/vault
 
 新しい端末を立ち上げ、Vaultのバージョンを確認します。
 ```console
-vault -version                                                                       
+$ vault -version                                                                       
 Vault v1.1.1+ent ('7a8b0b75453b40e25efdaf67871464d2dcf17a46')
 ```
 
