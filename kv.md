@@ -241,3 +241,4 @@ $ vault kv metadata delete kv/iam
 ## 参考リンク
 * [Vault KV Secret Engine](https://www.vaultproject.io/docs/secrets/kv/kv-v2.html)
 * [vault kv command](https://www.vaultproject.io/docs/commands/kv/patch.html)
+* [API Document](https://www.vaultproject.io/api/secret/kv/index.html)
