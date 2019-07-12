@@ -187,7 +187,7 @@ password    passwd-2
 
 このようにキーの存在ごと上書きされてしまいます。つぎに`patch`オプションを使ってみます。まずはデータを戻します。
 ```console
-vault kv put kv/iam name=kabu-2 password=passwd
+$ vault kv put kv/iam name=kabu-2 password=passwd
 Key              Value
 ---              -----
 created_time     2019-07-12T06:21:38.791328Z
@@ -237,7 +237,6 @@ password    passwd-2
 $ vault kv delete kv/iam
 $ vault kv metadata delete kv/iam
 ```
-
 
 ## 参考リンク
 * [Vault KV Secret Engine](https://www.vaultproject.io/docs/secrets/kv/kv-v2.html)
