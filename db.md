@@ -345,6 +345,7 @@ mysql>
 ```
 
 `revoke`コマンドを実行してみます。
+
 ```console
 $ vault lease revoke database/creds/role-handson-2/JSnf6zV2jTrRJmI66Hfz189K
 All revocation operations queued successfully!
