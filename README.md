@@ -8,9 +8,9 @@
 * Secret Engine 3: パブリッククラウドIAM ([AWS](), [Azure](), [GCP]())
 * Response Rapping
 * PKI Engine
-* [Encryption as a Service]((https://github.com/tkaburagi/wip-vault-workshop/blob/master/transit.md)
+* [Encryption as a Service](https://github.com/tkaburagi/wip-vault-workshop/blob/master/transit.md)
 * クラスタ構成
-* CIツール連携
-* [Kubernetes連携]((https://github.com/tkaburagi/wip-vault-workshop/blob/master/k8s.md))
+* CIツール連
+* [Kubernetes連携](https://github.com/tkaburagi/wip-vault-workshop/blob/master/k8s.md)
 * Cloud Foundry連携
 * Enterprise機能の紹介
