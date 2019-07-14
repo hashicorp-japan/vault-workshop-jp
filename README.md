@@ -13,4 +13,5 @@
 * CIツール連携
 * [Kubernetes連携](https://github.com/tkaburagi/wip-vault-workshop/blob/master/k8s.md)
 * Cloud Foundry連携
+* VaultとSpringを使った簡単なWebシステムを作る
 * Enterprise機能の紹介
