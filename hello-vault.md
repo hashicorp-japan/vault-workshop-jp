@@ -7,12 +7,14 @@
 [こちら](https://www.vaultproject.io/downloads.html)のWebサイトからご自身のOSに合ったものをダウンロードしてください。
 
 パスを通します。以下はmacOSの例ですが、OSにあった手順で`vault`コマンドにパスを通します。
+
 ```shell
 mv /path/to/vault /usr/local/bin
 chmod +x /usr/local/bin/vault
 ```
 
 新しい端末を立ち上げ、Vaultのバージョンを確認します。
+
 ```console
 $ vault -version                                                                       
 Vault v1.1.1+ent ('7a8b0b75453b40e25efdaf67871464d2dcf17a46')
@@ -56,6 +58,7 @@ Root Token: s.rAc6mBZgrNwPxSky2dBJkgSd
 途中で出力される`Root Token`は後で使いますのでメモしてとっておきましょう。`-dev`モードで起動すると、データーストレージのコンフィグレーション等を行うことなく、プリセットされた設定で手軽に起動することが出来ます。クラスタ構成やデータストレージなど細かな設定が必要な場合には利用しません。また、デフォルトだとデータはインメモリに保存されるため、起動毎にデータが消滅します。
 
 では、先ほど取得したトークンでログインしてみます。
+
 ```console
 $ vault login                                                                                             
 Token (will be hidden):
@@ -75,6 +78,7 @@ policies             ["root"]
 ```
 
 現在有効になっているシークレットエンジンを見てみます。現在使っているトークンはroot権限と紐づいているため、現在有効になっている全てのシークレットにアクセスすることが可能です。
+
 ```console
 $ vault secrets list 
 Path          Type         Accessor              Description
@@ -86,6 +90,7 @@ sys/          system       system_b2dfb5a6       system endpoints used for contr
 ```
 
 `kv`シークレットエンジンを使って、簡単なシークレットをVaultに保存して取り出してみます。
+
 ```console
 $ vault kv list secret/                         
 No value found at secret/metadata
@@ -118,13 +123,23 @@ Key         Value
 password    p@SSW0d
 ```
 
-Vaultにデータをputしてget出来ました。以降のセッションでその他のシークレットを扱っていきますが、「認証され」「ポシリーに基づいたトークンを取得し」「トークンを利用してシークレットにアクセスする」これが基本の流れです。
+また、VaultのCLIはAPIへのHTTPSのアクセスをラップしているため、全てのCLIでの操作はAPIへのcurlのリクエストに変換できます。`-output-curl-string`を使うだけです。
+
+```console
+$ vault kv list -output-curl-string kv/
+curl -H "X-Vault-Token: $(vault print token)" http://127.0.0.1:8200/v1/kv/metadata?list=true
+```
+
+curlコマンドを使ったリクエストが表示されました。アプリなどのクライアントからVaultのAPIを呼ぶ時などに記述方法に迷った時などに便利です。
+
+さて、Vaultにデータをputしてget出来ました。以降のセッションでその他のシークレットを扱っていきますが、「認証され」「ポシリーに基づいたトークンを取得し」「トークンを利用してシークレットにアクセスする」これが基本の流れです。
 
 ## Vaultのコンフィグレーション
 
 一旦Vaultのサーバを停止し、次はVaultのコンフィグレーションを作成し、起動してみます。Vaultのコンフィグレーションは`HashiCorp Configuration Language`で記述します。
 
 デスクトップに任意のフォルダーを作って、以下のファイルを作成します。ファイル名は`vault-local-config.hcl`とします。
+
 ```hcl
 storage "file" {
    path = "/tmp/vaultdata"
@@ -169,6 +184,7 @@ container.
 ## Vaultの初期化処理
 
 別の端末を立ち上げて以下のコマンドを実行してください。GUIでも同様のことが出来ますが、このハンズオンでは全てCLIを使います。
+
 ```console
 $ vault operator init
 Unseal Key 1: E9wz16Q+6K8sHdV0G1IZNw4/xBC3b0lm28Hz0K/MyfM1
@@ -181,6 +197,7 @@ Initial Root Token: s.51du1iIeam79Q5fBRBALVhRB
 ```
 
 initの処理をすると、Vaultを`unseal`するためのキーと`Initial Root Token`が生成されます。試しにこの状態でログインしてみます。
+
 ```console
 $ vault login                                                                         
 Token (will be hidden):
@@ -195,6 +212,7 @@ Code: 503. Errors:
 エラーになるはずです。Vaultでは`sealed`という状態になっているといかに強力な権限のあるトークンを使ったとしてもいかなる操作も受け付けません。`unseal`の処理は`Unseal Key`を使います。
 
 デフォルトだと5つのキーが生成され、そのうち3つのキーが集まると`unseal`されます。5つの`Unseal Key`の任意の3つを使ってみましょう。`vault operator unseal`コマンドを3度実行します。
+
 ```console
 $ vault operator unseal                                                        
 Unseal Key (will be hidden):
@@ -240,6 +258,7 @@ HA Enabled      false
 ``` 
 
 3回目の出力で`Sealed`が`false`に変化したことがわかるでしょう。この状態で再度ログインします。
+
 ```console
 $ vault login
 Token (will be hidden):

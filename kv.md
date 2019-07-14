@@ -24,6 +24,7 @@ sys/          system       system_ae51ee57       system endpoints used for contr
 ## KVデータのライフサイクル
 
 先ほどと同様、データをputしてみましょう。
+
 ```console
 $ vault kv put kv/iam name=kabu password=passwd
 $ vault kv get kv/iam                                            
@@ -35,6 +36,7 @@ password    passwd
 ```
 
 また、デフォルトではテーブル形式ですが様々なフォーマットで出力を得られます。
+
 ```console
 $ vault kv get -format=yaml kv/iam    
 data:
@@ -61,6 +63,7 @@ $ vault kv get -format=json kv/iam
 ```
 
 特定のフィールドのデータを抽出することもできます。
+
 ```console
 $ vault kv get -format=json -field=name kv/iam
 "kabu"
@@ -68,6 +71,7 @@ $ vault kv get -format=json -field=name kv/iam
 
 ### データの更新
 データの更新には2通りの方法があります。
+
 
 まずは上書きしてデータのバージョンを上げる方法です。
 ```console
@@ -87,7 +91,9 @@ Key         Value
 name        kabu
 password    passwd
 ```
+
 `enable-versionin`をするとメタデータが付与され、バージョン管理されます。データを上書きしてバージョン2を作ってみます。
+
 ```console
 $ vault kv put kv/iam name=kabu-2 password=passwd
 Key              Value
@@ -114,6 +120,7 @@ password    passwd
 ```
 
 データが上書きされてバージョン2のデータが生成されました。古いバージョンのデータは`-version`オプションを付与することで参照できます。
+
 ```console
 vault kv get -version=1 kv/
 ====== Metadata ======
@@ -132,6 +139,7 @@ password    passwd
 ```
 
 古いバージョンのデータを削除する際は以下の手順です。
+
 ```console
 $ vault kv destroy -versions=1 kv/iam
 $ vault kv get -version=1 kv/
@@ -186,6 +194,7 @@ password    passwd-2
 ```
 
 このようにキーの存在ごと上書きされてしまいます。つぎに`patch`オプションを使ってみます。まずはデータを戻します。
+
 ```console
 $ vault kv put kv/iam name=kabu-2 password=passwd
 Key              Value
@@ -212,6 +221,7 @@ password    passwd
 ```
 
 データの一部を更新してみましょう。
+
 ```console
 $ vault kv patch kv/iam password=passwd
 $ vault kv get kv/iam
@@ -231,8 +241,8 @@ password    passwd-2
 ```
 `patch`を使うとデータの一部のみを更新できます。
 
-
 最後にデータを削除します。
+
 ```console
 $ vault kv delete kv/iam
 $ vault kv metadata delete kv/iam
