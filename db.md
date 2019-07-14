@@ -205,7 +205,7 @@ $ vault write database/roles/role-handson−2 \
 Success! Data written to: database/roles/role-handson
 ```
 
-`allowed_roles`に`role-handson-2`を追加し、`role-handson-2`を作成しています。。`GRANT SELECT ON handson.product`としています。
+`allowed_roles`に`role-handson-2`を追加し、`role-handson-2`を作成しています。`GRANT SELECT ON handson.product`としています。
 
 このロールを使ってユーザを発行してログインしてみます。
 
@@ -219,7 +219,7 @@ lease_renewable    true
 password           A1a-8aBlTXjRSu9eR3y1
 username           v-role-Ync7153K8
 
-$ mysql -u v-role-Ync7153K8  -p                              kabu@/Users/kabu
+$ mysql -u v-role-Ync7153K8  -p                      
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 7
