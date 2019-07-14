@@ -251,7 +251,111 @@ mysql> show databases;
 
 ### 動的シークレットの破棄
 
+一つはTTLを設定した自動破棄です。短いTTLを設定した新しいロールを作ってみます。
 
+```console
+$ vault write database/config/mysql-handson-db \ 
+  plugin_name=mysql-legacy-database-plugin \
+  connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
+  allowed_roles="role-handson","role-handson-2","role-handson-3" \
+  username="root" \
+  password="rooooot"
+
+$ vault write database/roles/role-handson−3 \
+    db_name=mysql-handson-db \
+    creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
+    default_ttl="30s" \
+    max_ttl="30s"
+Success! Data written to: database/roles/role-handson
+```
+
+`max_ttl`のパラメータに30秒を指定しています。`default_ttl`生成した時のTTL、`max_ttl`は`renew`できる最大のTTLです。
+
+このロールを利用してShort Livedなユーザを発行します。
+
+```console
+vault read database/creds/role-handson-3
+Key                Value
+---                -----
+lease_id           database/creds/role-handson-3/H3y6DjZBGztisnO3B3DqzgkA
+lease_duration     30s
+lease_renewable    true
+password           A1a-0VP1UDi5BPEMnPnZ
+username           v-role-bnsYTFQAj
+```
+
+`lease_duration`が設定したTTLの30秒になっています。これを使ってまずは試しにログインしてみます。
+
+```console
+$ mysql -u v-role-bnsYTFQAj -p           
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 16
+Server version: 5.7.25 Homebrew
+
+Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> exit
+Bye¥
+```
+
+30秒後に再度ログインします。
+
+```console
+$ mysql -u v-role-bnsYTFQAj -p        
+Enter password:
+ERROR 1045 (28000): Access denied for user 'v-role-bnsYTFQAj'@'localhost' (using password: YES)
+```
+
+ユーザが破棄され、利用不可能になりました。
+
+2つ目の方法は`revoke`コマンドを使って明示的に破棄する方法です。`role-handson-2`のロールを使って新規のユーザを払い出します。払い出された`lease_id`をメモっておいてください。revokeの際に使用します。
+
+```console
+$ vault read database/creds/role-handson-2
+Key                Value
+---                -----
+lease_id           database/creds/role-handson-2/JSnf6zV2jTrRJmI66Hfz189K
+lease_duration     1h
+lease_renewable    true
+password           A1a-TaZktgzsQw4FfIT8
+username           v-role-jklQMrcJa
+
+$ mysql -u v-role-jklQMrcJa -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 22
+Server version: 5.7.25 Homebrew
+
+Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+```
+
+`revoke`コマンドを実行してみます。
+```console
+$ vault lease revoke database/creds/role-handson-2/JSnf6zV2jTrRJmI66Hfz189K
+All revocation operations queued successfully!
+
+$ mysql -u v-role-jklQMrcJa -p
+Enter password:
+ERROR 1045 (28000): Access denied for user 'v-role-jklQMrcJa'@'localhost' (using password: YES)
+```
+
+revokeされ、ログインが出来なくなりました。このようにVaultではシークレットを動的に生成し、短い時間でユーザを細かく破棄し、クレデンシャルをセキュアに保つ運用が簡単に実現できます。
 
 ## 参考リンク
 * [API Documents](https://www.vaultproject.io/api/secret/databases/index.html)
+* [Lease, Renew, and Revoke](https://www.vaultproject.io/docs/concepts/lease.html)
