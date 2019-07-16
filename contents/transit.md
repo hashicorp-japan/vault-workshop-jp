@@ -24,14 +24,16 @@ transit/      transit      transit_ec14846c      n/a
 ```
 
 Transitが有効になりました。Transitには大きく
+
 * 暗号化
 * 復号化
 * キーローテーション
+
 の機能があります。
 
 ## 初めての暗号化と復号化
 
-早速データを暗号化してみましょう。Transitで暗号化するためにはPlaintextはbase64で暗号化する必要があります。macOSであればターミナルから実行可能ですし、[こちら]のWebサイトでもエンコードができます。
+早速データを暗号化してみましょう。Transitで暗号化するためにはPlaintextはbase64で暗号化する必要があります。macOSであればターミナルから実行可能ですし、[こちら](https://kujirahand.com/web-tools/Base64.php)のWebサイトでもエンコードができます。
 
 `myimportantpassword`というパスワードを暗号化してみます。
 
@@ -64,7 +66,7 @@ myimportantpassword
 
 無事に復号化できました。
 
-暗号化キーは様々なアルゴリズムをサポートしており、`-type`で指定可能です。
+暗号化キーは様々なアルゴリズムをサポートしており、`type`で指定可能です。
 
 * aes256-gcm96 (Default)
 * chacha20-poly1305 
