@@ -1,0 +1,291 @@
+# TransitシークレットエンジンでVaultをEncryption as a Seviceとして使う
+
+これまでVaultのシークレット管理の機能を扱ってきましたが、Vaultの二つ目のユースケースは`Data Protection`です。その中でもAPIドリブンなEncryptionの機能を使ってVaultを暗号化としてのサービスとして扱う`Encryption as a Service (EaaS)`は非常に多く採用されているユースケースです。
+
+ここではそれを実現するTransitの機能と、実際のアプリを使った利用イメージを扱います。
+
+## Transitを有効化する。
+
+その他のシークレットエンジンと同様、EaaSを利用する際は`Transit`というシークレットエンジンを`enabled`にします。
+
+```console
+$ vault secrets enable -path=transit transit
+Success! Enabled the transit secrets engine at: transit/
+
+$ vault secrets list
+Path          Type         Accessor              Description
+----          ----         --------              -----------
+cubbyhole/    cubbyhole    cubbyhole_e3aa0798    per-token private secret storage
+database/     database     database_603dc42e     n/a
+identity/     identity     identity_86c0240d     identity store
+kv/           kv           kv_20084de2           n/a
+sys/          system       system_ae51ee57       system endpoints used for control, policy and debugging
+transit/      transit      transit_ec14846c      n/a
+```
+
+Transitが有効になりました。Transitには大きく
+* 暗号化
+* 復号化
+* キーローテーション
+の機能があります。
+
+## 初めての暗号化と復号化
+
+早速データを暗号化してみましょう。Transitで暗号化するためにはPlaintextはbase64で暗号化する必要があります。macOSであればターミナルから実行可能ですし、[こちら]のWebサイトでもエンコードができます。
+
+`myimportantpassword`というパスワードを暗号化してみます。
+
+```console
+$ base64 <<< "myimportantpassword"
+bXlpbXBvcnRhbnRwYXNzd29yZAo=
+```
+
+これを`transit/encrypt/`のエンドポイントを使って暗号化キーを作り、暗号化します。`my-encrypt-key`は暗号化キーの名前です。
+
+```console
+$ vault write transit/encrypt/my-encrypt-key plaintext=bXlpbXBvcnRhbnRwYXNzd29yZAo=
+Key           Value
+---           -----
+ciphertext    vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4iSocUfG5
+```
+
+この暗号化の機能はbase64にさえ変換してしまえば画像など様々な形式のデータを暗号化することができます。
+
+次に復号化をしてみます。復号化は`transit/decrypt/`のエンドポイントを使います。
+
+```console
+$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4iSocUfG5
+Key          Value
+---          -----
+
+$ base64 --decode <<< "bXlpbXBvcnRhbnRwYXNzd29yZAo="
+myimportantpassword
+```
+
+無事に復号化できました。
+
+暗号化キーは様々なアルゴリズムをサポートしており、`-type`で指定可能です。
+
+* aes256-gcm96 (Default)
+* chacha20-poly1305 
+* ed25519 
+* ecdsa-p256 
+* rsa-2048 
+* rsa-4096
+
+### キーローテーション
+
+暗号化、復号化のキーはどれだけ強力なアルゴリズムを使っても時間をかければ必ず解読出来てしまいます。そのため環境を最大限にセキュアに保つためにはキー自体をローテーションさせ、長く使わず短いサイクルでリニューアルすることが大切です。
+
+Transitでは`transit/keys/<KEYNAME>/rotate`と`transit/rewrap/<KEYNMAME>`というエンドポイントで簡単に実現できます。
+
+`rotate`はキーの更新、`rewarp`は古いデータを新しいキーで再暗号化するためのエンドポイントです。
+
+```console
+$ vault write -f transit/keys/my-encrypt-key/rotate
+$ vault read transit/keys/my-encrypt-key
+Key                       Value
+---                       -----
+allow_plaintext_backup    false
+deletion_allowed          false
+derived                   false
+exportable                false
+keys                      map[2:1563181079 1:1563181077]
+latest_version            2
+min_available_version     0
+min_decryption_version    1
+min_encryption_version    0
+name                      my-encrypt-key
+supports_decryption       true
+supports_derivation       true
+supports_encryption       true
+supports_signing          false
+type                      aes256-gcm96
+```
+
+バージョンが2に変わりました。`min_decryption_version`はこのデータが復号化できる最小のキーのバージョンを示しています。まずはこの状態で新しいデータを暗号化してみましょう。
+
+```console
+$ base64 <<< "myimportantpassword-v2"
+bXlpbXBvcnRhbnRwYXNzd29yZC12Mgo=
+
+$ vault write transit/encrypt/my-encrypt-key plaintext=bXlpbXBvcnRhbnRwYXNzd29yZC12Mgo=
+Key           Value
+---           -----
+ciphertext    vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7AkbiNgdr0gVOALw
+```
+
+新しいデータはv2のキーで暗号化復号化され、それ以前のデータは古いキーで復号化されます。v1とv2で暗号化したデータを復号化してみます。
+
+```console
+$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:0ys5ZE1/azWn6m6y5TYLjQeA0NoDgckT9Y3AJAJBI3oZgwhCj9Eqb9oT1FUfwJyj
+Key          Value
+---          -----
+plaintext    bXlpbXBvcnRhbnRwYXNzd29yZAo=
+
+$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7AkbiNgdr0gVOALw
+Key          Value
+---          -----
+plaintext    bXlpbXBvcnRhbnRwYXNzd29yZC12Mgo=
+```
+
+この状態でいずれv2の新しいキーに全てのデータを移行したいです。そのためには`rewrap`という操作を行い、古いデータの更新(再暗号化)を行います。`ciphertext`にはv1のデータを入れてください。
+
+```console
+$ vault write transit/rewrap/my-encrypt-key ciphertext=vault:v1:0ys5ZE1/azWn6m6y5TYLjQeA0NoDgckT9Y3AJAJBI3oZgwhCj9Eqb9oT1FUfwJyj
+Key           Value
+---           -----
+ciphertext    vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
+```
+
+`min_decryption_version`を更新しv1のキーを無効化し、利用できないようにします。
+
+```console
+$ vault write  transit/keys/my-encrypt-key/config min_decryption_version=2
+Success! Data written to: transit/keys/my-encrypt-key/config
+
+$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
+Key          Value
+---          -----
+plaintext    bXlpbXBvcnRhbnRwYXNzd29yZAo=
+
+$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:0ys5ZE1/azWn6m6y5TYLjQeA0NoDgckT9Y3AJAJBI3oZgwhCj9Eqb9oT1FUfwJyj
+Error writing data to transit/decrypt/my-encrypt-key: Error making API request.
+
+URL: PUT http://127.0.0.1:8200/v1/transit/decrypt/my-encrypt-key
+Code: 400. Errors:
+
+* ciphertext or signature version is disallowed by policy (too old)
+```
+
+v1のデータは復号化出来なくなり、v1のキーが無効になっていることがわかります。
+
+## 実際のアプリで使ってみる
+
+次に利用イメージをもう少し理解しやすくするため、SpringのアプリでTransitを利用してみます。アプリのレポジトリをcloneし起動します。
+
+```console
+$ git clone https://github.com/tkaburagi/spring-vault-transit-demo
+$ cd spring-vault-transit-demo
+$ sed "s|VAULT_TOKEN=|VAULT_TOKEN=<YOUR_ROOT_TOKEN>|g" set-env-local.sh > my-set-env-local.sh
+$ cat my-set-env-local.sh
+#!/bin/sh
+
+export VAULT_HOST=127.0.0.1
+export VAULT_TOKEN=s.51du1iIeam79Q5fBRBALVhRB
+export APPROLE=vault-approle
+export MYSQL_JDBC_URL=jdbc:mysql://127.0.0.1:3306/handson
+export MYSQL_USERNAME=root
+export MYSQL_PASSWORD=rooooot
+
+$ mvn clean package -DskipTests
+
+$ java -jar target/demo-0.0.1-SNAPSHOT.jar
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.1.4.RELEASE)
+
+2019-07-15 21:50:19.739  INFO 7226 --- [           main] com.example.demo.VaultDemoApplication    : Starting VaultDemoApplication v0.0.1-SNAPSHOT on Takayukis-MacBook-Pro.local with PID 7226 (/Users/kabu/hashicorp/intellij/springboot-vault-transit/target/demo-0.0.1-SNAPSHOT.jar started by kabu in /Users/kabu/hashicorp/intellij/springboot-vault-transit)
+2019-07-15 21:50:19.741  INFO 7226 --- [           main] com.example.demo.VaultDemoApplication    : No active profile set, falling back to default profiles: default
+```
+
+次にポリシーの設定をします。このポリシーはアプリの中で利用される`AppRole`の認証で付与されるトークンの権限となります。
+次にこのアプリから使うユーザのポリシーを作成します。`policy-vault.hcl`というファイル名で以下のようにして作成してください。
+
+```hcl
+# Enable transit secrets engine
+path "sys/mounts/transit" {
+  capabilities = [ "create", "read", "update", "delete", "list" ]
+}
+
+# To read enabled secrets engines
+path "sys/mounts" {
+  capabilities = [ "read" ]
+}
+
+# Manage the transit secrets engine
+path "transit/*" {
+  capabilities = [ "create", "read", "update", "delete", "list" ]
+}
+```
+
+```console
+$ vault policy write vault-policy path/to/policy-vault.hcl
+$ vault write auth/approle/role/vault-approle policies=vault-policy period=1h
+```
+
+最後にデータベースにテーブルを作ります。
+
+```mysql
+use handson;
+create table users (id varchar(50), username varchar(50), password varchar(200), email varchar(50), address varchar(50), creditcard varchar(200));
+```
+
+コードの説明は後ほどしますが、このアプリには4つのエンドポイントがあります。
+
+まずはパラメータで渡された文字列を暗号化、復号化する単純なエンドポイントです。
+
+```console
+$ curl -G http://localhost:8080/api/v1/transit/encrypt -d "ptext=hellotransit" 
+vault:v1:Wa87EPlyIe0xaF8R+725/j8XRB18cbM8PfGLjM0jmlRCaVD0FmGJQg==
+
+$ curl -G http://localhost:8080/api/v1/transit/decrypt --data-urlencode "ctext=vault:v1:9ZNILrEWKswi+lHhzGRXHfN0sY+idGEIHQZ4IVeLRNey/pNLibKZ6Q=="
+hellotransit                            
+```
+
+次にデータを暗号化し、データベースにデータを保存するエンドポイントです。`api/v1/encrypt/add-user`に平文でデータを渡すと暗号化され、データベースに暗号刺されたデータがinsertされます。
+
+```console
+$ curl http://localhost:8080/api/v1/encrypt/add-user -d username="Takayuki Kaburagi" -d password="PqssWOrd" -d address="Yokohama" --data-urlencode creditcard="9999-8888-6666-6666" --data-urlencode email="t.kaburagi@me.com"
+
+{"id":"db0bbb62-fdfd-4e2e-a4db-1e5e32e36761","username":"Takayuki Kaburagi","password":"vault:v1:aRtAJK+ED8ap2vM5f9ba8eL0VvnjD+Akw8ag2eHLYNucXfRx","email":"h.kaburagi@me.com","address":"Yokohama","creditcard":"vault:v1:LYpkecFI4bY6c7I8a3fB47d0oHNf6bPL/6VTc14g+zgEVg47EoRjKWTJeYeaisw="}
+```
+
+データベースで確認してみましょう。
+
+```mysql
+mysql> select * from users;;
++--------------------------------------+-----------------+-----------------------------------------------------------+-------------------+----------+---------------------------------------------------------------------------+
+| id                                   | username        | password                                                  | email             | address  | creditcard                                                                |
++--------------------------------------+-----------------+-----------------------------------------------------------+-------------------+----------+---------------------------------------------------------------------------+
+| db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | Takayuki Kaburagi | vault:v1:aRtAJK+ED8ap2vM5f9ba8eL0VvnjD+Akw8ag2eHLYNucXfRx | t.kaburagi@me.com | Yokohama | vault:v1:LYpkecFI4bY6c7I8a3fB47d0oHNf6bPL/6VTc14g+zgEVg47EoRjKWTJeYeaisw= |
++--------------------------------------+-----------------+-----------------------------------------------------------+-------------------+----------+---------------------------------------------------------------------------+
+```
+
+暗号されたデータが保存されていることがわかります。次にデータを取り出すためのエンドポイントです。`api/v1/plain/get-use`ではデータをそのまま取り出します。上の`uuid`の値をメモしてください。
+
+```console
+curl -G "http://localhost:8080/apri/v1/plain/get-use" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
+{
+  "id": "db0bbb62-fdfd-4e2e-a4db-1e5e32e36761",
+  "username": "Hiroki Kaburagi",
+  "password": "vault:v1:aRtAJK+ED8ap2vM5f9ba8eL0VvnjD+Akw8ag2eHLYNucXfRx",
+  "email": "h.kaburagi@me.com",
+  "address": "Yokohama",
+  "creditcard": "vault:v1:LYpkecFI4bY6c7I8a3fB47d0oHNf6bPL/6VTc14g+zgEVg47EoRjKWTJeYeaisw="
+```
+
+この場合、データは暗号化されたままなのでアプリ側で復号の処理を実装する必要があります。Vaultの場合、それをVaultに委託することが可能です。`api/v1/decrypt/get-user`を使います。
+
+```console
+curl -G "http://localhost:8080/api/v1/decrypt/get-user" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
+
+{
+  "id": "db0bbb62-fdfd-4e2e-a4db-1e5e32e36761",
+  "username": "Takayuki Kaburagi",
+  "password": "PqssWOrd",
+  "email": "t.kaburagi@me.com",
+  "address": "Yokohama",
+  "creditcard": "9999-8888-6666-6666"
+  ```
+
+Vaultに復号化し、アプリのデータとして利用することが出来るようになりました。このようにVaultではシークレット管理だけでなく暗号化の処理をサービスとして扱えるようにするような使い方をすることができます。
+
+
+## 参考リンク
+* [Transit](https://www.vaultproject.io/docs/secrets/transit/index.html)
+* [API Document](https://www.vaultproject.io/api/secret/transit/index.html)
