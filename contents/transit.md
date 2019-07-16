@@ -322,3 +322,5 @@ Vaultに復号化し、アプリのデータとして利用することが出来
 ## 参考リンク
 * [Transit](https://www.vaultproject.io/docs/secrets/transit/index.html)
 * [API Document](https://www.vaultproject.io/api/secret/transit/index.html)
+* [Spring Cloud Vault](https://cloud.spring.io/spring-cloud-vault/)
+* [Spring Vault](https://projects.spring.io/spring-vault/)
