@@ -421,9 +421,11 @@ ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentic
 
 
 ## 参考リンク
-* [API Document](https://www.vaultproject.io/api/system/policy.html)
+* [Policy API Document](https://www.vaultproject.io/api/system/policy.html)
 * [Authentication](https://www.vaultproject.io/docs/concepts/auth.html)
 * [Policies](https://www.vaultproject.io/docs/concepts/policies.html)
 * [OIDC Provider Configuration](https://www.vaultproject.io/docs/auth/jwt_oidc_providers.html)
 * [Auth0を使ったOIDC認証](https://learn.hashicorp.com/vault/operations/oidc-auth)
 * [GitHubを使った認証](https://learn.hashicorp.com/vault/getting-started/authentication)
+* [AppRole API Document](https://www.vaultproject.io/api/auth/approle/index.html)
+* [AppRole Auth Method](https://www.vaultproject.io/docs/auth/approle.html)
