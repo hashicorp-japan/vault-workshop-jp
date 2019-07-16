@@ -181,7 +181,7 @@ create table users (id varchar(50), username varchar(50), password varchar(200),
 まずはデータベース側です。コンフィグをアップデートし、`role-demoapp`というロールを許可します。
 
 ```shell
-vault write database/config/mysql-handson-db \
+$ vault write database/config/mysql-handson-db \
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
   allowed_roles="role-handson","role-handson-2","role-handson-3","role-demoapp" \
@@ -192,7 +192,7 @@ vault write database/config/mysql-handson-db \
 ロールを作成します。`handson.users`のテーブルに対して`SELECT`, `INSERT`の権限のあるロールです。
 
 ```shell
-vault write database/roles/role-demoapp \
+$ vault write database/roles/role-demoapp \
   db_name=mysql-handson-db \
   creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.users TO '{{name}}'@'%';" \
   default_ttl="5h" \
