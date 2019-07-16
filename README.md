@@ -11,6 +11,6 @@
 * [Encryption as a Service](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/transit.md)
 * クラスタ構成
 * CIツール連携
-* Kubernetes連
+* Kubernetes連携
 * Cloud Foundry連携
 * Enterprise機能の紹介
