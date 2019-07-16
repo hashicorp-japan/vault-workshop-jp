@@ -171,17 +171,8 @@ $ git clone https://github.com/tkaburagi/spring-vault-transit-demo
 $ cd spring-vault-transit-demo
 $ sed "s|VAULT_TOKEN=|VAULT_TOKEN=<YOUR_ROOT_TOKEN>|g" set-env-local.sh > my-set-env-local.sh
 $ cat my-set-env-local.sh
-#!/bin/sh
-
-export VAULT_HOST=127.0.0.1
-export VAULT_TOKEN=s.51du1iIeam79Q5fBRBALVhRB
-export APPROLE=vault-approle
-export MYSQL_JDBC_URL=jdbc:mysql://127.0.0.1:3306/handson
-export MYSQL_USERNAME=root
-export MYSQL_PASSWORD=rooooot
-
+$ source my-set-env-local.sh
 $ mvn clean package -DskipTests
-
 $ java -jar target/demo-0.0.1-SNAPSHOT.jar
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -261,7 +252,7 @@ mysql> select * from users;;
 暗号されたデータが保存されていることがわかります。次にデータを取り出すためのエンドポイントです。`api/v1/plain/get-use`ではデータをそのまま取り出します。上の`uuid`の値をメモしてください。
 
 ```console
-curl -G "http://localhost:8080/apri/v1/plain/get-use" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
+$ curl -G "http://localhost:8080/apri/v1/plain/get-use" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
 {
   "id": "db0bbb62-fdfd-4e2e-a4db-1e5e32e36761",
   "username": "Hiroki Kaburagi",
@@ -274,7 +265,7 @@ curl -G "http://localhost:8080/apri/v1/plain/get-use" -d uuid=db0bbb62-fdfd-4e2e
 この場合、データは暗号化されたままなのでアプリ側で復号の処理を実装する必要があります。Vaultの場合、それをVaultに委託することが可能です。`api/v1/decrypt/get-user`を使います。
 
 ```console
-curl -G "http://localhost:8080/api/v1/decrypt/get-user" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
+$ curl -G "http://localhost:8080/api/v1/decrypt/get-user" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
 
 {
   "id": "db0bbb62-fdfd-4e2e-a4db-1e5e32e36761",
