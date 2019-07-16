@@ -75,7 +75,7 @@ mysql> insert into product (id, name, col) values (1, "Nice hoodie", "1580");
 
 まずはデータベースへのコネクションの設定をVaultに行います。これ以降Vaultはこのパラメータを使ってユーザを払い出します。そのため強い権限のユーザを登録する必要があります。
 
-```console
+```shell
 $ vault write database/config/mysql-handson-db \
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
@@ -88,14 +88,15 @@ $ vault write database/config/mysql-handson-db \
 
 次にロールの定義をします。
 
-```console
+```shell
 $ vault write database/roles/role-handson \
-    db_name=mysql-handson-db \
-    creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';" \
-    default_ttl="1h" \
-    max_ttl="24h"
-Success! Data written to: database/roles/role-handson
+  db_name=mysql-handson-db \
+  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';" \
+  default_ttl="1h" \
+  max_ttl="24h"
+```
 
+```console
 $ vault list database/roles                         
 Keys
 ----
@@ -189,20 +190,21 @@ mysql> show tables
 
 次は該当のテーブルだけにアクセスできるロールを作ってみましょう。
 
-```console
+```shell 
 $ vault write database/config/mysql-handson-db \ 
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
   allowed_roles="role-handson","role-handson-2" \
   username="root" \
   password="rooooot"
+```
 
+```shell
 $ vault write database/roles/role-handson−2 \
-    db_name=mysql-handson-db \
-    creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
-    default_ttl="1h" \
-    max_ttl="24h"
-Success! Data written to: database/roles/role-handson
+  db_name=mysql-handson-db \
+  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
+  default_ttl="1h" \
+  max_ttl="24h"
 ```
 
 `allowed_roles`に`role-handson-2`を追加し、`role-handson-2`を作成しています。`GRANT SELECT ON handson.product`としています。
@@ -253,19 +255,20 @@ mysql> show databases;
 
 一つはTTLを設定した自動破棄です。短いTTLを設定した新しいロールを作ってみます。
 
-```console
+```shell
 $ vault write database/config/mysql-handson-db \ 
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
   allowed_roles="role-handson","role-handson-2","role-handson-3" \
   username="root" \
   password="rooooot"
-
+```
+```shell
 $ vault write database/roles/role-handson−3 \
-    db_name=mysql-handson-db \
-    creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
-    default_ttl="30s" \
-    max_ttl="30s"
+  db_name=mysql-handson-db \
+  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
+  default_ttl="30s" \
+  max_ttl="30s"
 Success! Data written to: database/roles/role-handson
 ```
 
@@ -367,12 +370,12 @@ VaultにはRootユーザの権限を持たせる必要があるため、Rootユ�
 
 ```shell
 $ vault write database/config/mysql-handson-db \
-    plugin_name=mysql-legacy-database-plugin \
-    connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
-    allowed_roles="role-handson","role-handson-2","role-handson-3" \
-    username="root" \
-    password="rooooot" \
-    root_rotation_statements="SET PASSWORD = PASSWORD('{{password}}')"
+  plugin_name=mysql-legacy-database-plugin \
+  connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
+  allowed_roles="role-handson","role-handson-2","role-handson-3" \
+  username="root" \
+  password="rooooot" \
+  root_rotation_statements="SET PASSWORD = PASSWORD('{{password}}')"
 ``` 
 
 その後、`rotate-root`のAPIを実行するだけです。
