@@ -122,7 +122,7 @@ password    passwd
 データが上書きされてバージョン2のデータが生成されました。古いバージョンのデータは`-version`オプションを付与することで参照できます。
 
 ```console
-vault kv get -version=1 kv/
+$ vault kv get -version=1 kv/
 ====== Metadata ======
 Key              Value
 ---              -----
