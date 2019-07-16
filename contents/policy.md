@@ -292,6 +292,7 @@ GitHubとOIDCを試してみたい方はすでに丁寧なインストラクシ�
 ワークフローの例は以下のようなイメージです。
 
 ![](https://learn.hashicorp.com/assets/images/vault-approle-workflow.png)
+
 ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentication](https://learn.hashicorp.com/vault/identity-access-management/iam-authentication)
 
 AppRoleで認証するためには`Role ID`と`Secret ID`という二つの値が必要で、usernameとpasswordのようなイメージです。各AppRoleはポリシーに紐付き、AppRoleで承認されるとクライアントにポリシーに基づいた権限のトークンが発行されます。
@@ -416,6 +417,7 @@ Code: 403. Errors:
 よりセキュアにSecret IDを扱う際は`Response Wrapping`という機能を利用しますが、これについては以降の章で扱います。また、以下のようなワークフローに組み込みより安全にIDの発行を行うことができます。
 
 ![](https://learn.hashicorp.com/assets/images/vault-approle-workflow2.png)
+
 ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentication](https://learn.hashicorp.com/vault/identity-access-management/iam-authentication)
 
 
