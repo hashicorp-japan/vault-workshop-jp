@@ -372,7 +372,7 @@ secret_id_accessor    f620512c-e9e9-4f84-bbf6-9f4d484ff2bc
 これらを使って認証し、トークンを取得してみましょう。
 
 ```console
-vault write auth/approle/login role_id="a25b3148-7b95-57bf-bc5d-cb72ffc08e68" secret_id="1cef3c1e-feca-99d8-ecd4-7a17ca997919"
+$ vault write auth/approle/login role_id="a25b3148-7b95-57bf-bc5d-cb72ffc08e68" secret_id="1cef3c1e-feca-99d8-ecd4-7a17ca997919"
 Key                     Value
 ---                     -----
 token                   s.nEolH5Pjqf3207KljT9xoamS
