@@ -166,28 +166,53 @@ v1のデータは復号化出来なくなり、v1のキーが無効になって�
 
 次に利用イメージをもう少し理解しやすくするため、SpringのアプリでTransitを利用してみます。アプリのレポジトリをcloneし起動します。
 
-```console
-$ git clone https://github.com/tkaburagi/spring-vault-transit-demo
-$ cd spring-vault-transit-demo
-$ sed "s|VAULT_TOKEN=|VAULT_TOKEN=<YOUR_ROOT_TOKEN>|g" set-env-local.sh > my-set-env-local.sh
-$ cat my-set-env-local.sh
-$ source my-set-env-local.sh
-$ mvn clean package -DskipTests
-$ java -jar target/demo-0.0.1-SNAPSHOT.jar
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
- :: Spring Boot ::        (v2.1.4.RELEASE)
+まずデータベースにテーブルを作ります。
 
-2019-07-15 21:50:19.739  INFO 7226 --- [           main] com.example.demo.VaultDemoApplication    : Starting VaultDemoApplication v0.0.1-SNAPSHOT on Takayukis-MacBook-Pro.local with PID 7226 (/Users/kabu/hashicorp/intellij/springboot-vault-transit/target/demo-0.0.1-SNAPSHOT.jar started by kabu in /Users/kabu/hashicorp/intellij/springboot-vault-transit)
-2019-07-15 21:50:19.741  INFO 7226 --- [           main] com.example.demo.VaultDemoApplication    : No active profile set, falling back to default profiles: default
+```mysql
+use handson;
+create table users (id varchar(50), username varchar(50), password varchar(200), email varchar(50), address varchar(50), creditcard varchar(200));
 ```
 
-次にポリシーの設定をします。このポリシーはアプリの中で利用される`AppRole`の認証で付与されるトークンの権限となります。
-次にこのアプリから使うユーザのポリシーを作成します。`policy-vault.hcl`というファイル名で以下のようにして作成してください。
+次にロールの設定をします。ロールは二つ作成します。
+
+* MySQLデータベースとやりとりしてデータのselect, insertをするための`database/*`配下のロール
+* VaultとやりとりしてTransitで暗号化復号化をするための`auth/*`配下のロール
+
+まずはデータベース側です。コンフィグをアップデートし、`role-demoapp`というロールを許可します。
+
+```shell
+vault write database/config/mysql-handson-db \
+  plugin_name=mysql-legacy-database-plugin \
+  connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
+  allowed_roles="role-handson","role-handson-2","role-handson-3","role-demoapp" \
+  username="root" \
+  root_rotation_statements="SET PASSWORD = PASSWORD('{{password}}')"
+  ```
+
+ロールを作成します。`handson.users`のテーブルに対して`SELECT`, `INSERT`の権限のあるロールです。
+
+```shell
+vault write database/roles/role-demoapp \
+  db_name=mysql-handson-db \
+  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.users TO '{{name}}'@'%';" \
+  default_ttl="5h" \
+  max_ttl="5h"
+```
+
+動作を確認しておきましょう。ここで生成したユーザ名パスワードは利用せず、実際にこの操作はアプリから実施することになります。
+
+```console
+$vault read database/creds/role-demoapp
+Key                Value
+---                -----
+lease_id           database/creds/role-demoapp/GwOQKPDCIJS1K1Z626RdrQlW
+lease_duration     5h
+lease_renewable    true
+password           A1a-4VU2FVBp5HdIJGvz
+username           v-role-FWRN0zpOp
+```
+
+次にVault認証用のロールです。ここで作るポリシーは`AppRole`の認証で付与されるトークンの権限となります。`policy-vault.hcl`というファイル名で以下のようにして作成してください。
 
 ```hcl
 # Enable transit secrets engine
@@ -211,11 +236,26 @@ $ vault policy write vault-policy path/to/policy-vault.hcl
 $ vault write auth/approle/role/vault-approle policies=vault-policy period=1h
 ```
 
-最後にデータベースにテーブルを作ります。
+これで準備は完了です。アプリをクローンして、起動してみましょう。
 
-```mysql
-use handson;
-create table users (id varchar(50), username varchar(50), password varchar(200), email varchar(50), address varchar(50), creditcard varchar(200));
+```console
+$ git clone https://github.com/tkaburagi/spring-vault-transit-demo
+$ cd spring-vault-transit-demo
+$ sed "s|VAULT_TOKEN=|VAULT_TOKEN=<YOUR_ROOT_TOKEN>|g" set-env-local.sh > my-set-env-local.sh
+$ cat my-set-env-local.sh
+$ source my-set-env-local.sh
+$ mvn clean package -DskipTests
+$ java -jar target/demo-0.0.1-SNAPSHOT.jar
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.1.4.RELEASE)
+
+2019-07-15 21:50:19.739  INFO 7226 --- [           main] com.example.demo.VaultDemoApplication    : Starting VaultDemoApplication v0.0.1-SNAPSHOT on Takayukis-MacBook-Pro.local with PID 7226 (/Users/kabu/hashicorp/intellij/springboot-vault-transit/target/demo-0.0.1-SNAPSHOT.jar started by kabu in /Users/kabu/hashicorp/intellij/springboot-vault-transit)
+2019-07-15 21:50:19.741  INFO 7226 --- [           main] com.example.demo.VaultDemoApplication    : No active profile set, falling back to default profiles: default
 ```
 
 コードの説明は後ほどしますが、このアプリには4つのエンドポイントがあります。
