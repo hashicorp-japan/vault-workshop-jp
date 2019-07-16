@@ -357,6 +357,37 @@ ERROR 1045 (28000): Access denied for user 'v-role-jklQMrcJa'@'localhost' (using
 
 revokeされ、ログインが出来なくなりました。このようにVaultではシークレットを動的に生成し、短い時間でユーザを細かく破棄し、クレデンシャルをセキュアに保つ運用が簡単に実現できます。
 
+## Rootユーザのパスワードローテーション
+
+VaultにはRootユーザの権限を持たせる必要があるため、Rootユーザのパスワードの扱いは非常にセンシティブです。Vaultにはコンフィグレーションとして登録したデータベースのルートユーザのパスワードをローテーションさせるAPIを持っています。これを使ってこまめにRootのパスワードをリフレッシュできます。
+
+**VaultによってRootパスワードのローテーションを行った後はRootのパスワードはVaultしか扱うことができません。そのため通常別の特権ユーザを準備してから行います。** 以下の手順はデフォルトのルートユーザをローテーションさせる手順のため、実施後Vaultからしか使えなくなります。こちらを実行するかはお任せします。
+
+まず、`root_rotation_statements`のパラメータをコンフィグに追加してローテーションのAPIが呼ばれた時に実施する処理を記述します。
+
+```shell
+$ vault write database/config/mysql-handson-db \
+    plugin_name=mysql-legacy-database-plugin \
+    connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
+    allowed_roles="role-handson","role-handson-2","role-handson-3" \
+    username="root" \
+    password="rooooot" \
+    root_rotation_statements="SET PASSWORD = PASSWORD('{{password}}')"
+``` 
+
+その後、`rotate-root`のAPIを実行するだけです。
+
+```console
+$ vault write -force database/rotate-root/mysql-handson-db
+Success! Data written to: database/rotate-root/mysql-handson-db
+
+$ mysql -u root -p
+Enter password: rooooot
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+```
+
+古いRootパスワードは破棄され、利用不可能となりました。
+
 ## 参考リンク
 * [API Documents](https://www.vaultproject.io/api/secret/databases/index.html)
 * [Lease, Renew, and Revoke](https://www.vaultproject.io/docs/concepts/lease.html)
