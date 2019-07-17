@@ -8,7 +8,7 @@
 * [Response Rapping](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/response-wrapping.md)
 * Secret Engine 3: Public Cloud ([AWS](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/aws.md), Azure, GCP)
 * Secret Engine 4: PKI Engine
-* [Secret Engine 5: Encryption as a Service](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/transit.md)
+* [Secret Engine 5: Transit (Encryption as a Service)](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/transit.md)
 * クラスタ構成
 * CIツール連携
 * Kubernetes連携
