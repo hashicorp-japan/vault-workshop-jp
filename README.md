@@ -1,4 +1,4 @@
-# Vault Wokrshop
+# Vault Workshop
 
 ## アジェンダ
 * [初めてのVault](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/hello-vault.md)
