@@ -159,7 +159,6 @@ ui = true
 
 ```console
 $ vault server -config path/to/local-config.hcl
-vault server -config ~/hashicorp/vault/configs/local-config.hcl                                   
 WARNING! mlock is not supported on this system! An mlockall(2)-like syscall to
 prevent memory from being swapped to disk is not supported on this system. For
 better security, only run Vault on systems where this call is supported. If
