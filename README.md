@@ -9,7 +9,8 @@
 * Secret Engine 3: Public Cloud ([AWS](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/aws.md), Azure, GCP)
 * Secret Engine 4: PKI Engine
 * [Secret Engine 5: Transit (Encryption as a Service)](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/transit.md)
-* クラスタ構成
+* Secret ENgine 6: SSH
+* 運用系機能色々
 * CIツール連携
 * Kubernetes連携
 * Cloud Foundry連携

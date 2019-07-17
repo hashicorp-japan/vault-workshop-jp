@@ -66,7 +66,7 @@ rootでログインをしたら、サンプルのデータを投入します。
 ```mysql
 mysql> create database handson;
 mysql> create table products (id int, name varchar(10), price varchar(10));
-mysql> insert into product (id, name, col) values (1, "Nice hoodie", "1580");
+mysql> insert into products (id, name, col) values (1, "Nice hoodie", "1580");
 ```
 
 これでMySQLの準備は完了です。
@@ -156,7 +156,7 @@ mysql> select * from products;
 |    1 | Nice hoodie  | 1580  |
 +------+--------------+-------+
 
-mysql> insert into product (id, name, price) values (1, "aaa", "bbb");
+mysql> insert into products (id, name, price) values (1, "aaa", "bbb");
 ERROR 1142 (42000): INSERT command denied to user 'v-role-InoM8WOwU'@'localhost' for table 'product'
 
 mysql> create table test (id int, name varchar(10), price varchar(10));
@@ -202,12 +202,12 @@ $ vault write database/config/mysql-handson-db \
 ```shell
 $ vault write database/roles/role-handson−2 \
   db_name=mysql-handson-db \
-  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
+  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.products TO '{{name}}'@'%';" \
   default_ttl="1h" \
   max_ttl="24h"
 ```
 
-`allowed_roles`に`role-handson-2`を追加し、`role-handson-2`を作成しています。`GRANT SELECT ON handson.product`としています。
+`allowed_roles`に`role-handson-2`を追加し、`role-handson-2`を作成しています。`GRANT SELECT ON handson.products`としています。
 
 このロールを使ってユーザを発行してログインしてみます。
 
@@ -266,7 +266,7 @@ $ vault write database/config/mysql-handson-db \
 ```shell
 $ vault write database/roles/role-handson−3 \
   db_name=mysql-handson-db \
-  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
+  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.products TO '{{name}}'@'%';" \
   default_ttl="30s" \
   max_ttl="30s"
 Success! Data written to: database/roles/role-handson
