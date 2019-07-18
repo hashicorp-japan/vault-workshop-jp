@@ -126,7 +126,7 @@ password    p@SSW0d
 また、VaultのCLIはAPIへのHTTPSのアクセスをラップしているため、全てのCLIでの操作はAPIへのcurlのリクエストに変換できます。`-output-curl-string`を使うだけです。
 
 ```console
-$ vault kv list -output-curl-string kv/
+$ vault kv list -output-curl-string secret/
 curl -H "X-Vault-Token: $(vault print token)" http://127.0.0.1:8200/v1/kv/metadata?list=true
 ```
 
