@@ -122,7 +122,7 @@ username           v-role-YpuDx1rjz
 次に発行したユーザを使ってMySQLサーバにアクセスしてみます。
 
 ```console 
-$ mysql -u v-role-YpuDx1rjz -p
+$ mysql -u v-role-YpuDx1rjz  -h 127.0.0.1 -p handson
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 6
