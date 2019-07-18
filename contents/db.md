@@ -65,8 +65,8 @@ rootでログインをしたら、サンプルのデータを投入します。
 
 ```mysql
 mysql> create database handson;
-mysql> create table products (id int, name varchar(10), price varchar(10));
-mysql> insert into products (id, name, col) values (1, "Nice hoodie", "1580");
+mysql> create table products (id int, name varchar(50), price varchar(50));
+mysql> insert into products (id, name, price) values (1, "Nice hoodie", "1580");
 ```
 
 これでMySQLの準備は完了です。
