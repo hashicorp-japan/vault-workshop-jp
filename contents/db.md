@@ -201,7 +201,7 @@ $ vault write database/config/mysql-handson-db \
 ```
 
 ```shell
-$ vault write database/roles/role-handson−2 \
+$ vault write database/roles/role-handson-2 \
   db_name=mysql-handson-db \
   creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.products TO '{{name}}'@'%';" \
   default_ttl="1h" \
