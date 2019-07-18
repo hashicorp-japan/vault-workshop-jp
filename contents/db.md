@@ -331,7 +331,7 @@ lease_renewable    true
 password           A1a-TaZktgzsQw4FfIT8
 username           v-role-jklQMrcJa
 
-$ mysql -u v-role-jklQMrcJa -p
+$ mysql -u v-role-jklQMrcJa -p -h 127.0.0.1 -p handson
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 22
