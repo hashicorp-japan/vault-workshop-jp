@@ -158,7 +158,7 @@ ui = true
 ストレージのタイプは複数選択できますが、ここではローカルファイルを使います。実際の運用で可用性などを考慮する場合はConsulなどHAの機能が盛り込まれたストレージを使うべきです。このコンフィグを使ってVaultを再度起動してみましょう。
 
 ```console
-$ vault server -config path/to/local-config.hcl
+$ vault server -config path/to/vault-local-config.hcl
 WARNING! mlock is not supported on this system! An mlockall(2)-like syscall to
 prevent memory from being swapped to disk is not supported on this system. For
 better security, only run Vault on systems where this call is supported. If
