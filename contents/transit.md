@@ -202,7 +202,7 @@ $ vault write database/roles/role-demoapp \
 動作を確認しておきましょう。ここで生成したユーザ名パスワードは利用せず、実際にこの操作はアプリから実施することになります。
 
 ```console
-$vault read database/creds/role-demoapp
+$ vault read database/creds/role-demoapp
 Key                Value
 ---                -----
 lease_id           database/creds/role-demoapp/GwOQKPDCIJS1K1Z626RdrQlW
