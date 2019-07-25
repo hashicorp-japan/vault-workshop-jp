@@ -65,8 +65,9 @@ rootでログインをしたら、サンプルのデータを投入します。
 
 ```mysql
 mysql> create database handson;
-mysql> create table products (id int, name varchar(10), price varchar(10));
-mysql> insert into products (id, name, col) values (1, "Nice hoodie", "1580");
+mysql> use handson;
+mysql> create table products (id int, name varchar(50), price varchar(50));
+mysql> insert into products (id, name, price) values (1, "Nice hoodie", "1580");
 ```
 
 これでMySQLの準備は完了です。
@@ -121,7 +122,7 @@ username           v-role-YpuDx1rjz
 次に発行したユーザを使ってMySQLサーバにアクセスしてみます。
 
 ```console 
-$ mysql -u v-role-YpuDx1rjz -p
+$ mysql -u v-role-YpuDx1rjz  -h 127.0.0.1 -p handson
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 6
@@ -200,7 +201,7 @@ $ vault write database/config/mysql-handson-db \
 ```
 
 ```shell
-$ vault write database/roles/role-handson−2 \
+$ vault write database/roles/role-handson-2 \
   db_name=mysql-handson-db \
   creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.products TO '{{name}}'@'%';" \
   default_ttl="1h" \
@@ -330,7 +331,7 @@ lease_renewable    true
 password           A1a-TaZktgzsQw4FfIT8
 username           v-role-jklQMrcJa
 
-$ mysql -u v-role-jklQMrcJa -p
+$ mysql -u v-role-jklQMrcJa -p -h 127.0.0.1 -p handson
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 22
