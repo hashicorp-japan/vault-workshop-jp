@@ -192,7 +192,7 @@ mysql> show tables
 次は該当のテーブルだけにアクセスできるロールを作ってみましょう。
 
 ```shell 
-$ vault write database/config/mysql-handson-db \ 
+$ vault write database/config/mysql-handson-db \
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
   allowed_roles="role-handson","role-handson-2" \
@@ -257,7 +257,7 @@ mysql> show databases;
 一つはTTLを設定した自動破棄です。短いTTLを設定した新しいロールを作ってみます。
 
 ```shell
-$ vault write database/config/mysql-handson-db \ 
+$ vault write database/config/mysql-handson-db \
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
   allowed_roles="role-handson","role-handson-2","role-handson-3" \
