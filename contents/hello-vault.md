@@ -27,6 +27,7 @@ Vault v1.1.1+ent ('7a8b0b75453b40e25efdaf67871464d2dcf17a46')
 次にVaultサーバを立ち上げ、GenericなシークレットをVaultに保存して取り出してみます。
 
 ```console
+$ export VAULT_ADDR="http://127.0.0.1:8200"
 $ vault server -dev
 ==> Vault server configuration:
 
