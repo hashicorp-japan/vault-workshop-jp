@@ -133,6 +133,40 @@ curl -H "X-Vault-Token: $(vault print token)" http://127.0.0.1:8200/v1/kv/metada
 
 curlコマンドを使ったリクエストが表示されました。アプリなどのクライアントからVaultのAPIを呼ぶ時などに記述方法に迷った時などに便利です。
 
+また、デフォルトではテーブル形式ですが様々なフォーマットで出力を得られます。
+
+```console
+$ vault kv get -format=yaml secret/mypassword    
+data:
+  name: kabu
+  password: passwd
+lease_duration: 2764800
+lease_id: ""
+renewable: false
+request_id: 33de9c9d-1455-ca31-5571-84d69d0a0b77
+warnings: null
+
+$ vault kv get -format=json secret/mypassword                            
+{
+  "request_id": "15a27428-e566-186b-3a47-b66c727f5f02",
+  "lease_id": "",
+  "lease_duration": 2764800,
+  "renewable": false,
+  "data": {
+    "name": "kabu",
+    "password": "passwd"
+  },
+  "warnings": null
+}
+```
+
+特定のフィールドのデータを抽出することもできます。
+
+```console
+$ vault kv get -format=json -field=password secret/mypassword
+"p@SSW0d"
+```
+
 さて、Vaultにデータをputしてget出来ました。以降のセッションでその他のシークレットを扱っていきますが、「認証され」「ポシリーに基づいたトークンを取得し」「トークンを利用してシークレットにアクセスする」これが基本の流れです。
 
 ## Vaultのコンフィグレーション

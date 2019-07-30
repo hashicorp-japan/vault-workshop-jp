@@ -35,40 +35,6 @@ name        kabu
 password    passwd
 ```
 
-また、デフォルトではテーブル形式ですが様々なフォーマットで出力を得られます。
-
-```console
-$ vault kv get -format=yaml kv/iam    
-data:
-  name: kabu
-  password: passwd
-lease_duration: 2764800
-lease_id: ""
-renewable: false
-request_id: 33de9c9d-1455-ca31-5571-84d69d0a0b77
-warnings: null
-
-$ vault kv get -format=json kv/iam                             
-{
-  "request_id": "15a27428-e566-186b-3a47-b66c727f5f02",
-  "lease_id": "",
-  "lease_duration": 2764800,
-  "renewable": false,
-  "data": {
-    "name": "kabu",
-    "password": "passwd"
-  },
-  "warnings": null
-}
-```
-
-特定のフィールドのデータを抽出することもできます。
-
-```console
-$ vault kv get -format=json -field=name kv/iam
-"kabu"
-```
-
 ### データの更新
 データの更新には2通りの方法があります。
 
