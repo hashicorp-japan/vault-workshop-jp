@@ -59,12 +59,18 @@ ciphertext    vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4i
 $ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4iSocUfG5
 Key          Value
 ---          -----
+---          -----
+plaintext    bXlpbXBvcnRhbnRwYXNzd29yZAo=
+```
 
+`plaintext`としてBase64のコードが表示されました。これをデコードしてパスワードを取り出してみます。
+
+```console
 $ base64 --decode <<< "bXlpbXBvcnRhbnRwYXNzd29yZAo="
 myimportantpassword
 ```
 
-無事に復号化できました。
+無事に復号化できました。Vaultから復号化されたbase64のテキストをデコードして、、
 
 暗号化キーは様々なアルゴリズムをサポートしており、`type`で指定可能です。
 
@@ -117,7 +123,7 @@ Key           Value
 ciphertext    vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7AkbiNgdr0gVOALw
 ```
 
-新しいデータはv2のキーで暗号化復号化され、それ以前のデータは古いキーで復号化されます。v1とv2で暗号化したデータを復号化してみます。
+新しいデータはv2のキーで暗号化復号化され、それ以前のデータは古いキーで復号化されます。v1とv2で暗号化したデータをそれぞれ復号化してみます。
 
 ```console
 $ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:0ys5ZE1/azWn6m6y5TYLjQeA0NoDgckT9Y3AJAJBI3oZgwhCj9Eqb9oT1FUfwJyj
@@ -139,8 +145,7 @@ Key           Value
 ---           -----
 ciphertext    vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
 ```
-
-`min_decryption_version`を更新しv1のキーを無効化し、利用できないようにします。
+これでv1で暗号化したデータをv2で暗号化しました。次に、`min_decryption_version`を更新しv1のキーを無効化し、利用できないようにします。
 
 ```console
 $ vault write  transit/keys/my-encrypt-key/config min_decryption_version=2
@@ -292,7 +297,7 @@ mysql> select * from users;;
 暗号されたデータが保存されていることがわかります。次にデータを取り出すためのエンドポイントです。`api/v1/plain/get-use`ではデータをそのまま取り出します。上の`uuid`の値をメモしてください。
 
 ```console
-$ curl -G "http://localhost:8080/apri/v1/plain/get-use" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
+$ curl -G "http://localhost:8080/apri/v1/plain/get-user" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
 {
   "id": "db0bbb62-fdfd-4e2e-a4db-1e5e32e36761",
   "username": "Hiroki Kaburagi",
