@@ -199,7 +199,7 @@ $ ssh -i signed-cert.pub -i ~/.ssh/id_rsa ubuntu@192.168.11.9
 * クライアントはSSHコネクションの間そのOTPを利用しホストに接続
 * クライアントがホストに接続したことを確認するとVaultがそのパスワードを消去
 
-まずはホスト側の準備をします。VaultのOTPを利用するには全てのホスト側で`[vault-ssh-helper](https://github.com/hashicorp/vault-ssh-helper)`をインストールする必要があります。
+まずはホスト側の準備をします。VaultのOTPを利用するには全てのホスト側で`[vault-ssh-helper]`(https://github.com/hashicorp/vault-ssh-helper)をインストールする必要があります。
 
 ホストに`vagrant ssh`でログインして以下のコマンドを実行します。
 
