@@ -5,7 +5,7 @@
 
 ## LDAPサーバーの準備
 
-もし、すでに利用可能なLDAPやADなどがあればそちらをご使用ください。手元にLDAP環境ない場合、[OpenLDAPコンテナ](https://github.com/osixia/docker-openldap)などを準備ください。
+もし、すでに利用可能なLDAPやADなどがあればそちらをご使用ください。手元にLDAP環境がない場合、[OpenLDAPコンテナ](https://github.com/osixia/docker-openldap)などを準備ください。
 
 ここでは、[AccountなどがセットアップされたLDAP環境](https://github.com/grove-mountain/docker-ldap-server)を用います。
 ワークショップ内で使用するスクリプトなどは、[準備した環境](https://github.com/hashicorp-japan/vault-workshop/tree/master/contents/auth_ldap)があるのでダウンロードしてください。
