@@ -1,0 +1,70 @@
+
+dn: cn=founders,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: founders
+uniqueMember: cn=alice,ou=people,dc=ourcorp,dc=com
+uniqueMember: cn=bob,ou=people,dc=ourcorp,dc=com
+
+dn: cn=finance,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: finance
+uniqueMember: cn=alice,ou=people,dc=ourcorp,dc=com
+
+dn: cn=rockstars,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: rockstars
+uniqueMember: cn=alice,ou=people,dc=ourcorp,dc=com
+
+dn: cn=engineering,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: engineering
+uniqueMember: cn=bob,ou=people,dc=ourcorp,dc=com
+uniqueMember: cn=chun,ou=people,dc=ourcorp,dc=com
+
+dn: cn=it,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: it
+uniqueMember: cn=bob,ou=people,dc=ourcorp,dc=com
+uniqueMember: cn=deepak,ou=people,dc=ourcorp,dc=com
+
+dn: cn=database,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: database
+uniqueMember: cn=chun,ou=people,dc=ourcorp,dc=com
+
+dn: cn=marketing,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: marketing
+uniqueMember: cn=chun,ou=people,dc=ourcorp,dc=com
+
+dn: cn=managers,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: managers
+uniqueMember: cn=deepak,ou=people,dc=ourcorp,dc=com
+uniqueMember: cn=frank,ou=people,dc=ourcorp,dc=com
+
+dn: cn=security,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: security
+uniqueMember: cn=eve,ou=people,dc=ourcorp,dc=com
+
+dn: cn=hackers,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: hackers
+uniqueMember: cn=eve,ou=people,dc=ourcorp,dc=com
+
+dn: cn=hr,ou=um_group,dc=ourcorp,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: hr
+uniqueMember: cn=frank,ou=people,dc=ourcorp,dc=com

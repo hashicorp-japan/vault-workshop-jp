@@ -1,0 +1,20 @@
+
+dn: ou=um_group,dc=ourcorp,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: um_group
+
+dn: ou=posix_group,dc=ourcorp,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: posix_group
+
+dn: ou=people,dc=ourcorp,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: people
+
+dn: ou=service_acct,dc=ourcorp,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: service_acct
