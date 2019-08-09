@@ -2,12 +2,14 @@
 
 ここではLDAPを用いた認証を行ってみます。
 
+
 ## LDAPサーバーの準備
 
 もし、すでに利用可能なLDAPやADなどがあればそちらをご使用ください。手元にLDAP環境ない場合、[OpenLDAPコンテナ](https://github.com/osixia/docker-openldap)などを準備ください。
 
 ここでは、[AccountなどがセットアップされたLDAP環境](https://github.com/grove-mountain/docker-ldap-server)を用います。
 ワークショップ内で使用するスクリプトなどは、[準備した環境](https://github.com/hashicorp-japan/vault-workshop/tree/master/contents/auth_ldap)があるのでダウンロードしてください。
+
 
 ### OpenLDAPコンテナの起動
 
@@ -16,6 +18,7 @@
 1.start_ldap_server.sh
 ```
 `docker ps`などでコンテナが起動したことを確認ください。
+
 
 ### OpenLDAPコンテナとの通信確認
 LDAPサーバーとの通信を確認するには、以下のコマンドを叩いてエントリーが取得できることを確認ください。以下ではITグループに所属しているユーザー一覧を表示します。
@@ -46,6 +49,7 @@ result: 0 Success
 # numResponses: 2
 # numEntries: 1
 ```
+
 
 ## LDAP auth methodの設定
 
@@ -89,6 +93,7 @@ ldap-um/     ldap        auth_ldap_ff29eb9c        n/a
 token/       token       auth_token_8c9e5cf0       token based credentials
 ```
 
+
 ## シークレットを準備
 
 次にこのワークショップで用いるシークレットを準備します。Secret engineはKVエンジンを使用します。もし、まだ設定していない場合は以下のコマンドでKVを有効化してください。
@@ -114,6 +119,7 @@ vault write secret/ldap/engineering password="hoge"
 ```
 
 ITグループ向け、Securityグループ向け、Engineeringグループ向けの３つのシークレットが書き込まれました。
+
 
 ## Policyの設定
 
@@ -151,6 +157,7 @@ path "secret/ldap/security" {
 
 それぞれのPolicyに、secret/ldap以下のそれぞれのシークレットへのアクセス権限が明示的に記載されています。
 
+
 ### Policyの設定とグループへの適用
 
 Policyが準備できたら、そのPolicyをLDAP上のグループと紐付けます。
@@ -172,6 +179,8 @@ vault write auth/ldap-um/groups/security policies=security_policy
 ```
 
 `vault policy write`でPolicyを書き込み、`vault write auth/ldap-um/groups/<グループ名>`でグループとPolicyを紐付けます。
+
+
 
 ## LDAP認証をもちいたログイン
 
@@ -239,6 +248,7 @@ $ VAULT_TOKEN=$IT_TOKEN vault <コマンド>  # コマンドをITトークンで
 $ VAULT_TOKEN=$SECURITY_TOKEN vault <コマンド>  # コマンドをSecurityトークンで実行
 ```
 
+
 ## シークレットの取得
 
 それではシークレットの取得をしてみましょう。
@@ -270,6 +280,7 @@ Code: 403. Errors:
 はい、ITグループのPolicyではsecret/ldap/securityへのアクセス権限がないので無事にはじかれました。
 
 同様にSecurityグループのTokenでも試してみてください。
+
 
 
 ## 参考リンク
