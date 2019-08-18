@@ -110,11 +110,13 @@ identity_policies    []
 policies             ["root"]
 ```
 
-ポリシーはVaultのコンフィグレーションと同様`HCL`で記述します。以下のファイルを`my-first-policy.hcl`というファイル名で作ってください。
-```hcl
+ポリシーはVaultのコンフィグレーションと同様`HCL`で記述します。
+```shell
+$ cat my-first-policy.hcl <<EOF
 path "database/*" {
   capabilities = [ "read", "list"]
 }
+EOF
 ```
 
 作ったら`vault policy write`のコマンドでポリシーを作成します。
@@ -297,12 +299,14 @@ ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentic
 
 AppRoleで認証するためには`Role ID`と`Secret ID`という二つの値が必要で、usernameとpasswordのようなイメージです。各AppRoleはポリシーに紐付き、AppRoleで承認されるとクライアントにポリシーに基づいた権限のトークンが発行されます。
 
-まずはポリシーを作ってみましょう。今回は先ほど作った`kv`のデータにアクセスできるようなポリシーを作ってみます。`my-approle-policy.hcl`というファイル名で以下のファイルを作ってwriteしてください。
+まずはポリシーを作ってみましょう。今回は先ほど作った`kv`のデータにアクセスできるようなポリシーを作ってみます。
 
-```hcl
+```shell
+$ cat my-approle-policy.hcl <<EOF
 path "kv/*" {
   capabilities = [ "read", "list", "create", "update", "delete"]
 }
+EOF
 ```
 
 ```shell

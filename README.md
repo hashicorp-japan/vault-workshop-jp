@@ -12,7 +12,7 @@
 * [Secret Engine 5: Transit (Encryption as a Service)](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/transit.md)
 * [Secret Engine 6: SSH](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/ssh.md)
 * 運用系機能色々
-* CIツール連携
-* Kubernetes連携
+* CIツール連携([Concourse](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/concourse.md), Jenkins)
+* [Kubernetes連携](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/k8s.md)
 * Cloud Foundry連携
 * Enterprise機能の紹介

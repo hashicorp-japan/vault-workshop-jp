@@ -217,9 +217,10 @@ password           A1a-4VU2FVBp5HdIJGvz
 username           v-role-FWRN0zpOp
 ```
 
-次にVault認証用のロールです。ここで作るポリシーは`AppRole`の認証で付与されるトークンの権限となります。`policy-vault.hcl`というファイル名で以下のようにして作成してください。
+次にVault認証用のロールです。ここで作るポリシーは`AppRole`の認証で付与されるトークンの権限となります。以下のようにポリシーの定義ファイルを作成してください。
 
 ```hcl
+$ cat policy-vault.hcl <<EOF
 # Enable transit secrets engine
 path "sys/mounts/transit" {
   capabilities = [ "create", "read", "update", "delete", "list" ]
@@ -234,6 +235,7 @@ path "sys/mounts" {
 path "transit/*" {
   capabilities = [ "create", "read", "update", "delete", "list" ]
 }
+EOF
 ```
 
 ```console

@@ -175,7 +175,8 @@ $ vault kv get -format=json -field=password secret/mypassword
 
 デスクトップに任意のフォルダーを作って、以下のファイルを作成します。ファイル名は`vault-local-config.hcl`とします。
 
-```hcl
+```shell 
+$ cat > vault-local-config.hcl <<EOF
 storage "file" {
    path = "/tmp/vaultdata"
 }
@@ -186,6 +187,7 @@ listener "tcp" {
 }
 
 ui = true
+EOF
 ```
 
 ここではストレージ、リスナーとUIの最低限の設定をしています。その他にも[様々な設定](https://www.vaultproject.io/docs/configuration/)が出来ます。
