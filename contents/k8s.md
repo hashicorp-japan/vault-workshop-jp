@@ -305,6 +305,7 @@ echo $VAULT_K8S_LOGIN | jq
   }
 }
 ```
+</details>
 
 `.auth.client_token`がVaultのAPI実行のためには必要なのでこれを取得します。
 
@@ -438,6 +439,7 @@ spec:
         - name: vault-token
           emptyDir: {}
 ```
+</details>
 
 Applyします。
 
