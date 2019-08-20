@@ -219,8 +219,8 @@ Key                Value
 lease_id           aws/creds/my-role/agnda2uyVWKso4E3HoWlPqY8
 lease_duration     5m
 lease_renewable    true
-access_key         AKIAZLVKZYENZ4GXUCE3
-secret_key         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
+access_key         ****************
+secret_key         ****************
 security_token     <nil>
 ```
 
