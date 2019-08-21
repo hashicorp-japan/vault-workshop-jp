@@ -50,6 +50,7 @@ EOF
 
 ```console
 $ watch -n 1 aws iam list-users
+
 {
     "Users": [
         {
@@ -83,6 +84,7 @@ $ watch -n 1 aws iam list-users
 
 ```console
 $ vault read aws/creds/my-role
+
 Key                Value
 ---                -----
 lease_id           aws/creds/my-role/f3e92392-7d9c-09c8-c921-575d62fe80d8
@@ -120,6 +122,7 @@ security_token     <nil>
 
 ```console
 $ aws configure
+
 AWS Access Key ID [****************62E7]: ****************
 AWS Secret Access Key [****************WF35]: ****************
 Default region name [ap-northeast-1]:
@@ -130,6 +133,7 @@ Vaultから払い出されたユーザのシークレットを入力して下さ
 
 ```console
 $ aws ec2 describe-instances
+
 An error occurred (UnauthorizedOperation) when calling the DescribeInstances operation: You are not authorized to perform this operation.
 
 $ aws s3 ls
@@ -146,12 +150,14 @@ aws cliのユーザを元のユーザに切り替えておきます。
 
 ```console
 $ aws configure
+
 AWS Access Key ID [****************62E7]: ****************
 AWS Secret Access Key [****************WF35]: ****************
 Default region name [ap-northeast-1]:
 Default output format [json]:
 
 $ watch -n 1 aws iam list-users
+
 {
     "Users": [
         {
@@ -204,6 +210,7 @@ vault write aws/config/lease lease=5m lease_max=10m
 
 ```console
 $ vault read aws/config/lease
+
 Key          Value
 ---          -----
 lease        5m0s
@@ -214,6 +221,7 @@ lease_max    10m0s
 
 ```console
 $ vault read aws/creds/my-role
+
 Key                Value
 ---                -----
 lease_id           aws/creds/my-role/agnda2uyVWKso4E3HoWlPqY8
