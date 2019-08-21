@@ -66,7 +66,7 @@ vault secrets enable database
 
 ```
 helm install --name postgres \
-             --set image.repository=postgres
+             --set image.repository=postgres \
              --set image.tag=10.6 \
              --set postgresqlDataDir=/data/pgdata \
              --set persistence.mountPath=/data/ \
