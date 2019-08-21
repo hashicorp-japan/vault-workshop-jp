@@ -22,6 +22,7 @@ VaultとKubernetesは様々な形で連携できます。例えば、
 
 ```shell
 $ git clone https://github.com/hashicorp/vault-helm.git
+$ helm init
 $ helm install ./vault-helm --name=vault
 ```
 
