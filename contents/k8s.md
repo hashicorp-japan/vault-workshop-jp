@@ -22,19 +22,20 @@ VaultとKubernetesは様々な形で連携できます。例えば、
 
 ```shell
 $ git clone https://github.com/hashicorp/vault-helm.git
+$ helm init
 $ helm install ./vault-helm --name=vault
 ```
 
 インストールが完了したら別の端末を立ち上げてポートフォワードします。
 
 ```shell
-port-forward vault-0 8200:8200
+kubectl port-forward vault-0 8200:8200
 ```
 
 ```shell
 export VAULT_ADDR="http://127.0.0.1:8200"
 vault operator init -recovery-shares=1 -recovery-threshold=1
-vault unseal <UNSEAL_KEY>
+vault operator unseal <UNSEAL_KEY>
 ```
 
 ```console
@@ -66,7 +67,7 @@ vault secrets enable database
 
 ```
 helm install --name postgres \
-             --set image.repository=postgres
+             --set image.repository=postgres \
              --set image.tag=10.6 \
              --set postgresqlDataDir=/data/pgdata \
              --set persistence.mountPath=/data/ \

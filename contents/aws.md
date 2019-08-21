@@ -21,7 +21,7 @@ vault secrets enable aws
 ```shell
 vault write aws/config/root \
     access_key=************ \
-    secret_key==************ \
+    secret_key=************ \
     region=ap-northeast-1
 ```
 
@@ -34,7 +34,7 @@ vault write aws/roles/my-role \
     credential_type=iam_user \
     policy_document=-<<EOF
 {
-  "Version": "2019-8-17",
+  "Version": "2012-10-17",
   "Statement": [
     {
       "Effect": "Allow",
