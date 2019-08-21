@@ -44,7 +44,17 @@ $ vault server -config=path/to/vault-local-config.hcl start
 
 ### クライアントキーサイン
 
-この機能は証明書によるホストへの署名リクエスストを受け、SSHキーにVaultがサインするためのものです。
+公開鍵認証の場合サーバに対する秘密鍵を共有したり、キーペアをそれぞれに持たせて運用が複雑化する課題がありますがCA認証によりこれらを解決でき、かつVaultがCAとして機能することで非常にシンプルなワークフローで実現できます。公開鍵認証とCA認証の一般的な流れは下記の通りです。
+
+[公開鍵認証]
+<kbd>
+  <img src="https://github-image-tkaburagi.s3-ap-northeast-1.amazonaws.com/vault-workshop/puflow.png">
+</kbd>
+
+[CA認証]
+<kbd>
+  <img src="https://github-image-tkaburagi.s3-ap-northeast-1.amazonaws.com/vault-workshop/caflow.png">
+</kbd>
 
 まずいつものようにVaultのSSHシークレットエンジンを有効化しましょう。
 
@@ -52,7 +62,11 @@ $ vault server -config=path/to/vault-local-config.hcl start
 vault secrets enable -path=ssh ssh
 ```
 
-まず、クライアントキーにサインをするためのCAの情報を設定します。`generate_signing_key`を指定することでこのタイミングでキーペアーを発行できます。既存にある場合は`private_key`, `public_key`のパラメータの引数としてセットします。
+### CAの設定
+
+図の①の手順です。
+
+まず、VaultをCAとして設定します。`generate_signing_key`を指定することでこのタイミングでサイン用のキーペアーを発行できます。既存にある場合は`private_key`, `public_key`のパラメータの引数としてセットします。
 
 ここでは`generate_signing_key`を付与して生成してみます。
 
@@ -60,7 +74,38 @@ vault secrets enable -path=ssh ssh
 vault write ssh-client-signer/config/ca generate_signing_key=true
 ```
 
-Public Keyのみが出力されるでしょう。次に、この公開鍵をターゲットとなるホスト(VM)のSSHコンフィグレーションに配布します。
+Public Keyのみが出力されるでしょう。
+
+次にVault上に、SSHでログインするユーザに与える権限と認証のタイプを指定します。
+
+```shell
+$ export VAULT_ADDR="http://192.168.11.2:8200"
+```
+
+```
+$ vault write ssh/roles/my-role -<<"EOH"
+{
+  "allow_user_certificates": true,
+  "allowed_users": "ubuntu",
+  "default_extensions": [
+    {
+      "permit-pty": ""
+    }
+  ],
+  "key_type": "ca",
+  "default_user": "ubuntu",
+  "ttl": "30m0s"
+}
+EOH
+```
+
+`key_type`は他に`otp`と`dynamic`を指定することができ、`otp`はこのあと扱います。
+
+### サイン用公開鍵の配布
+
+図の②の手順です。
+
+次に、この公開鍵をターゲットとなるホスト(VM)のSSHコンフィグレーションに配布します。(図の②)
 
 Vagrantを使ってUbuntu OSのVMを一つ起動してみましょう。適当なディレクトリを作ります。
 
@@ -150,6 +195,8 @@ $ cat /etc/ssh/trusted-user-ca-keys.pem
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABA.....
 ```
 
+これを`sshd_config`に配備します。
+
 ```console
 $ sudo sed -i '$a TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem' /etc/ssh/sshd_config
 $ sudo service ssh restart
@@ -157,34 +204,41 @@ $ sudo service ssh restart
 
 今回はVaultサーバとクライアントがローカルマシンで同居しているのでわかりづらいかもしれませんが、Vaultを起動しているローカルマシンで以下を実行します。
 
-```shell
-$ export VAULT_ADDR="http://192.168.11.2:8200"
+### クライアント側の設定
 
-$ vault write ssh/roles/my-role -<<"EOH"
-{
-  "allow_user_certificates": true,
-  "allowed_users": "ubuntu",
-  "default_extensions": [
-    {
-      "permit-pty": ""
-    }
-  ],
-  "key_type": "ca",
-  "default_user": "ubuntu",
-  "ttl": "30m0s"
-}
-EOH
+クライアントでキーペアを作成します。図の③の手順です。
+```shell
+$ ssh-keygen -t 
 ```
 
-クライアントで以下を実行します。
+生成された公開鍵をVault(CA)に渡してサインのリクエストをし、サイン済みの公開鍵(証明書)を発行します。
+
 ```shell
-$ ssh-keygen -t rsa
 $ vault write -field=signed_key ssh/sign/my-role \
     public_key=@$HOME/.ssh/id_rsa.pub > signed-cert.pub
-$ ssh -i signed-cert.pub -i ~/.ssh/id_rsa ubuntu@192.168.11.9
 ```
 
-### ホストキーサイン
+出力される`signed_key`がそれに当たります。
+
+証明書の内容を確認してみましょう。
+
+```shell
+ssh-keygen -Lf ~/.ssh/signed-cert.pub
+```
+
+`Valid`の欄がRoleで指定した30minsのTTLになっているはずです。
+
+最後にこれを使ってSSHでサーバにアクセスしてみましょう。
+
+```shell
+ssh -i signed-cert.pub -i ~/.ssh/id_rsa ubuntu@192.168.11.9
+```
+
+`ubuntu`ユーザでログインできるはずです。
+
+この証明書は30分後に無効となりログインが不可能になります。また、`revoke`を行うことで明示的に無効にできます。
+
+このようにCA認証を簡単に利用することができるため、環境やチームが拡大するにつれて複雑化する運用を効率化することができます。
 
 ## One-time SSH Paswords
 
@@ -330,3 +384,4 @@ Vaultにより無効化されました。
 * [SSH Secret Engine](https://www.vaultproject.io/docs/secrets/ssh/index.html)
 * [API Document](https://www.vaultproject.io/api/secret/ssh/index.html)
 * [Vault SSH Helper](https://github.com/hashicorp/vault-ssh-helper)
+* [公開鍵認証とCA認証](http://kontany.net/blog/?p=211)
