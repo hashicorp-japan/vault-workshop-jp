@@ -8,9 +8,7 @@ VaultとKubernetesは様々な形で連携できます。例えば、
 などです。
 
 ここでは以下のような構成で試してみます。
-
 ![](https://github-image-tkaburagi.s3-ap-northeast-1.amazonaws.com/vault-workshop/Screen+Shot+2019-08-19+at+15.01.12.png)
-
 * Rails <-> PostgresでRailsからデータを取得
 * Vault <-> PostgresでPostgresのシークレットを発行、更新
 * Rails <-> VaultでPostgresのシークレットを取得
@@ -119,7 +117,12 @@ max_ttl="24h"
 このロールを使ってシークレットを払い出します。
 
 ```console
-$ vault read -format json database/creds/postgres-role
+vault read -format json database/creds/postgres-role
+```
+
+<details><summary>出力結果の例</summary>
+
+```
 {
   "request_id": "98843e81-cb6d-10cc-a7a8-96754fcebbe1",
   "lease_id": "database/creds/postgres-role/RMTEnlBPjOQt4JKql7Qsm4Z3",
@@ -132,6 +135,7 @@ $ vault read -format json database/creds/postgres-role
   "warnings": null
 }
 ```
+</details>
 
 最後にポリシーの設定を行います。このポリシーはK8s上のPodのアプリから取得するトークンに紐づくポリシーです。つまり、アプリケーションに与える権限となります。
 
@@ -180,7 +184,7 @@ metadata:
 EOF
 ```
 
-Applyします。
+`ClusterRole`の`system:auth-delegator`はK8sがデフォルトで持っているロールです。 このロールを`postgres-vault`のサービスアカウントにマッピングしてReviewToken APIを使った認証認可の権限を与えます。
 
 ```shell
 kubectl apply -f postgres-serviceaccount.yml
@@ -188,7 +192,7 @@ kubectl apply -f postgres-serviceaccount.yml
 
 ## Vault Kubernetes Auth Methodの設定
 
-次に(ここから本題です)VaultのK8s Auth Methodの設定を行います。これはKubernetesのサービスアカウントを利用してVault認証するための設定です。これによってK8s上のPodからサービスアカウントを使ってVaultからPostgresのシークレットを取得することが可能になります。
+次に(ここから本題です)VaultのK8s Auth Methodの設定を行います。これはKubernetesのサービスアカウントトークンを利用してVault認証するための設定です。これによってK8s上のPodからサービスアカウントを使ってVaultからPostgresのシークレットを取得することが可能になります。
 
 VaultのK8s認証メソッドを有効化しておきます。
 
@@ -201,10 +205,9 @@ vault auth enable kubernetes
 * `kubernetes_ca_cert`
   * TLSクライアントがK8s APIを使うための証明書
 * `token_reviewer_jwt`
-  * TokenReview APIにアクセスするために使用されるサービスアカウントJWT
+  * TokenReview APIにアクセスするために使用されるサービスアカウントトークン
 
-これらを取得するために以下のコマンドを実行してください。出力内容を確認しながら実行したい場合は`kubectl`は個別で実行してみてください。
-
+これらを取得するために以下のコマンドを実行してください。
 ```
 export VAULT_SA_NAME=$(kubectl get sa postgres-vault -o jsonpath="{.secrets[*]['name']}")
 export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data.token}" | base64 --decode; echo)
@@ -212,7 +215,61 @@ export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data['ca\.cr
 export K8S_HOST=$(kubectl exec -it $VAULT_POD -- sh -c 'echo $KUBERNETES_SERVICE_HOST')
 ```
 
-取得した値を使って認証の設定を行います。Kubernetes authメソッドは、サービスアカウントJWTを検証し、Kubernetes TokenReview APIでそれらの存在を検証します。このエンドポイントは、JWT署名とKubernetes APIにアクセスするために必要な情報を検証するために使用される公開キーを構成します。
+<details><summary>`kubectl get sa postgres-vault -o json`の例</summary>
+
+```json
+{
+    "apiVersion": "v1",
+    "kind": "ServiceAccount",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"ServiceAccount\",\"metadata\":{\"annotations\":{},\"name\":\"postgres-vault\",\"namespace\":\"default\"}}\n"
+        },
+        "creationTimestamp": "2019-08-12T07:04:38Z",
+        "name": "postgres-vault",
+        "namespace": "default",
+        "resourceVersion": "26321",
+        "selfLink": "/api/v1/namespaces/default/serviceaccounts/postgres-vault",
+        "uid": "7309c23d-bccf-11e9-9fcc-0800275363d6"
+    },
+    "secrets": [
+        {
+            "name": "postgres-vault-token-ts9x4"
+        }
+    ]
+}
+```
+</details>
+
+<details><summary>`kubectl get secret $VAULT_SA_NAME -o json`の例</summary>
+
+```json
+{
+    "apiVersion": "v1",
+    "data": {
+        "ca.crt": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwdGFXNXAKYTNWaVpVTkJNQjRYRFRFNU1EZ3hNREE0TVRVeE9Wb1hEVEk1TURnd09EQTRNVFV4T1Zvd0ZURVRNQkVHQTFVRQpBeE1LYldsdWFXdDFZbVZEUVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBS1FSCnNxRUV4SjZYU1QxZWNzeU9QVWlrQ1F4Rnd0bGcvbTc4RjVpUXI2clRndEpDRlZqTnhQZXdRaEtvcWlCLzg2WXYKT1UybFFyVEpycTFHazFpdFlDdXRlcjZtY0xLYk9wSHZYb01MUUtkZXlXRzdtcUEwb0pFY2xvWFZSNjI5V0pSSwplZ1FZb3B2Wk5IVVdYTnQxNEFjTjFDS1F0WmVhd3JqTHc0SXk2R3BvWHFLa0o3Q052QU45NEpQT0J3T25GbjUrCnMyNFhnd29yWnI4YWVOcUZNdGVWWkllMk9qS2c5dnJmb1Zvc3NNeTB1NmdwR3N4Q2tMUFFUeGthQnNwMW1KRWEKZHFFR082R2x2QTdYR1NocGR3RHk4UFM5b2ltVzVEQkhrUWFOWDYxQ1JzYlpLaVVhZXFtOCtJNllvYWxGNEdIegptV0hJRnhEcyttem43V2VUbHBVQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWRKUVFXCk1CUUdDQ3NHQVFVRkJ3TUNCZ2dyQmdFRkJRY0RBVEFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFBZnA0VkQ4Sk1PTjdtYmxJaExmRmJTNmdFUUVuMit6eHU0dC9UZTIwVmhLenVHTlBsTwpyM09YV2trWWZBdVFHM3R1NGVDZ2pWR3NWeElPZndxVUswVEhRZ0tnNHFxRXdSdmEwNEhTK0ZKZk1yM1ZCZVFCCjhNbjNGSnErVS8wa3hrNmdWKy96WDVQa1BqalhJaHNmVlVGRzNsVjUydnIyeVIwQ0xIRnRkRkI2TzY3L2h0MVMKWFZsRExWQk1vVDVWbENlTDNjS2srZU4yUGZ2ZVlWRmxBbjlNemRqL2dLYjBVUFF1OFVLNDhyS0U5Ri96Tk5HZgp3T0FoVDI0VVVNUklxTVlNWXdsSEpOaVZqWEtBa05Eb3FFSVdYVHUwUW5uMFc1blUwR0RpNXEycVA5UDA1NWJWCnZkUG8zU3l3Ulk3YzU3UkJveHBpWVVxd1pjT2JZdk5WNC95UAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==",
+        "namespace": "ZGVmYXVsdA==",
+        "token": "ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklpSjkuZXlKcGMzTWlPaUpyZFdKbGNtNWxkR1Z6TDNObGNuWnBZMlZoWTJOdmRXNTBJaXdpYTNWaVpYSnVaWFJsY3k1cGJ5OXpaWEoyYVdObFlXTmpiM1Z1ZEM5dVlXMWxjM0JoWTJVaU9pSmtaV1poZFd4MElpd2lhM1ZpWlhKdVpYUmxjeTVwYnk5elpYSjJhV05sWVdOamIzVnVkQzl6WldOeVpYUXVibUZ0WlNJNkluQnZjM1JuY21WekxYWmhkV3gwTFhSdmEyVnVMWFJ6T1hnMElpd2lhM1ZpWlhKdVpYUmxjeTVwYnk5elpYSjJhV05sWVdOamIzVnVkQzl6WlhKMmFXTmxMV0ZqWTI5MWJuUXVibUZ0WlNJNkluQnZjM1JuY21WekxYWmhkV3gwSWl3aWEzVmlaWEp1WlhSbGN5NXBieTl6WlhKMmFXTmxZV05qYjNWdWRDOXpaWEoyYVdObExXRmpZMjkxYm5RdWRXbGtJam9pTnpNd09XTXlNMlF0WW1OalppMHhNV1U1TFRsbVkyTXRNRGd3TURJM05UTTJNMlEySWl3aWMzVmlJam9pYzNsemRHVnRPbk5sY25acFkyVmhZMk52ZFc1ME9tUmxabUYxYkhRNmNHOXpkR2R5WlhNdGRtRjFiSFFpZlEuWGF0TktwVmpFNnJLZ3JzN2t3TTE3ODU1UXhBLVc2b0lRTWlUZW9rQmJEZjRfd3EwcWJzN2pwSEJnRlRVMkdORl9DTWkwSmlHa0loUFJ1X3NIUTkzaHVwdDBJWFFFZzNURFR2OXFsVFdlN1hQUFRaLXhqdUpRUFhxNENHMzd1R2x1T1J4UmdWWktVM3FaSnV4WlZINmNSdjJMeF9aZDN5MFppN09EUkZWaEJtLUtpeFN1czdFeHdjd3BUQlRoQ3EtSm12c25od3ZmOFlHeDdEdUUtQ3FndEdjMXJnZ2N1djd1WC1BbnZKRXRiLTVwdEgwZWlVX3F4dXNHb2c5LW5iMXRnYTR3dHJfd1V4bWZCMFAxZWp0S2hUSm1ZZ3dIdi1zYlNYTGVLZ3VLNVRLYXBMSV9EaWFXdnRDb3RVS0VmM3JibXdBM28xSlBZMGlMbFdGTVJrNmdB"
+    },
+    "kind": "Secret",
+    "metadata": {
+        "annotations": {
+            "kubernetes.io/service-account.name": "postgres-vault",
+            "kubernetes.io/service-account.uid": "7309c23d-bccf-11e9-9fcc-0800275363d6"
+        },
+        "creationTimestamp": "2019-08-12T07:04:38Z",
+        "name": "postgres-vault-token-ts9x4",
+        "namespace": "default",
+        "resourceVersion": "26320",
+        "selfLink": "/api/v1/namespaces/default/secrets/postgres-vault-token-ts9x4",
+        "uid": "730db7e6-bccf-11e9-9fcc-0800275363d6"
+    },
+    "type": "kubernetes.io/service-account-token"
+}
+```
+</details>
+
+取得した値を使って認証の設定を行います。これはVaultがKubernetesに接続するための設定です。`kubernetes_host`で設定したエンドポイントに対して取得した`token_reviewer_jwt`で認証します。
 
 ```
 vault write auth/kubernetes/config \
@@ -221,7 +278,7 @@ vault write auth/kubernetes/config \
   kubernetes_ca_cert="$SA_CA_CRT"
 ```
 
-サービスアカウントロールにアタッチされるロールを作ります。
+サービスアカウントロールにアタッチされるロールを作ります。`default`ネームスペースの先ほど作った`postgres-vault`サービスアカウントを認可して、Vault上で作った`postgres-policy`の権限を付与しています。
 
 ```
 vault write auth/kubernetes/role/postgres \
@@ -231,9 +288,23 @@ vault write auth/kubernetes/role/postgres \
     ttl=24h
 ```
 
+つまりここで`postgres-vault`で認証されたクライアントに対して下記のように作った権限を与えるという意味です。
+
+```hcl
+path "database/creds/postgres-role" {
+  capabilities = ["read"]
+}
+path "sys/leases/renew" {
+  capabilities = ["create"]
+}
+path "sys/leases/revoke" {
+  capabilities = ["update"]
+}
+```
+
 ## TemporarilyのPodで試す
 
-アプリで利用する前にTemporarilyのPodを立てて一連の流れをテストしてみましょう。`postgres-vault`のサービスアカウントを使ってPodを一つ起動してみます。
+アプリで利用する前にTemporarilyのPodを立てて一連の流れをテストしてみましょう。`postgres-vault`のサービスアカウントを設定したPodを一つ起動してみます。
 
 ```
 $ kubectl run tmp --rm -i --tty --serviceaccount=postgres-vault --image alpine
@@ -256,13 +327,13 @@ apk add curl postgresql-client jq
 KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 ```
 
-次にこれを利用してKubernetes Auth Methodを使ってVaultにログインします。
+次にこれを利用してKubernetes Auth Methodを使ってVaultにログインします。ログインには`auth/kubernetes/login`のエンドポイントを使います。
 
 ```
 VAULT_K8S_LOGIN=$(curl --request POST --data '{"jwt": "'"$KUBE_TOKEN"'", "role": "postgres"}' http://vault.default.svc.cluster.local:8200/v1/auth/kubernetes/login)
 ```
 
-ログイン情報を確認しておきましょう。
+ログイン情報を確認しておきましょう。トークンが発行され、認証されたクライアントに`postgres-policy`が割り当てられていることがわかります。
 
 ```
 echo $VAULT_K8S_LOGIN | jq
@@ -307,13 +378,13 @@ echo $VAULT_K8S_LOGIN | jq
 ```
 </details>
 
-`.auth.client_token`がVaultのAPI実行のためには必要なのでこれを取得します。
+`.auth.client_token`がVaultのトークンなのでこれを取得します。
 
 ```
 X_VAULT_TOKEN=$(echo $VAULT_K8S_LOGIN | jq -r '.auth.client_token')
 ```
 
-次に、VaultのAPIをコールしてPostgresのシークレットを生成しましょう。
+次に、このトークンを使ってVaultのAPIをコールしてPostgresのシークレットを生成しましょう。`database/creds/ROLE_NAME`がエンドポイントです。
 
 ```
 POSTGRES_CREDS=$(curl --header "X-Vault-Token: $X_VAULT_TOKEN" http://vault.default.svc.cluster.local:8200/v1/database/creds/postgres-role)
@@ -322,7 +393,7 @@ POSTGRES_CREDS=$(curl --header "X-Vault-Token: $X_VAULT_TOKEN" http://vault.defa
 確認します。
 
 ```
-echo $POSTGRES_CREDS | jq
+$ echo $POSTGRES_CREDS | jq
 
 {
   "request_id": "d31b68f9-54f1-0ec2-8cc9-bbd31fc7d3f5",
@@ -348,6 +419,12 @@ psql -h postgres-postgresql -U $PGUSER postgres -c 'SELECT * FROM pg_catalog.pg_
 ```
 
 テーブルが表示され正しくシークレットが発行できることが確認できるはずです。
+
+<kbd>
+  <img src="https://miro.medium.com/max/700/1*qfojP76kbu-L7rYDMTx8JQ.png">
+</kbd>
+
+PodからVaultのシークレットを使ってシークレットを発行する一連の手順を確認しました。
 
 ## 実際のWebアプリのPodから利用してみる
 
@@ -474,4 +551,6 @@ port-forward <POD_NAME_2> 3002:3000
 * [Kubernetes with Vault](https://www.vaultproject.io/docs/platform/k8s/index.html)
 * [Kubernetes Auth Method](https://www.vaultproject.io/docs/auth/kubernetes.html)
 * [Kubernetes Auth Method API](https://www.vaultproject.io/api/auth/kubernetes/index.html)
+* [Helm Chart for Vault](https://github.com/hashicorp/vault-helm)
+* [Helm Chart for Postgres](https://github.com/helm/charts/tree/master/stable/postgresql)
 * [Sample App Blog](https://medium.com/@gmaliar/dynamic-secrets-on-kubernetes-pods-using-vault-35d9094d169)
