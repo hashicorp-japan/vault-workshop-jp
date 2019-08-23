@@ -14,5 +14,5 @@
 * 運用系機能色々
 * CIツール連携([Concourse](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/concourse.md), Jenkins)
 * [Kubernetes連携](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/k8s.md)
-* Cloud Foundry連携
+* [Cloud Foundry連携](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/pcf.md)
 * Enterprise機能の紹介
