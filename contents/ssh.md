@@ -66,7 +66,7 @@ vault secrets enable -path=ssh ssh
 ここでは`generate_signing_key`を付与して生成してみます。
 
 ```shell
-vault write ssh-client-signer/config/ca generate_signing_key=true
+vault write ssh/config/ca generate_signing_key=true
 ```
 
 Public Keyのみが出力されるでしょう。
