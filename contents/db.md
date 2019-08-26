@@ -61,6 +61,10 @@ Starting MySQL
 > $ sudo mysql.server restart
 > ```
 
+```console
+$ mysql -u root -p
+```
+
 rootでログインをしたら、サンプルのデータを投入します。
 
 ```mysql
