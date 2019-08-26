@@ -47,7 +47,7 @@ Starting MySQL
 
 > rootユーザのパスワードが設定されていない場合、以下のコマンドで変更してください。
 > ```console
-> $ vault mysql -u root
+> $ mysql -u root
 > ```
 > 
 > ```mysql
@@ -58,7 +58,7 @@ Starting MySQL
 > ```
 > 
 > ```console
-> $ vault sudo mysql.server restart
+> $ sudo mysql.server restart
 > ```
 
 rootでログインをしたら、サンプルのデータを投入します。
