@@ -19,6 +19,7 @@ Vaultはデフォルトでは以下のようなDatabaseに対応しています�
 KVと同様`database`シークレットエンジンを`enable`します。
 
 ```console
+$ export VAULT_ADDR="http://127.0.0.1:8200"
 $ vault secrets enable -path=database database
 Success! Enabled the database secrets engine at: database/
 ```
@@ -126,8 +127,8 @@ username           v-role-YpuDx1rjz
 次に発行したユーザを使ってMySQLサーバにアクセスしてみます。
 
 ```console 
-$ mysql -u v-role-YpuDx1rjz  -h 127.0.0.1 -p handson
-Enter password:
+$ mysql -u <USERNAME_GEN_BY_VAULT>  -h 127.0.0.1 -p handson
+Enter password: <PASSWORD__GEN_BY_VAULT>
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 6
 Server version: 5.7.25 Homebrew
@@ -176,8 +177,7 @@ Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
 
 Database changed
-mysql> show tables
-    -> ;
+mysql> show tables;
 +---------------------------+
 | Tables_in_mysql           |
 +---------------------------+
@@ -226,8 +226,8 @@ lease_renewable    true
 password           A1a-8aBlTXjRSu9eR3y1
 username           v-role-Ync7153K8
 
-$ mysql -u v-role-Ync7153K8  -p                      
-Enter password:
+$ mysql -u <USERNAME_GEN_BY_VAULT>  -p                      
+Enter password: <PASSWORD__GEN_BY_VAULT>
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 7
 Server version: 5.7.25 Homebrew
@@ -272,12 +272,12 @@ $ vault write database/config/mysql-handson-db \
 $ vault write database/roles/role-handson-3 \
   db_name=mysql-handson-db \
   creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.products TO '{{name}}'@'%';" \
-  default_ttl="30s" \
-  max_ttl="30s"
+  default_ttl="120s" \
+  max_ttl="360s"
 Success! Data written to: database/roles/role-handson
 ```
 
-`max_ttl`のパラメータに30秒を指定しています。`default_ttl`生成した時のTTL、`max_ttl`は`renew`できる最大のTTLです。
+`max_ttl`のパラメータに120秒を指定しています。`default_ttl`生成した時のTTL、`max_ttl`は`renew`できる最大のTTLです。
 
 このロールを利用してShort Livedなユーザを発行します。
 
@@ -295,8 +295,8 @@ username           v-role-bnsYTFQAj
 `lease_duration`が設定したTTLの30秒になっています。これを使ってまずは試しにログインしてみます。
 
 ```console
-$ mysql -u v-role-bnsYTFQAj -p           
-Enter password:
+$ mysql -u <USERNAME_GEN_BY_VAULT> -p           
+Enter password: <PASSWORD__GEN_BY_VAULT>
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 16
 Server version: 5.7.25 Homebrew
@@ -316,8 +316,8 @@ Bye¥
 30秒後に再度ログインします。
 
 ```console
-$ mysql -u v-role-bnsYTFQAj -p        
-Enter password:
+$ mysql -u <USERNAME_GEN_BY_VAULT> -p        
+Enter password: <PASSWORD__GEN_BY_VAULT>
 ERROR 1045 (28000): Access denied for user 'v-role-bnsYTFQAj'@'localhost' (using password: YES)
 ```
 
@@ -335,8 +335,8 @@ lease_renewable    true
 password           A1a-TaZktgzsQw4FfIT8
 username           v-role-jklQMrcJa
 
-$ mysql -u v-role-jklQMrcJa -p -h 127.0.0.1 -p handson
-Enter password:
+$ mysql -u <USERNAME_GEN_BY_VAULT> -p -h 127.0.0.1 -p handson
+Enter password: <PASSWORD__GEN_BY_VAULT>
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 22
 Server version: 5.7.25 Homebrew
@@ -358,8 +358,8 @@ mysql>
 $ vault lease revoke database/creds/role-handson-2/JSnf6zV2jTrRJmI66Hfz189K
 All revocation operations queued successfully!
 
-$ mysql -u v-role-jklQMrcJa -p
-Enter password:
+$ mysql -u <USERNAME_GEN_BY_VAULT> -p
+Enter password: <PASSWORD__GEN_BY_VAULT>
 ERROR 1045 (28000): Access denied for user 'v-role-jklQMrcJa'@'localhost' (using password: YES)
 ```
 
