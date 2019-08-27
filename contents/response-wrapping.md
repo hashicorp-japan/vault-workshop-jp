@@ -44,7 +44,7 @@ policies             ["default" "my-policy"]
 このトークンを使って`cubbyhole`にデータを投入します。
 
 ```console
-$ VAULT_TOKEN=s.vz9bwNR7LRtTYiTqo3KxO9aV vault secrets list
+$ VAULT_TOKEN=<TOKEN_ABOVE> vault secrets list
 Path          Type         Accessor              Description
 ----          ----         --------              -----------
 cubbyhole/    cubbyhole    cubbyhole_e3aa0798    per-token private secret storage
@@ -65,6 +65,7 @@ foo    bar
 次にルートトークンからこのデータを参照してみましょう。
 
 ```console
+$ export ROOT_TOKEN=<YOUR_ROOT_TOKEN>
 $ VAULT_TOKEN=$ROOT_TOKEN vault list cubbyhole/
 
 $ VAULT_TOKEN=$ROOT_TOKEN vault read cubbyhole/my-cubbyhole-secret 
@@ -79,7 +80,7 @@ No value found at cubbyhole/my-cubbyhole-secret
 
 Response Wrappingのワークフローは少し複雑です。
 
-1. 実際に利用するクレデンシャルは発行する際に、一時トークン(Wrapping Token)を同時発行します。
+1. 実際に利用するクレデンシャルを発行する際に、一時トークン(Wrapping Token)を同時発行します。
 2. クレデンシャルはWrapping Tokenの`cubbyhole/response`内に保存されます。
 3. クライアントはWapping Tokenを使って`unwrap`という処理を行い、`cubbyhole/response`内のクレデンシャルを取り出します。
 4. 一度利用された`Wrappgin Token`は即座に無効化され2度とクレデンシャルは取得できなくなります。
@@ -139,7 +140,7 @@ Code: 403. Errors:
 * bad token
 ```
 
-unwrapもできず、トークンをLookupしてもエラーがトークンが無効になっていることがわかります。このようにTTL内でも一度利用され、クレデンシャルが取得されると2度と利用できません。
+unwrapもできず、トークンをLookupしてもエラーが返りトークンが無効になっていることがわかります。このようにTTL内でも一度利用され、クレデンシャルが取得されると2度と利用できません。
 
 余裕のある方はもう一度同じ手順でラッピングトークンを作り、今度はそのトークンの`cubbyhole/response`にアクセスしてトークンが保存されていることを確認しましょう。
 
