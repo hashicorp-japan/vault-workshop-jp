@@ -29,14 +29,16 @@ $ helm install ./vault-helm --name=vault
 インストールが完了したら別の端末を立ち上げてポートフォワードします。
 
 ```shell
-kubectl port-forward vault-0 8200:8200
+$ kubectl port-forward vault-0 8200:8200
 ```
 
 ```shell
-export VAULT_ADDR="http://127.0.0.1:8200"
-vault operator init -recovery-shares=1 -recovery-threshold=1
-vault operator unseal <UNSEAL_KEY>
+$ export VAULT_ADDR="http://127.0.0.1:8200"
+$ vault operator
+$ vault operator unseal <UNSEAL_KEY>
 ```
+
+Unsealは3回繰り返してください。初期化の手順は[こちら](https://github.com/hashicorp-japan/vault-workshop/blob/master/contents/hello-vault.md#vault%E3%81%AE%E5%88%9D%E6%9C%9F%E5%8C%96%E5%87%A6%E7%90%86)を参考にして下さい。
 
 ```console
 $ vault status
@@ -56,7 +58,7 @@ HA Enabled               false
 `Sealed`が`false`になっていればOKです。データベースシークレットエンジンを有効化しておきましょう。
 
 ```shell
-vault secrets enable database
+$ vault secrets enable database
 ```
 
 次にPostgresをK8s上にインストールします。
@@ -65,7 +67,7 @@ vault secrets enable database
 
 次にPostgresをインストールします。
 
-```
+```shell
 helm install --name postgres \
              --set image.repository=postgres \
              --set image.tag=10.6 \
@@ -86,20 +88,20 @@ vault-0                                        0/1     Running   1          7d12
 Postgresユーザのパスワードを設定します。
 
 ```shell
-kubectl exec -it postgres-postgresql-0 -- psql -U postgres
+$ kubectl exec -it postgres-postgresql-0 -- psql -U postgres
 ```
 
 ```shell
-ALTER USER postgres WITH PASSWORD 'postgres';
-quit
+$ ALTER USER postgres WITH PASSWORD 'postgres';
+$ quit
 ```
 
 # Vault - Postgres間の連携設定
 
 前に実施したMySQLと同様、Postgresのシークレットを払い出すための設定をK8s上のVaultに行っていきます。まずはConfigの設定です。
 
-```
-vault write database/config/postgres \
+```shell
+$ vault write database/config/postgres \
 plugin_name=postgresql-database-plugin \
 allowed_roles="postgres-role" \
 connection_url="postgresql://postgres:postgres@postgres-postgresql.default.svc.cluster.local:5432/postgres?sslmode=disable"
@@ -107,8 +109,8 @@ connection_url="postgresql://postgres:postgres@postgres-postgresql.default.svc.c
 
 次に`postgres-role`の設定です。
 
-```
-vault write database/roles/postgres-role \
+```shell
+$ vault write database/roles/postgres-role \
 db_name=postgres \
 creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT SELECT ON ALL TABLES IN SCHEMA PUBLIC TO \"{{name}}\";" \
 default_ttl="1h" \
@@ -117,13 +119,13 @@ max_ttl="24h"
 
 このロールを使ってシークレットを払い出します。
 
-```console
-vault read -format json database/creds/postgres-role
+```shell
+$ vault read -format json database/creds/postgres-role
 ```
 
 <details><summary>出力結果の例</summary>
 
-```
+```json
 {
   "request_id": "98843e81-cb6d-10cc-a7a8-96754fcebbe1",
   "lease_id": "database/creds/postgres-role/RMTEnlBPjOQt4JKql7Qsm4Z3",
@@ -163,7 +165,7 @@ $ vault policy write postgres-policy postgres-policy.hcl
 次はK8sの設定です。`Service Account`と[TokenReview API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.10/#tokenreview-v1-authentication-k8s-io)を使ってサービスアカウントに認証するための`Cluster Role Binding`を作ります。
 
 ```shell
-cat > postgres-serviceaccount.yml <<EOF
+$ cat > postgres-serviceaccount.yml <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -188,7 +190,7 @@ EOF
 `ClusterRole`の`system:auth-delegator`はK8sがデフォルトで持っているロールです。 このロールを`postgres-vault`のサービスアカウントにマッピングしてReviewToken APIを使った認証認可の権限を与えます。
 
 ```shell
-kubectl apply -f postgres-serviceaccount.yml
+$ kubectl apply -f postgres-serviceaccount.yml
 ```
 
 ## Vault Kubernetes Auth Methodの設定
@@ -198,7 +200,7 @@ kubectl apply -f postgres-serviceaccount.yml
 VaultのK8s認証メソッドを有効化しておきます。
 
 ```shell
-vault auth enable kubernetes
+$ vault auth enable kubernetes
 ```
 
 次にKubernetesの認証の設定を行います。以下の情報が必要です。
@@ -210,10 +212,10 @@ vault auth enable kubernetes
 
 これらを取得するために以下のコマンドを実行してください。
 ```
-export VAULT_SA_NAME=$(kubectl get sa postgres-vault -o jsonpath="{.secrets[*]['name']}")
-export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data.token}" | base64 --decode; echo)
-export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo)
-export K8S_HOST=$(kubectl exec -it $VAULT_POD -- sh -c 'echo $KUBERNETES_SERVICE_HOST')
+$ export VAULT_SA_NAME=$(kubectl get sa postgres-vault -o jsonpath="{.secrets[*]['name']}")
+$ export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data.token}" | base64 --decode; echo)
+$ export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo)
+$ export K8S_HOST=$(kubectl exec -it $VAULT_POD -- sh -c 'echo $KUBERNETES_SERVICE_HOST')
 ```
 
 <details><summary>`kubectl get sa postgres-vault -o json`の例</summary>
@@ -272,8 +274,8 @@ export K8S_HOST=$(kubectl exec -it $VAULT_POD -- sh -c 'echo $KUBERNETES_SERVICE
 
 取得した値を使って認証の設定を行います。これはVaultがKubernetesに接続するための設定です。`kubernetes_host`で設定したエンドポイントに対して取得した`token_reviewer_jwt`で認証します。
 
-```
-vault write auth/kubernetes/config \
+```shell
+$ vault write auth/kubernetes/config \
   token_reviewer_jwt="$SA_JWT_TOKEN" \
   kubernetes_host="https://$K8S_HOST:443" \
   kubernetes_ca_cert="$SA_CA_CRT"
@@ -281,8 +283,8 @@ vault write auth/kubernetes/config \
 
 サービスアカウントロールにアタッチされるロールを作ります。`default`ネームスペースの先ほど作った`postgres-vault`サービスアカウントを認可して、Vault上で作った`postgres-policy`の権限を付与しています。
 
-```
-vault write auth/kubernetes/role/postgres \
+```shell
+$ vault write auth/kubernetes/role/postgres \
     bound_service_account_names=postgres-vault \
     bound_service_account_namespaces=default \
     policies=postgres-policy \
@@ -322,27 +324,27 @@ $ kubectl run tmp --rm -i --tty --serviceaccount=postgres-vault --image alpine
 
 Aplineに必要なパッケージをインストールして、サービスアカウントトークンを取得してfetchします
 
-```
-apk update
-apk add curl postgresql-client jq
-KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+```shell
+$ apk update
+$ apk add curl postgresql-client jq
+$ KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 ```
 
 次にこれを利用してKubernetes Auth Methodを使ってVaultにログインします。ログインには`auth/kubernetes/login`のエンドポイントを使います。
 
-```
-VAULT_K8S_LOGIN=$(curl --request POST --data '{"jwt": "'"$KUBE_TOKEN"'", "role": "postgres"}' http://vault.default.svc.cluster.local:8200/v1/auth/kubernetes/login)
+```shell
+$ VAULT_K8S_LOGIN=$(curl --request POST --data '{"jwt": "'"$KUBE_TOKEN"'", "role": "postgres"}' http://vault.default.svc.cluster.local:8200/v1/auth/kubernetes/login)
 ```
 
 ログイン情報を確認しておきましょう。トークンが発行され、認証されたクライアントに`postgres-policy`が割り当てられていることがわかります。
 
-```
-echo $VAULT_K8S_LOGIN | jq
+```shell
+$ echo $VAULT_K8S_LOGIN | jq
 ```
 
 <details><summary>出力結果</summary>
 
-```
+```json
 {
   "request_id": "071f4939-26d5-ef37-0311-30dc64b804d7",
   "lease_id": "",
@@ -382,13 +384,13 @@ echo $VAULT_K8S_LOGIN | jq
 `.auth.client_token`がVaultのトークンなのでこれを取得します。
 
 ```
-X_VAULT_TOKEN=$(echo $VAULT_K8S_LOGIN | jq -r '.auth.client_token')
+$ X_VAULT_TOKEN=$(echo $VAULT_K8S_LOGIN | jq -r '.auth.client_token')
 ```
 
 次に、このトークンを使ってVaultのAPIをコールしてPostgresのシークレットを生成しましょう。`database/creds/ROLE_NAME`がエンドポイントです。
 
 ```
-POSTGRES_CREDS=$(curl --header "X-Vault-Token: $X_VAULT_TOKEN" http://vault.default.svc.cluster.local:8200/v1/database/creds/postgres-role)
+$ POSTGRES_CREDS=$(curl --header "X-Vault-Token: $X_VAULT_TOKEN" http://vault.default.svc.cluster.local:8200/v1/database/creds/postgres-role)
 ```
 
 確認します。
@@ -414,9 +416,9 @@ $ echo $POSTGRES_CREDS | jq
 このユーザを使ってPostgresを利用しています。
 
 ```
-PGUSER=$(echo $POSTGRES_CREDS | jq -r '.data.username')
-export PGPASSWORD=$(echo $POSTGRES_CREDS | jq -r '.data.password')
-psql -h postgres-postgresql -U $PGUSER postgres -c 'SELECT * FROM pg_catalog.pg_tables;'
+$ PGUSER=$(echo $POSTGRES_CREDS | jq -r '.data.username')
+$ export PGPASSWORD=$(echo $POSTGRES_CREDS | jq -r '.data.password')
+$ psql -h postgres-postgresql -U $PGUSER postgres -c 'SELECT * FROM pg_catalog.pg_tables;'
 ```
 
 テーブルが表示され正しくシークレットが発行できることが確認できるはずです。
@@ -522,20 +524,20 @@ spec:
 Applyします。
 
 ```shell
-kubectl apply -f vault-rails.yml
+$ kubectl apply -f vault-rails.yml
 ```
 
 Pod名を取得しましょう。
 
 ```shell
-kubectl get po -l app=vault-dymanic-secrets-rails -o wide
+$ kubectl get po -l app=vault-dymanic-secrets-rails -o wide
 ```
 
 Pod名を引数にPort fowardの設定を行います。
 
 ```shell
-port-forward <POD_NAME_1> 3001:3000
-port-forward <POD_NAME_2> 3002:3000
+$ port-forward <POD_NAME_1> 3001:3000
+$ port-forward <POD_NAME_2> 3002:3000
 ```
 
 ブラウザでアクセスするとPostgresのユーザ名とパスワードがPodごとに発行されていることがわかるでしょう。

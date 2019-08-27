@@ -11,7 +11,9 @@
 まず、プリセットされるポリシー一覧を確認してみましょう。ポリシーを管理するエンドポイントは`sys/policy`と`sys/policies`です。`sys`のエンドポイントには[その他にも様々な機能](https://www.vaultproject.io/api/system/index.html)が用意されています。
 
 ```console
+$ export VAULT_ADDR="http://127.0.0.1:8200"
 $ vault list sys/policy
+
 Keys
 ----
 default
@@ -20,6 +22,7 @@ root
 
 ```console
 $ vault read sys/policy/default
+
 Key      Value
 ---      -----
 name     default
@@ -43,7 +46,7 @@ path "auth/token/revoke-self" {
 `path`と指定されているのが各エンドポイントで`capablities`が各エンドポイントに対する権限を現しています。試しに`default`の権限を持つトークンを発行してみましょう。`default`にはこの前に作成した`database`への権限はないので`database`のパスへの如何なる操作もできないはずです。
 
 ```console
-$ vault token create -policy=default -ttl=10m
+$ vault token create -policy=default
 Key                  Value
 ---                  -----
 token                s.acBPCz3lfDryfVr01RgwyTqK
@@ -55,7 +58,7 @@ identity_policies    []
 policies             ["default"]
 ```
 
-`default`の権限を持ったトークンを10分のTTLで生成しました。このトークンをコピーして`vault login`します。
+`default`の権限を持ったトークンを生成しました。このトークンをコピーして`vault login`します。
 
 ```console
 $ vault login
@@ -195,14 +198,24 @@ URL: GET http://127.0.0.1:8200/v1/sys/internal/ui/mounts/kv
 Code: 403. Errors:
 
 * preflight capability check returned 403, please ensure client's policies grant access to path "kv/"
+```
 
+Databaseのエンドポイントのread, list出来てきますがkvエンドポイントには権限がないことがわかります。
+
+次にDatabaseエンドポイントにwriteの処理をしてみましょう。
+
+```shell
 $ vault write database/roles/role-handson-4 \
     db_name=mysql-handson-db \
     creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
     default_ttl="30s" \
     max_ttl="30s"
-Error writing data to database/roles/role-handson-4: Error making API request.
+```
 
+エラーが出るはずです。
+
+```
+Error writing data to database/roles/role-handson-4: Error making API request.
 URL: PUT http://127.0.0.1:8200/v1/database/roles/role-handson-4
 Code: 403. Errors:
 
@@ -423,7 +436,6 @@ Code: 403. Errors:
 ![](https://learn.hashicorp.com/assets/images/vault-approle-workflow2.png)
 
 ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentication](https://learn.hashicorp.com/vault/identity-access-management/iam-authentication)
-
 
 
 ## 参考リンク

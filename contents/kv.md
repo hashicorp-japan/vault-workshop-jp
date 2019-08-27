@@ -7,6 +7,7 @@
 Vaultでは各シークレットエンジンを有効化するために`enable`の処理を行います。`enable`は特定の権限を持ったトークンのみが実施できるようにすべきですが、ここではroot tokenを使います。ポリシーについては後ほど扱います。
 
 ```console
+$ export VAULT_ADDR="http://127.0.0.1:8200"
 $ vault secrets enable -path=kv kv
 Success! Enabled the kv secrets engine at: kv/
 
@@ -37,7 +38,6 @@ password    passwd
 
 ### データの更新
 データの更新には2通りの方法があります。
-
 
 まずは上書きしてデータのバージョンを上げる方法です。
 ```console
@@ -136,7 +136,8 @@ password    passwd
 二つ目の更新の方法は`-patch`オプションを付与する方法です。先ほどの上書きの方法だと、キーを忘れてアップデートするとどうなるか試してみましょう。
 
 ```console
-$ vault kv put kv/iam password=passwd-2                                                                                                kabu@/Users/kabu/hashicorp/vault
+$ vault kv put kv/iam password=passwd-2
+
 Key              Value
 ---              -----
 created_time     2019-07-12T06:19:28.028113Z

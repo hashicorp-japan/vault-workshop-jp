@@ -7,11 +7,90 @@ VaultのSSHシークレットエンジンではSSHを使ったマシンへのア
 
 ここでは両方を簡単に試してみます。
 
-この章ではローカルに立ち上がっているVaultと仮想マシンを通信させるため、Vaultのコンフィグを以下のように変更し再起動します。`Ctrl+C`でVaultの端末を止めて以下のようにファイルを変更してください。
+## VagrantでVMを起動
+
+Vagrantを使ってUbuntu OSのVMを一つ起動してみましょう。適当なディレクトリを作ります。
+
+```shell
+$ mkdir -p ~/vagrant/ubuntu
+$ cd ~/vagrant/ubuntu
+$ vagrant box add ubuntu14.04 https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
+$ vagrant init ubuntu14.04
+```
+
+`Vagrantfile`の以下の行のコメントは外してください。
+
+```
+# config.vm.network "public_network"
+```
+
+```console
+$ vagrant up
+
+Bringing machine 'default' up with 'virtualbox' provider...
+==> default: Importing base box 'ubuntu14.04'...
+==> default: Matching MAC address for NAT networking...
+==> default: Setting the name of the VM: ubuntu_default_1564553548030_13754
+==> default: Clearing any previously set forwarded ports...
+==> default: Clearing any previously set network interfaces...
+==> default: Available bridged network interfaces:
+1) en0: Wi-Fi (Wireless)
+2) ap1
+3) p2p0
+4) awdl0
+5) en2: Thunderbolt 2
+6) en4: Thunderbolt 4
+7) en1: Thunderbolt 1
+8) en3: Thunderbolt 3
+9) bridge0
+10) en5: USB Ethernet(?)
+==> default: When choosing an interface, it is usually the one that is
+==> default: being used to connect to the internet.
+    default: Which interface should the network bridge to? 1
+==> default: Preparing network interfaces based on configuration...
+    default: Adapter 1: nat
+    default: Adapter 2: bridged
+==> default: Forwarding ports...
+    default: 22 (guest) => 2222 (host) (adapter 1)
+==> default: Booting VM...
+==> default: Waiting for machine to boot. This may take a few minutes...
+    default: SSH address: 127.0.0.1:2222
+    default: SSH username: vagrant
+    default: SSH auth method: private key
+
+
+    default:
+    default: Vagrant insecure key detected. Vagrant will automatically replace
+    default: this with a newly generated keypair for better security.
+    default:
+    default: Inserting generated public key within guest...
+    default: Removing insecure key from the guest if it's present...
+    default: Key inserted! Disconnecting and reconnecting using new SSH key...
+==> default: Machine booted and ready!
+==> default: Checking for guest additions in VM...
+    default: The guest additions on this VM do not match the installed version of
+    default: VirtualBox! In most cases this is fine, but in rare cases it can
+    default: prevent things such as shared folders from working properly. If you see
+    default: shared folder errors, please make sure the guest additions within the
+    default: virtual machine match the version of VirtualBox you have installed on
+    default: your host and reload your VM.
+    default:
+    default: Guest Additions Version: 4.3.40
+    default: VirtualBox Version: 6.0
+==> default: Configuring and enabling network interfaces...
+==> default: Mounting shared folders...
+    default: /vagrant => /Users/kabu/vagrant/ubuntu
+```
+
+起動しました。今後このVMのことを「ホスト」、ローカルマシンのことを「クライアント」と呼びます。
+
+## Vaultの起動
+
+ローカルに立ち上がっているVaultとホストを通信させるため、Vaultのコンフィグを以下のように変更し再起動します。`Ctrl+C`でVaultの端末を止めて以下のようにファイルを変更してください。
 
 ```hcl
 storage "file" {
-   path = "/Users/Shared/vault-oss-data"
+   path = "/path/to/vault-oss-data"
 }
 
 listener "tcp" {
@@ -101,81 +180,6 @@ EOH
 図の②の手順です。
 
 次に、この公開鍵をターゲットとなるホスト(VM)のSSHコンフィグレーションに配布します。(図の②)
-
-Vagrantを使ってUbuntu OSのVMを一つ起動してみましょう。適当なディレクトリを作ります。
-
-```shell
-$ mkdir -p ~/vagrant/ubuntu
-$ cd ~/vagrant/ubuntu
-$ vagrant box add ubuntu14.04 https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box
-$ vagrant init ubuntu14.04
-```
-
-`Vagrantfile`の以下の行のコメントは外してください。
-
-```
-# config.vm.network "public_network"
-```
-
-```console
-$ vagrant up
-
-Bringing machine 'default' up with 'virtualbox' provider...
-==> default: Importing base box 'ubuntu14.04'...
-==> default: Matching MAC address for NAT networking...
-==> default: Setting the name of the VM: ubuntu_default_1564553548030_13754
-==> default: Clearing any previously set forwarded ports...
-==> default: Clearing any previously set network interfaces...
-==> default: Available bridged network interfaces:
-1) en0: Wi-Fi (Wireless)
-2) ap1
-3) p2p0
-4) awdl0
-5) en2: Thunderbolt 2
-6) en4: Thunderbolt 4
-7) en1: Thunderbolt 1
-8) en3: Thunderbolt 3
-9) bridge0
-10) en5: USB Ethernet(?)
-==> default: When choosing an interface, it is usually the one that is
-==> default: being used to connect to the internet.
-    default: Which interface should the network bridge to? 1
-==> default: Preparing network interfaces based on configuration...
-    default: Adapter 1: nat
-    default: Adapter 2: bridged
-==> default: Forwarding ports...
-    default: 22 (guest) => 2222 (host) (adapter 1)
-==> default: Booting VM...
-==> default: Waiting for machine to boot. This may take a few minutes...
-    default: SSH address: 127.0.0.1:2222
-    default: SSH username: vagrant
-    default: SSH auth method: private key
-
-
-    default:
-    default: Vagrant insecure key detected. Vagrant will automatically replace
-    default: this with a newly generated keypair for better security.
-    default:
-    default: Inserting generated public key within guest...
-    default: Removing insecure key from the guest if it's present...
-    default: Key inserted! Disconnecting and reconnecting using new SSH key...
-==> default: Machine booted and ready!
-==> default: Checking for guest additions in VM...
-    default: The guest additions on this VM do not match the installed version of
-    default: VirtualBox! In most cases this is fine, but in rare cases it can
-    default: prevent things such as shared folders from working properly. If you see
-    default: shared folder errors, please make sure the guest additions within the
-    default: virtual machine match the version of VirtualBox you have installed on
-    default: your host and reload your VM.
-    default:
-    default: Guest Additions Version: 4.3.40
-    default: VirtualBox Version: 6.0
-==> default: Configuring and enabling network interfaces...
-==> default: Mounting shared folders...
-    default: /vagrant => /Users/kabu/vagrant/ubuntu
-```
-
-起動しました。今後このVMのことを「ホスト」、ローカルマシンのことを「クライアント」と呼びます。
 
 ホストに`vagrant ssh`でログインします。以下のコマンドでVaultで生成したpublic_keyを取得します。
 
