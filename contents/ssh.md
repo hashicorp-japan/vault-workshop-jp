@@ -24,11 +24,6 @@ listener "tcp" {
   tls_disable = 1
 }
 
-seal "awskms" {
-  region     = "ap-northeast-1"
-  endpoint   = "https://kms.ap-northeast-1.amazonaws.com"
-}
-
 api_addr = "http://192.168.11.2:8200"
 
 ui = true
@@ -71,7 +66,7 @@ vault secrets enable -path=ssh ssh
 ここでは`generate_signing_key`を付与して生成してみます。
 
 ```shell
-vault write ssh-client-signer/config/ca generate_signing_key=true
+vault write ssh/config/ca generate_signing_key=true
 ```
 
 Public Keyのみが出力されるでしょう。
