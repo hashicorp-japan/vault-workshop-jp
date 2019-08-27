@@ -13,13 +13,14 @@ AWSシークレットエンジンではIAMポリシーの定義に基づいたAW
 まずシークレットエンジンをenableにします。
 
 ```shell
-vault secrets enable aws
+$ export VAULT_ADDR="http://127.0.0.1:8200"
+$ vault secrets enable aws
 ```
 
 次にVaultがAWSのAPIを実行するために必要なキーを登録します。
 
 ```shell
-vault write aws/config/root \
+$ vault write aws/config/root \
     access_key=************ \
     secret_key=************ \
     region=ap-northeast-1
@@ -30,7 +31,7 @@ vault write aws/config/root \
 次にロールを登録します。このロールがVaultから払い出されるユーザの権限と紐付きます。ロールは複数登録することが可能です。今回はまずは`credential_type`に`iam_user`を指定しています。
 
 ```shell
-vault write aws/roles/my-role \
+$ vault write aws/roles/my-role \
     credential_type=iam_user \
     policy_document=-<<EOF
 {
@@ -46,7 +47,7 @@ vault write aws/roles/my-role \
 EOF
 ```
 
-`watch`コマンドでユーザのリストを監視します。
+別端末を開いて`watch`コマンドでユーザのリストを監視します。
 
 ```console
 $ watch -n 1 aws iam list-users
@@ -183,7 +184,7 @@ $ watch -n 1 aws iam list-users
 まずはマニュアルでの実行手順です。`vault read aws/creds/my-role`を実行した際に発行された`lease_id`をコピーしてください。
 
 ```shell
-vault lease revoke aws/creds/my-role/<LEASE_ID>
+$ vault lease revoke aws/creds/my-role/<LEASE_ID>
 ```
 
 `watch`の実行結果を見るとユーザが削除されているでしょう。
@@ -205,7 +206,7 @@ vault lease revoke aws/creds/my-role/<LEASE_ID>
 次に自動Revokeです。デフォルトではTTLが`765h`になっています。これは数分にしてみましょう。
 
 ```shell
-vault write aws/config/lease lease=5m lease_max=10m
+vault write aws/config/lease lease=2m lease_max=10m
 ```
 
 ```console
@@ -213,7 +214,7 @@ $ vault read aws/config/lease
 
 Key          Value
 ---          -----
-lease        5m0s
+lease        2m0s
 lease_max    10m0s
 ```
 
@@ -225,14 +226,14 @@ $ vault read aws/creds/my-role
 Key                Value
 ---                -----
 lease_id           aws/creds/my-role/agnda2uyVWKso4E3HoWlPqY8
-lease_duration     5m
+lease_duration     2m
 lease_renewable    true
 access_key         ****************
 secret_key         ****************
 security_token     <nil>
 ```
 
-`watch`の実行結果を見るとユーザが増えています。今度は5分後にこのユーザは自動で削除されます。
+`watch`の実行結果を見るとユーザが増えています。今度は2分後にこのユーザは自動で削除されます。
 
 ```json
 {
