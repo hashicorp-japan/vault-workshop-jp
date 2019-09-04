@@ -286,13 +286,13 @@ vault read database/creds/role-handson-3
 Key                Value
 ---                -----
 lease_id           database/creds/role-handson-3/H3y6DjZBGztisnO3B3DqzgkA
-lease_duration     30s
+lease_duration     120s
 lease_renewable    true
 password           A1a-0VP1UDi5BPEMnPnZ
 username           v-role-bnsYTFQAj
 ```
 
-`lease_duration`が設定したTTLの30秒になっています。これを使ってまずは試しにログインしてみます。
+`lease_duration`が設定したTTLの120秒になっています。これを使ってまずは試しにログインしてみます。
 
 ```console
 $ mysql -u <USERNAME_GEN_BY_VAULT> -p           
