@@ -173,12 +173,14 @@ $ vault kv get -format=json -field=password secret/mypassword
 
 一旦Vaultのサーバを停止し、次はVaultのコンフィグレーションを作成し、起動してみます。Vaultのコンフィグレーションは`HashiCorp Configuration Language`で記述します。
 
-デスクトップに任意のフォルダーを作って、以下のファイルを作成します。ファイル名は`vault-local-config.hcl`とします。`path`は自由にディレクトリを指定して下さい。
+デスクトップに任意のフォルダーを作って、以下のファイルを作成します。ファイル名は`vault-local-config.hcl`とします。`path`は書き換えてください。
 
 ```shell 
+$ mkdir vault-workshop
+$ cd vault-workshop
 $ cat > vault-local-config.hcl <<EOF
 storage "file" {
-   path = "/path/to/vaultdata"
+   path = "/path/to/vault-workshop/vaultdata"
 }
 
 listener "tcp" {
@@ -195,7 +197,7 @@ EOF
 ストレージのタイプは複数選択できますが、ここではローカルファイルを使います。実際の運用で可用性などを考慮する場合はConsulなどHAの機能が盛り込まれたストレージを使うべきです。このコンフィグを使ってVaultを再度起動してみましょう。
 
 ```console
-$ vault server -config path/to/vault-local-config.hcl
+$ vault server -config vault-local-config.hcl
 WARNING! mlock is not supported on this system! An mlockall(2)-like syscall to
 prevent memory from being swapped to disk is not supported on this system. For
 better security, only run Vault on systems where this call is supported. If
