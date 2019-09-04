@@ -58,30 +58,17 @@ identity_policies    []
 policies             ["default"]
 ```
 
-`default`の権限を持ったトークンを生成しました。このトークンをコピーして`vault login`します。
+`default`の権限を持ったトークンを生成しました。このトークンをコピーします。Tokenを環境変数にセットしておきましょう。
 
-```console
-$ vault login
-Token (will be hidden):
-Success! You are now authenticated. The token information displayed below
-is already stored in the token helper. You do NOT need to run "vault login"
-again. Future Vault requests will automatically use this token.
-
-Key                  Value
----                  -----
-token                s.up9r7C0hQAy6xvtDbwPL6y4L
-token_accessor       dHRTUY5drNf3hWYagF6TbiCl
-token_duration       9m16s
-token_renewable      true
-token_policies       ["default"]
-identity_policies    []
-policies             ["default"]
+```shell
+$ export DEFAULT_TOKEN=s.acBPCz3lfDryfVr01RgwyTqK
+$ export ROOT_TOKEN=s.51du1iIeam79Q5fBRBALVhRB
 ```
 
 `database`エンドポイントにアクセスしましょう。権限がないため`permission denied`が発生します。
 
 ```console
-$ vault list database/roles
+$ VAULT_TOKEN=$DEFAULT_TOKEN vault list database/roles
 Error listing database/roles/: Error making API request.
 
 URL: GET http://127.0.0.1:8200/v1/database/roles?list=true
@@ -93,28 +80,10 @@ Code: 403. Errors:
 
 ## ポリシーを作る
 
-新しいポリシーを登録してみましょう。`default`のポリシーにはポリシーを作る権限はないためrootでログインをし直します。今回は一番最初に取得したRoot Tokenを入力してください。
-
-```console
-$ vault login
-Token (will be hidden):
-Success! You are now authenticated. The token information displayed below
-is already stored in the token helper. You do NOT need to run "vault login"
-again. Future Vault requests will automatically use this token.
-
-Key                  Value
----                  -----
-token                s.51du1iIeam79Q5fBRBALVhRB
-token_accessor       z28eqFezRCtIlaH33OSnhEGt
-token_duration       ∞
-token_renewable      false
-token_policies       ["root"]
-identity_policies    []
-policies             ["root"]
-```
-
 ポリシーはVaultのコンフィグレーションと同様`HCL`で記述します。
+
 ```shell
+$ cd /path/to/vault-workshop
 $ cat my-first-policy.hcl <<EOF
 path "database/*" {
   capabilities = [ "read", "list"]
@@ -122,10 +91,10 @@ path "database/*" {
 EOF
 ```
 
-作ったら`vault policy write`のコマンドでポリシーを作成します。
+作ったら`vault policy write`のコマンドでポリシーを作成します。ポリシーの作成はRoot Tokenで実施します。
 
 ```console
-$ vault policy write my-policy ~/my-first-policy.hcl
+$ VAULT_TOKEN=$ROOT_TOKEN vault policy write my-policy my-first-policy.hcl
 Success! Uploaded policy: my-policy
 
 $ vault policy list           
@@ -142,7 +111,7 @@ path "database/*" {
 新しいポリシーができました。このポリシーと紐づけられたトークンは`database`エンドポイントへの`read`, `list`の権限を与えられます。ではトークンを発行してみます。
 
 ```console
-$ vault token create -policy=my-policy 
+$ VAULT_TOKEN=$ROOT_TOKEN vault token create -policy=my-policy 
 Key                  Value
 ---                  -----
 token                s.bA9M42W41G7tF90REMDCtMeO
@@ -154,25 +123,14 @@ identity_policies    []
 policies             ["default" "my-policy"]
 ```
 
-Vaultにこのトークンを使ってログインし、以下のコマンドを実行してください。
+Vaultにこのトークンを使って以下のコマンドを実行してください。
+
+```shell
+$ export MY_YOKEN=s.bA9M42W41G7tF90REMDCtMeO
+```
 
 ```console
-$ vault login s.bA9M42W41G7tF90REMDCtMeO
-Success! You are now authenticated. The token information displayed below
-is already stored in the token helper. You do NOT need to run "vault login"
-again. Future Vault requests will automatically use this token.
-
-Key                  Value
----                  -----
-token                s.bA9M42W41G7tF90REMDCtMeO
-token_accessor       LfQCnqPOJHGqO8TplfSjTNFs
-token_duration       767h59m33s
-token_renewable      true
-token_policies       ["default" "my-policy"]
-identity_policies    []
-policies             ["default" "my-policy"]
-
-$ vault list database/roles       
+$ VAULT_TOKEN=$MY_TOKEN vault list database/roles       
 Keys
 ----
 my-role
@@ -180,7 +138,7 @@ role-handson
 role-handson-2
 role-handson-3
 
-$ vault read database/roles/my-role
+$ VAULT_TOKEN=$MY_TOKEN vault read database/roles/my-role
 Key                      Value
 ---                      -----
 creation_statements      [CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';]
@@ -191,7 +149,7 @@ renew_statements         []
 revocation_statements    []
 rollbakc_statements      []
 
-$ vault kv list kv/
+$ VAULT_TOKEN=$MY_TOKEN vault kv list kv/
 Error making API request.
 
 URL: GET http://127.0.0.1:8200/v1/sys/internal/ui/mounts/kv
@@ -205,7 +163,7 @@ Databaseのエンドポイントのread, list出来てきますがkvエンドポ
 次にDatabaseエンドポイントにwriteの処理をしてみましょう。
 
 ```shell
-$ vault write database/roles/role-handson-4 \
+$ VAULT_TOKEN=$MY_TOKEN vault write database/roles/role-handson-4 \
     db_name=mysql-handson-db \
     creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';" \
     default_ttl="30s" \
@@ -227,34 +185,21 @@ Code: 403. Errors:
 
 もう少し細かいポリシーに変更してみましょう。
 
-ルートトークンでログインし直します。
-
-```console
-$ vault login s.51du1iIeam79Q5fBRBALVhRB
-Success! You are now authenticated. The token information displayed below
-is already stored in the token helper. You do NOT need to run "vault login"
-again. Future Vault requests will automatically use this token.
-
-Key                  Value
----                  -----
-token                s.51du1iIeam79Q5fBRBALVhRB
-token_accessor       z28eqFezRCtIlaH33OSnhEGt
-token_duration       ∞
-token_renewable      false
-token_policies       ["root"]
-identity_policies    []
-policies             ["root"]
-```
-
 [ドキュメント](https://www.vaultproject.io/docs/concepts/policies.html)を見ながら`database/roles`以下の直下のすべてのリソースに対して`create`,`read`,`list`の権限があるが、`database/roles/role-handson`だけには一切アクセスできないコンフィグファイルを作ってみてください。
 
 正解は[こちら](https://raw.githubusercontent.com/tkaburagi/vault-configs/master/policies/my-first-policy.hcl)です。
 
 ```console
-$ vault policy write my-policy ~/hashicorp/vault/configs/policies/my-first-policy.hcl
-$ vault token create -policy=my-policy -ttl=20m
-$ vault login <TOKEN>
-$ vault list database/roles
+$ VAULT_TOKEN=$ROOT_TOKEN vault policy write my-policy my-first-policy.hcl
+$ VAULT_TOKEN=$ROOT_TOKEN vault token create -policy=my-policy -ttl=20m
+```
+
+```shell
+$ export MY_YOKEN=<TOKEN_ABOVE>
+```
+
+```
+$ VAULT_TOKEN=$MY_TOKEN vault list database/roles
 Keys
 ----
 my-role
@@ -262,7 +207,7 @@ role-handson
 role-handson-2
 role-handson-3
 
-$ vault read database/roles/role-handson
+$ VAULT_TOKEN=$MY_TOKEN vault read database/roles/role-handson
 Error reading database/roles/role-handson: Error making API request.
 
 URL: GET http://127.0.0.1:8200/v1/database/roles/role-handson
@@ -271,7 +216,7 @@ Code: 403. Errors:
 * 1 error occurred:
 	* permission denied
 
-$ vault read database/roles/role-handson-2
+$ VAULT_TOKEN=$MY_TOKEN vault read database/roles/role-handson-2
 Key                      Value
 ---                      -----
 creation_statements      [CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON handson.product TO '{{name}}'@'%';]
@@ -323,19 +268,15 @@ EOF
 ```
 
 ```shell
-$  vault policy write my-approle path/to/my-approle-policy.hcl
+$ VAULT_TOKEN=$ROOT_TOKEN vault policy write my-approle path/to/my-approle-policy.hcl
 ```
 
 `approle`を`enable`にし、`my-approle`のポリシーに基づいたAppRoleを一つ作成します。
 
 ```console
-$ vault auth enable approle
-$ vault write -f auth/approle/role/my-approle policies=my-approle
-$ vault read auth/approle/role/my-approle
-WARNING! The following warnings were returned from Vault:
-
-  * The "bound_cidr_list" parameter is deprecated and will be removed in favor
-  of "secret_id_bound_cidrs".
+$ VAULT_TOKEN=$ROOT_TOKEN vault auth enable approle
+$ VAULT_TOKEN=$ROOT_TOKEN vault write -f auth/approle/role/my-approle policies=my-approle
+$ VAULT_TOKEN=$ROOT_TOKEN vault read auth/approle/role/my-approle
 
 Key                      Value
 ---                      -----
@@ -357,7 +298,7 @@ token_type               default
 これでAppRoleの作成は完了です。次に`Role ID`を取得します。
 
 ```console
-$ vault read auth/approle/role/my-approle/role-id
+$ VAULT_TOKEN=$ROOT_TOKEN vault read auth/approle/role/my-approle/role-id
 Key        Value
 ---        -----
 role_id    a25b3148-7b95-57bf-bc5d-cb72ffc08e68
@@ -368,7 +309,7 @@ role_id    a25b3148-7b95-57bf-bc5d-cb72ffc08e68
 一つは`push`と呼ばれる方法で、カスタムの値を指定するパターンです。
 
 ```console
-$ vault write -f auth/approle/role/my-approle/custom-secret-id secret_id=ZeCletlb
+$ VAULT_TOKEN=$ROOT_TOKEN vault write -f auth/approle/role/my-approle/custom-secret-id secret_id=ZeCletlb
 Key                   Value
 ---                   -----
 secret_id             ZeCletlb
@@ -378,7 +319,7 @@ secret_id_accessor    c2b12a4a-0fbf-45ce-b135-be2c1d829b06
 push型はカスタムの値をして出来ますが、Vault以外のサーバ、アプリやツールなどSecret IDを発行する側にSecret IDを知らせてしまうことになるため、通常使用しません。`pull`と呼ばれる方法が一般的です。
 
 ```console
-$ vault write -f auth/approle/role/my-approle/secret-id
+$ VAULT_TOKEN=$ROOT_TOKEN vault write -f auth/approle/role/my-approle/secret-id
 Key                   Value
 ---                   -----
 secret_id             1cef3c1e-feca-99d8-ecd4-7a17ca997919
@@ -390,7 +331,7 @@ secret_id_accessor    f620512c-e9e9-4f84-bbf6-9f4d484ff2bc
 これらを使って認証し、トークンを取得してみましょう。
 
 ```console
-$ vault write auth/approle/login role_id="a25b3148-7b95-57bf-bc5d-cb72ffc08e68" secret_id="1cef3c1e-feca-99d8-ecd4-7a17ca997919"
+$ VAULT_TOKEN=$ROOT_TOKEN vault write auth/approle/login role_id="a25b3148-7b95-57bf-bc5d-cb72ffc08e68" secret_id="1cef3c1e-feca-99d8-ecd4-7a17ca997919"
 Key                     Value
 ---                     -----
 token                   s.nEolH5Pjqf3207KljT9xoamS
@@ -403,10 +344,14 @@ policies                ["default" "my-approle"]
 token_meta_role_name    my-approle-policy
 ```
 
-AppRoleにより認証され、発行されたトークンを試してみましょう。`VAULT_TOKEN`をセットすると使えます。
+AppRoleにより認証され、発行されたトークンを試してみましょう。
+
+```shell
+$ export MY_YOKEN=s.nEolH5Pjqf3207KljT9xoamS
+```
 
 ```console
-$ VAULT_TOKEN=s.nEolH5Pjqf3207KljT9xoamS vault kv get kv/iam
+$ VAULT_TOKEN=$MY_TOKEN vault kv get kv/iam
 ====== Metadata ======
 Key              Value
 ---              -----
@@ -421,7 +366,7 @@ Key         Value
 name        kabu
 password    passwd-2
 
-$ VAULT_TOKEN=s.nEolH5Pjqf3207KljT9xoamS vault read database/roles/role-demoapp
+$ VAULT_TOKEN=$MY_TOKEN vault read database/roles/role-demoapp
 Error reading database/roles/role-demoapp: Error making API request.
 
 URL: GET http://127.0.0.1:8200/v1/database/roles/role-demoapp
