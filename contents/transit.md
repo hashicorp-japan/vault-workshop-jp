@@ -51,12 +51,15 @@ Key           Value
 ciphertext    vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4iSocUfG5
 ```
 
+```shell
+$ export CTEXT_V1=vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4iSocUfG5
+```
 この暗号化の機能はbase64にさえ変換してしまえば画像など様々な形式のデータを暗号化することができます。
 
 次に復号化をしてみます。復号化は`transit/decrypt/`のエンドポイントを使います。
 
 ```console
-$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4iSocUfG5
+$ vault write transit/decrypt/my-encrypt-key ciphertext=$CTEXT_V1
 Key          Value
 ---          -----
 ---          -----
@@ -70,7 +73,7 @@ $ base64 --decode <<< "bXlpbXBvcnRhbnRwYXNzd29yZAo="
 myimportantpassword
 ```
 
-無事に復号化できました。Vaultから復号化されたbase64のテキストをデコードして、、
+無事に復号化できました。
 
 暗号化キーは様々なアルゴリズムをサポートしており、`type`で指定可能です。
 
@@ -118,45 +121,59 @@ $ base64 <<< "myimportantpassword-v2"
 bXlpbXBvcnRhbnRwYXNzd29yZC12Mgo=
 
 $ vault write transit/encrypt/my-encrypt-key plaintext=bXlpbXBvcnRhbnRwYXNzd29yZC12Mgo=
+
 Key           Value
 ---           -----
 ciphertext    vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7AkbiNgdr0gVOALw
 ```
 
+```shell
+$ export CTEXT_V2=vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7AkbiNgdr0gVOALw
+```
+
 新しいデータはv2のキーで暗号化復号化され、それ以前のデータは古いキーで復号化されます。v1とv2で暗号化したデータをそれぞれ復号化してみます。
 
 ```console
-$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:0ys5ZE1/azWn6m6y5TYLjQeA0NoDgckT9Y3AJAJBI3oZgwhCj9Eqb9oT1FUfwJyj
+$ vault write transit/decrypt/my-encrypt-key ciphertext=$CTEXT_V1
+
 Key          Value
 ---          -----
 plaintext    bXlpbXBvcnRhbnRwYXNzd29yZAo=
 
-$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7AkbiNgdr0gVOALw
+$ vault write transit/decrypt/my-encrypt-key ciphertext=$CTEXT_V2
+
 Key          Value
 ---          -----
 plaintext    bXlpbXBvcnRhbnRwYXNzd29yZC12Mgo=
 ```
 
-この状態でいずれv2の新しいキーに全てのデータを移行したいです。そのためには`rewrap`という操作を行い、古いデータの更新(再暗号化)を行います。`ciphertext`にはv1のデータを入れてください。
+V1, V2のデータ共に複合化可能です。この状態でいずれv2の新しいキーに全てのデータを移行したいです。そのためには`rewrap`という操作を行い、古いデータの更新(再暗号化)を行います。`ciphertext`にはv1のデータを入れてください。
 
 ```console
-$ vault write transit/rewrap/my-encrypt-key ciphertext=vault:v1:0ys5ZE1/azWn6m6y5TYLjQeA0NoDgckT9Y3AJAJBI3oZgwhCj9Eqb9oT1FUfwJyj
+$ vault write transit/rewrap/my-encrypt-key ciphertext=$CTEXT_V1
+
 Key           Value
 ---           -----
 ciphertext    vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
 ```
 これでv1で暗号化したデータをv2で暗号化しました。次に、`min_decryption_version`を更新しv1のキーを無効化し、利用できないようにします。
 
+```shell
+export CTEXT_V1_V2=vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
+```
+
 ```console
 $ vault write  transit/keys/my-encrypt-key/config min_decryption_version=2
+
 Success! Data written to: transit/keys/my-encrypt-key/config
 
-$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
+$ vault write transit/decrypt/my-encrypt-key ciphertext=$CTEXT_V1_V2
+
 Key          Value
 ---          -----
 plaintext    bXlpbXBvcnRhbnRwYXNzd29yZAo=
 
-$ vault write transit/decrypt/my-encrypt-key ciphertext=vault:v1:0ys5ZE1/azWn6m6y5TYLjQeA0NoDgckT9Y3AJAJBI3oZgwhCj9Eqb9oT1FUfwJyj
+$ vault write transit/decrypt/my-encrypt-key ciphertext=CTEXT_V1
 Error writing data to transit/decrypt/my-encrypt-key: Error making API request.
 
 URL: PUT http://127.0.0.1:8200/v1/transit/decrypt/my-encrypt-key
@@ -171,7 +188,9 @@ v1のデータは復号化出来なくなり、v1のキーが無効になって�
 
 次に利用イメージをもう少し理解しやすくするため、SpringのアプリでTransitを利用してみます。アプリのレポジトリをcloneし起動します。
 
-まずデータベースにテーブルを作ります。
+まずデータベースにテーブルを作ります。MySQLにログインし、以下のコマンドを発行します。
+
+この手順を完了するには[Java 12](https://www.oracle.com/technetwork/java/javase/downloads/jdk12-downloads-5295953.html)が必要です。
 
 ```mysql
 use handson;
@@ -190,9 +209,9 @@ $ vault write database/config/mysql-handson-db \
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
   allowed_roles="role-handson","role-handson-2","role-handson-3","role-demoapp" \
-  username="root" \
-  root_rotation_statements="SET PASSWORD = PASSWORD('{{password}}')"
-  ```
+  username="root"
+  password="rooooot"
+```
 
 ロールを作成します。`handson.users`のテーブルに対して`SELECT`, `INSERT`の権限のあるロールです。
 
@@ -208,6 +227,7 @@ $ vault write database/roles/role-demoapp \
 
 ```console
 $ vault read database/creds/role-demoapp
+
 Key                Value
 ---                -----
 lease_id           database/creds/role-demoapp/GwOQKPDCIJS1K1Z626RdrQlW
@@ -239,19 +259,20 @@ EOF
 ```
 
 ```console
-$ vault policy write vault-policy path/to/policy-vault.hcl
+$ vault policy write vault-policy policy-vault.hcl
 $ vault write auth/approle/role/vault-approle policies=vault-policy period=1h
 ```
 
-これで準備は完了です。アプリをクローンして、起動してみましょう。
+これで準備は完了です。アプリをクローンして、起動してみましょう。`YOUR_ROOT_TOKEN`はご自身のRoot Tokenです。
 
 ```console
+$ export ROOT_TOKEN=<YOUR_ROOT_TOKEN>
 $ git clone https://github.com/tkaburagi/spring-vault-transit-demo
 $ cd spring-vault-transit-demo
-$ sed "s|VAULT_TOKEN=|VAULT_TOKEN=<YOUR_ROOT_TOKEN>|g" set-env-local.sh > my-set-env-local.sh
+$ sed "s|VAULT_TOKEN=|VAULT_TOKEN=$ROOT_TOKEN|g" set-env-local.sh > my-set-env-local.sh
 $ cat my-set-env-local.sh
 $ source my-set-env-local.sh
-$ mvn clean package -DskipTests
+$ ./mvnw clean package -DskipTests
 $ java -jar target/demo-0.0.1-SNAPSHOT.jar
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -288,7 +309,7 @@ $ curl http://localhost:8080/api/v1/encrypt/add-user -d username="Takayuki Kabur
 データベースで確認してみましょう。
 
 ```mysql
-mysql> select * from users;;
+mysql> select * from users;
 +--------------------------------------+-----------------+-----------------------------------------------------------+-------------------+----------+---------------------------------------------------------------------------+
 | id                                   | username        | password                                                  | email             | address  | creditcard                                                                |
 +--------------------------------------+-----------------+-----------------------------------------------------------+-------------------+----------+---------------------------------------------------------------------------+
@@ -299,7 +320,8 @@ mysql> select * from users;;
 暗号されたデータが保存されていることがわかります。次にデータを取り出すためのエンドポイントです。`api/v1/plain/get-use`ではデータをそのまま取り出します。上の`uuid`の値をメモしてください。
 
 ```console
-$ curl -G "http://localhost:8080/apri/v1/plain/get-user" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
+$ curl -G "http://localhost:8080/api/v1/non-decrypt/get-user" -d uuid=d87b7a21-0a33-4e64-a05d-60065eed71a9 | jq
+
 {
   "id": "db0bbb62-fdfd-4e2e-a4db-1e5e32e36761",
   "username": "Hiroki Kaburagi",
@@ -325,6 +347,76 @@ $ curl -G "http://localhost:8080/api/v1/decrypt/get-user" -d uuid=db0bbb62-fdfd-
 
 Vaultに復号化し、アプリのデータとして利用することが出来るようになりました。このようにVaultではシークレット管理だけでなく暗号化の処理をサービスとして扱えるようにするような使い方をすることができます。
 
+
+最後にキーのローテーションとRewrapをしてみます。`get-keys`のエンドポイントでアプリからキーの情報が取り出せるようになっています。
+
+```console
+$ curl -G http://localhost:8080/api/v1/get-keys | jq
+
+{
+  "name": [
+    "springdemo"
+  ],
+  "type": "aes256-gcm96",
+  "latest_version": 1,
+  "min_decrypt_version": 1
+}
+```
+
+まずキーをローテーションします。
+
+```console
+$ vault write -f transit/keys/springdemo/rotate
+$ curl -G http://localhost:8080/api/v1/get-keys | jq
+
+{
+  "name": [
+    "springdemo"
+  ],
+  "type": "aes256-gcm96",
+  "latest_version": 2,
+  "min_decrypt_version": 1
+}
+```
+
+新しいデータを投入してみましょう。
+
+```shell
+curl http://localhost:8080/api/v1/encrypt/add-user -d username="Yusuke Kaburagi" -d password="PqssWOrd" -d address="Tokyo" --data-urlencode creditcard="9999-8888-6666-6666" --data-urlencode email="yusuke@locahost"
+```
+
+v1, v2のデータが両方入っていることがわかります。
+
+```shell
+mysql> select * from users;
+```
+
+v1のデータをv2にRewrapしてみます。このアプリでは`api/v1/rewrap`のエンドポイントで実現しています。
+
+```shell
+curl -G http://localhost:8080/api/v1/rewrap -d uuid=<OLD DATA'S UUID> | jq
+```
+
+データを見るとv2に更新されているでしょう。
+
+```shell
+mysql> select * from users;
+```
+
+あとは同様に`min_decryption_version`をbumpすれば完了です。
+
+```shell
+$ vault write  transit/keys/springdemo/config min_decryption_version=2
+$ curl -G http://localhost:8080/api/v1/get-keys | jq
+
+{
+  "name": [
+    "springdemo"
+  ],
+  "type": "aes256-gcm96",
+  "latest_version": 2,
+  "min_decrypt_version": 2
+```
 
 ## 参考リンク
 * [Transit](https://www.vaultproject.io/docs/secrets/transit/index.html)
