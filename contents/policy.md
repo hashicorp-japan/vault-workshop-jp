@@ -350,21 +350,26 @@ AppRoleにより認証され、発行されたトークンを試してみまし�
 $ export MY_TOKEN=s.nEolH5Pjqf3207KljT9xoamS
 ```
 
+```shell
+VAULT_TOKEN=$ROOT_TOKEN vault secrets enable -version=2 kv
+VAULT_TOKEN=$ROOT_TOKEN vault kv put kv/iam password=p@SSW0d
+```
+
+
 ```console
 $ VAULT_TOKEN=$MY_TOKEN vault kv get kv/iam
 ====== Metadata ======
 Key              Value
 ---              -----
-created_time     2019-07-15T02:02:54.166723Z
+created_time     2019-09-05T02:02:17.120801Z
 deletion_time    n/a
 destroyed        false
-version          3
+version          1
 
 ====== Data ======
 Key         Value
 ---         -----
-name        kabu
-password    passwd-2
+password    p@SSW0d2
 
 $ VAULT_TOKEN=$MY_TOKEN vault read database/roles/role-demoapp
 Error reading database/roles/role-demoapp: Error making API request.
