@@ -84,7 +84,7 @@ Code: 403. Errors:
 
 ```shell
 $ cd /path/to/vault-workshop
-$ cat my-first-policy.hcl <<EOF
+$ cat > my-first-policy.hcl <<EOF
 path "database/*" {
   capabilities = [ "read", "list"]
 }
@@ -260,7 +260,7 @@ AppRoleで認証するためには`Role ID`と`Secret ID`という二つの値�
 まずはポリシーを作ってみましょう。今回は先ほど作った`kv`のデータにアクセスできるようなポリシーを作ってみます。
 
 ```shell
-$ cat my-approle-policy.hcl <<EOF
+$ cat > my-approle-policy.hcl <<EOF
 path "kv/*" {
   capabilities = [ "read", "list", "create", "update", "delete"]
 }
