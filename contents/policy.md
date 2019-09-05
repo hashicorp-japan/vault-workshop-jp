@@ -202,7 +202,6 @@ $ export MY_TOKEN=<TOKEN_ABOVE>
 $ VAULT_TOKEN=$MY_TOKEN vault list database/roles
 Keys
 ----
-my-role
 role-handson
 role-handson-2
 role-handson-3
