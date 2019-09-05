@@ -173,7 +173,7 @@ Key          Value
 ---          -----
 plaintext    bXlpbXBvcnRhbnRwYXNzd29yZAo=
 
-$ vault write transit/decrypt/my-encrypt-key ciphertext=CTEXT_V1
+$ vault write transit/decrypt/my-encrypt-key ciphertext=$CTEXT_V1
 Error writing data to transit/decrypt/my-encrypt-key: Error making API request.
 
 URL: PUT http://127.0.0.1:8200/v1/transit/decrypt/my-encrypt-key
