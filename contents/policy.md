@@ -195,7 +195,7 @@ $ VAULT_TOKEN=$ROOT_TOKEN vault token create -policy=my-policy -ttl=20m
 ```
 
 ```shell
-$ export MY_YOKEN=<TOKEN_ABOVE>
+$ export MY_TOKEN=<TOKEN_ABOVE>
 ```
 
 ```
