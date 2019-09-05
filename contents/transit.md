@@ -209,7 +209,7 @@ $ vault write database/config/mysql-handson-db \
   plugin_name=mysql-legacy-database-plugin \
   connection_url="{{username}}:{{password}}@tcp(127.0.0.1:3306)/" \
   allowed_roles="role-handson","role-handson-2","role-handson-3","role-demoapp" \
-  username="root"
+  username="root" \
   password="rooooot"
 ```
 
@@ -240,7 +240,7 @@ username           v-role-FWRN0zpOp
 次にVault認証用のロールです。ここで作るポリシーは`AppRole`の認証で付与されるトークンの権限となります。以下のようにポリシーの定義ファイルを作成してください。
 
 ```hcl
-$ cat policy-vault.hcl <<EOF
+$ cat > policy-vault.hcl <<EOF
 # Enable transit secrets engine
 path "sys/mounts/transit" {
   capabilities = [ "create", "read", "update", "delete", "list" ]
