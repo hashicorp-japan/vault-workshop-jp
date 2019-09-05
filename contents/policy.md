@@ -126,7 +126,7 @@ policies             ["default" "my-policy"]
 Vaultにこのトークンを使って以下のコマンドを実行してください。
 
 ```shell
-$ export MY_YOKEN=s.bA9M42W41G7tF90REMDCtMeO
+$ export MY_TOKEN=s.bA9M42W41G7tF90REMDCtMeO
 ```
 
 ```console
@@ -195,7 +195,7 @@ $ VAULT_TOKEN=$ROOT_TOKEN vault token create -policy=my-policy -ttl=20m
 ```
 
 ```shell
-$ export MY_YOKEN=<TOKEN_ABOVE>
+$ export MY_TOKEN=<TOKEN_ABOVE>
 ```
 
 ```
@@ -347,7 +347,7 @@ token_meta_role_name    my-approle-policy
 AppRoleにより認証され、発行されたトークンを試してみましょう。
 
 ```shell
-$ export MY_YOKEN=s.nEolH5Pjqf3207KljT9xoamS
+$ export MY_TOKEN=s.nEolH5Pjqf3207KljT9xoamS
 ```
 
 ```console
