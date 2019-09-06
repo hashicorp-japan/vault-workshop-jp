@@ -133,12 +133,11 @@ $ export MY_TOKEN=s.bA9M42W41G7tF90REMDCtMeO
 $ VAULT_TOKEN=$MY_TOKEN vault list database/roles       
 Keys
 ----
-my-role
 role-handson
 role-handson-2
 role-handson-3
 
-$ VAULT_TOKEN=$MY_TOKEN vault read database/roles/my-role
+$ VAULT_TOKEN=$MY_TOKEN vault read database/roles/role-handson
 Key                      Value
 ---                      -----
 creation_statements      [CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';]
