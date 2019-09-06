@@ -258,6 +258,11 @@ path "transit/*" {
 EOF
 ```
 
+AppRoleが有効になっていない方は下記のコマンドで有効化しましょう。
+```shell
+$ vault auth enable approle
+```
+
 ```console
 $ vault policy write vault-policy policy-vault.hcl
 $ vault write auth/approle/role/vault-approle policies=vault-policy period=1h
