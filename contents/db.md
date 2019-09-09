@@ -36,37 +36,17 @@ Success! Enabled the database secrets engine at: database/
 
 ### MySQLの準備
 
-ローカルでMySQLを起動してください。
+ローカルのDocker上でMySQLを起動してください。
 
-```console
-$ sudo mysql.server start
-Password:
-Starting MySQL
-.Logging to '/usr/local/var/mysql/Takayukis-MacBook-Pro.local.err'.
- SUCCESS!
- ```
-
-> rootユーザのパスワードが設定されていない場合、以下のコマンドで変更してください。
-> ```console
-> $ mysql -u root
-> ```
-> 
-> ```mysql
-> mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'rooooot';
-> Query OK, 0 rows affected (0.00 sec)
-> 
-> mysql> exit
-> ```
-> 
-> ```console
-> $ sudo mysql.server restart
-> ```
-
-```console
-$ mysql -u root -p
+```shell
+$ docker run --name mysql -e MYSQL_ROOT_PASSWORD=rooooot -p 3306:3306 -d mysql:5.7.22
 ```
 
-rootでログインをしたら、サンプルのデータを投入します。
+rootでログインをしたら、サンプルのデータを投入します。パスワードは`rooooot`です。
+
+```shell
+$ mysql -u root -p -h127.0.0.1
+```
 
 ```mysql
 mysql> create database handson;
