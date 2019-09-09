@@ -219,6 +219,9 @@ container.
 ```
 今回はプロダクションモードで起動しています。先ほどと違い、`Root Token`, `Unseal Key`は出力されません。Vaultを利用するまでに`init`と`unseal`という処理が必要です。
 
+>起動時に"Error initializing core: Failed to lock memory: cannot allocate memory"のエラーが出る場合は以下の1行をvault-local-config.hclに追記してください。
+> `disable_mlock  = true`
+
 ## Vaultの初期化処理
 
 別の端末を立ち上げて以下のコマンドを実行してください。GUIでも同様のことが出来ますが、このハンズオンでは全てCLIを使います。
