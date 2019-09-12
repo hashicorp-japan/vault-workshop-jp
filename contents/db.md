@@ -102,6 +102,19 @@ $ vault write database/config/mysql-handson-db \
   password="rooooot"
 ```
 
+>ここでMySQLへのAccess Deniedでエラーになる方は下記のコマンドを実行してください。
+>ここでのMySQLの再起動方法はOSによって異なります。
+>```
+>"sudo mysql -u root -p
+>mysql> USE mysql;
+>mysql> UPDATE user SET plugin='mysql_native_password' WHERE User='root';
+>mysql> FLUSH PRIVILEGES;
+>mysql> exit;
+>service mysql restart
+>mysql login -p root
+>mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'rooooot'; 
+>service mysql restart"
+>```
 `database/config/*****`はコンフィグの名前、任意に指定可能です。`plugin_name`は別途説明します。`allowed_roles`はこれから作成するユーザのロールの名前です。`allowed_roles`はList型になっており、一つのコンフィグに複数のロールを紐づけることが可能です。
 
 次にロールの定義をします。
