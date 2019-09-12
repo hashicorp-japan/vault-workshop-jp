@@ -57,6 +57,38 @@ mysql> insert into products (id, name, price) values (1, "Nice hoodie", "1580");
 
 これでMySQLの準備は完了です。
 
+<details><summary>Dockerではなくローカルで起動の場合はこちら</summary>
+
+```console
+$ sudo mysql.server start
+Password:
+Starting MySQL
+.Logging to '/usr/local/var/mysql/Takayukis-MacBook-Pro.local.err'.
+ SUCCESS!
+ ```
+
+> rootユーザのパスワードが設定されていない場合、以下のコマンドで変更してください。
+> ```console
+> $ mysql -u root
+> ```
+> 
+> ```mysql
+> mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'rooooot';
+> Query OK, 0 rows affected (0.00 sec)
+> 
+> mysql> exit
+> ```
+> 
+> ```console
+> $ sudo mysql.server restart
+> ```
+
+ログインを試してみてください。
+```console
+$ mysql -u root -p
+```
+</details>
+
 ### Vaultの設定
 
 まずはデータベースへのコネクションの設定をVaultに行います。これ以降Vaultはこのパラメータを使ってユーザを払い出します。そのため強い権限のユーザを登録する必要があります。
