@@ -58,6 +58,7 @@ HA Enabled               false
 `Sealed`が`false`になっていればOKです。データベースシークレットエンジンを有効化しておきましょう。
 
 ```shell
+$ vault login <ROOT_TOKEN>
 $ vault secrets enable database
 ```
 
@@ -215,7 +216,7 @@ $ vault auth enable kubernetes
 $ export VAULT_SA_NAME=$(kubectl get sa postgres-vault -o jsonpath="{.secrets[*]['name']}")
 $ export SA_JWT_TOKEN=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data.token}" | base64 --decode; echo)
 $ export SA_CA_CRT=$(kubectl get secret $VAULT_SA_NAME -o jsonpath="{.data['ca\.crt']}" | base64 --decode; echo)
-$ export K8S_HOST=$(kubectl exec -it $VAULT_POD -- sh -c 'echo $KUBERNETES_SERVICE_HOST')
+$ export K8S_HOST=$(kubectl exec -it vault-0 -- sh -c 'echo $KUBERNETES_SERVICE_HOST')
 ```
 
 <details><summary>`kubectl get sa postgres-vault -o json`の例</summary>
@@ -530,7 +531,7 @@ $ kubectl apply -f vault-rails.yml
 Pod名を取得しましょう。
 
 ```shell
-$ kubectl get po -l app=vault-dymanic-secrets-rails -o wide
+$ kubectl get pod -l app=vault-dymanic-secrets-rails -o wide
 ```
 
 Pod名を引数にPort fowardの設定を行います。
