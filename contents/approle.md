@@ -160,3 +160,5 @@ ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentic
 ##　参考リンク
 * [AppRole API Document](https://www.vaultproject.io/api/auth/approle/index.html)
 * [AppRole Auth Method](https://www.vaultproject.io/docs/auth/approle.html)
+* [Auth0を使ったOIDC認証](https://learn.hashicorp.com/vault/operations/oidc-auth)
+* [GitHubを使った認証](https://learn.hashicorp.com/vault/getting-started/authentication)
