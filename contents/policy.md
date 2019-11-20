@@ -228,6 +228,8 @@ rollback_statements      []
 
 以上のようになればOKです。
 
+ここまではトークン発行の権限を持つユーザから直接トークンをCLIを使って発行してきました。通常クライアントからVaultを利用する際は信頼する認証プロバイダとVaultを連携させプロバイダで認証をし適切なトークンを発行するといったワークフローを簡単に実現できます。以降の章ではその方法をいくつか紹介していきます。
+
 ## 参考リンク
 * [Policy API Document](https://www.vaultproject.io/api/system/policy.html)
 * [Authentication](https://www.vaultproject.io/docs/concepts/auth.html)
