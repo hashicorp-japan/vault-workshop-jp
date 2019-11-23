@@ -18,4 +18,4 @@
 * CIツール連携([Concourse](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/concourse.md), Jenkins)
 * [Kubernetes連携](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/k8s.md)
 * [Cloud Foundry連携](https://github.com/tkaburagi/wip-vault-workshop/blob/master/contents/pcf.md)
-* Enterprise機能の紹介
+* [Enterprise機能の紹介](https://docs.google.com/presentation/d/1dtoRmLxySDL8PTEe_X51BQNIXn19H_910StO2DlFkLI/edit?usp=sharing)
