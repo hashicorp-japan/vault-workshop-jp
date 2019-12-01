@@ -15,7 +15,7 @@
 
 まず以下のコマンドでLDAPコンテナを起動します。
 ```shell
-1.start_ldap_server.sh
+$ ./1.start_ldap_server.sh
 ```
 `docker ps`などでコンテナが起動したことを確認ください。
 
@@ -25,7 +25,7 @@ LDAPサーバーとの通信を確認するには、以下のコマンドを叩�
 
 
 ```console
-$./3.list_it_members.sh
+$ ./3.list_it_members.sh
 # extended LDIF
 #
 # LDAPv3
@@ -56,7 +56,7 @@ result: 0 Success
 次にVault側でLDAP auth methodを設定します。
 
 ```shell
-_2.enable_auth_ldap.sh
+$ ./_2.enable_auth_ldap.sh
 ```
 
 こちらの中身はこうなっています。
@@ -85,7 +85,7 @@ vault write auth/ldap-um/config \
 `vault auth list`コマンドでLDAP認証が作成されていることを確認ください。
 
 ```console
-$vault auth list
+$ vault auth list
 Path         Type        Accessor                  Description
 ----         ----        --------                  -----------
 approle/     approle     auth_approle_4bd66d05     n/a
@@ -98,14 +98,16 @@ token/       token       auth_token_8c9e5cf0       token based credentials
 
 次にこのワークショップで用いるシークレットを準備します。Secret engineはKVエンジンを使用します。もし、まだ設定していない場合は以下のコマンドでKVを有効化してください。
 
-`vault secrets enable -path=secret kv`
+```shell
+$ vault secrets enable -path=secret kv`
+```
 
 これにより、Vault上の/secretというPathにKVエンジンがマウントされます。
 
 KVエンジンにシークレットを書き込みます。
 
 ```shell
-./_4.populage_kvs.sh
+$ ./_4.populage_kvs.sh
 ```
 
 中身はこうなっています。
@@ -163,7 +165,7 @@ path "secret/ldap/security" {
 Policyが準備できたら、そのPolicyをLDAP上のグループと紐付けます。
 
 ```
-$./5.write_associate_policy.sh
+$ ./5.write_associate_policy.sh
 ```
 
 中身はこうなっています。
@@ -214,7 +216,7 @@ token_meta_username    deepak
 同様にSecurityグループでのログインも行ってください。
 
 ```console
-$./7.login_security_member.sh
+$ ./7.login_security_member.sh
 Success! You are now authenticated. The token information displayed below
 is already stored in the token helper. You do NOT need to run "vault login"
 again. Future Vault requests will automatically use this token.
@@ -235,7 +237,7 @@ token_meta_username    eve
 この後の作業では、これらのTokenを切り替えて作業していきます。Tokenの切り替えは、`vault login <Token値>`で行います。
 
 ```shell
-vault login s.E9OVOHtCWsCHCxnf0uggkTeOga` # 上記のITグループのTokenを使用
+$ vault login s.E9OVOHtCWsCHCxnf0uggkTeOga` # 上記のITグループのTokenを使用
 ```
 
 Tokenは環境変数(VAULT_TOKEN)
@@ -256,18 +258,18 @@ $ VAULT_TOKEN=$SECURITY_TOKEN vault <コマンド>  # コマンドをSecurityト
 まず、PolicyによればITグループのユーザーはsecret/ldap/itにはアクセスができるはずです。
 
 ```console
-$VAULT_TOKEN=$IT_TOKEN vault read secret/ldap/it
+$ VAULT_TOKEN=$IT_TOKEN vault read secret/ldap/it
 Key                 Value
 ---                 -----
 refresh_interval    768h
 password            foo
 ```
 
-はい、無事にシークレットを取得できました。
+無事にシークレットを取得できました。
 次にSecurityグループのシークレットの取得も試してみましょう。
 
 ```console
-$VAULT_TOKEN=$IT_TOKEN vault read secret/ldap/security
+$ VAULT_TOKEN=$IT_TOKEN vault read secret/ldap/security
 Error reading secret/ldap/security: Error making API request.
 
 URL: GET http://127.0.0.1:8200/v1/secret/ldap/security
@@ -277,7 +279,7 @@ Code: 403. Errors:
 	* permission denied
 ```
 
-はい、ITグループのPolicyではsecret/ldap/securityへのアクセス権限がないので無事にはじかれました。
+ITグループのPolicyではsecret/ldap/securityへのアクセス権限がないので無事にはじかれました。
 
 同様にSecurityグループのTokenでも試してみてください。
 
