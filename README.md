@@ -14,7 +14,5 @@
 * [Secret Engine 4: PKI Engine](contents/pki.md)
 * [Secret Engine 5: Transit (Encryption as a Service)](contents/transit.md)
 * [Secret Engine 6: SSH](contents/ssh.md)
-* CIツール連携([Concourse](contents/concourse.md), Jenkins)
 * [Kubernetes連携](contents/k8s.md)
-* [Cloud Foundry連携](contents/pcf.md)
 * [Enterprise機能の紹介](https://docs.google.com/presentation/d/1dtoRmLxySDL8PTEe_X51BQNIXn19H_910StO2DlFkLI/edit?usp=sharing)
