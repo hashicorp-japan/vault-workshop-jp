@@ -251,7 +251,7 @@ lease_renewable    true
 password           A1a-8aBlTXjRSu9eR3y1
 username           v-role-Ync7153K8
 
-$ mysql -u <USERNAME_GEN_BY_VAULT> -h 127.0.0.1 -p handson                  
+$ mysql -u <USERNAME_GEN_BY_VAULT> -h 127.0.0.1 -p                  
 Enter password: <PASSWORD__GEN_BY_VAULT>
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 7
