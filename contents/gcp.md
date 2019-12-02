@@ -155,7 +155,7 @@ ERROR: (gcloud.iam.service-accounts.create) User [vaultpj-viewer-1575172760@peak
 デフォルトだと768hの有効期限ですが、最低限の期間に設定し、それ以降は無効にすることがベストです。まずは準備をします。
 
 ```console
-gcloud iam service-accounts list
+$ gcloud iam service-accounts list
 NAME                                                                EMAIL                                                                        DISABLED
 admin                                                               
 Service account for Vault secrets backend role set pj-viewer        vaultpj-viewer-1575172760@peak-elevator-237302.iam.gserviceaccount.com       False
@@ -226,8 +226,8 @@ ttl        2m
 
 TTLを2分に設定しました。`max_ttl`は`renew`というオペレーションで延長できる最大の有効期限です。
 
-```
-vault read gcp/key/pj-viewer
+```console
+$ vault read gcp/key/pj-viewer
 Key                 Value
 ---                 -----
 lease_id            gcp/key/pj-viewer/XWUOnUut8QYauHiBRSXHXs9o
