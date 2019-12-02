@@ -88,7 +88,7 @@ password    passwd
 データが上書きされてバージョン2のデータが生成されました。古いバージョンのデータは`-version`オプションを付与することで参照できます。
 
 ```console
-$ vault kv get -version=1 kv/
+$ vault kv get -version=1 kv/iam
 ====== Metadata ======
 Key              Value
 ---              -----
@@ -108,7 +108,7 @@ password    passwd
 
 ```console
 $ vault kv destroy -versions=1 kv/iam
-$ vault kv get -version=1 kv/
+$ vault kv get -version=1 kv/iam
 ====== Metadata ======
 Key              Value
 ---              -----
@@ -117,7 +117,7 @@ deletion_time    n/a
 destroyed        true
 version          1
 
-$ vault kv get -version=2 kv/
+$ vault kv get -version=2 kv/iam
 ====== Metadata ======
 Key              Value
 ---              -----
