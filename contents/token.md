@@ -48,7 +48,7 @@ Performance stand-by nodeで使えるか？  | No  |  Yes
 
 Service Tokenは階層構造で構成されます。
 つまり、各TokenはChild Tokenを作成することで、Parent Tokenとなります（もちろんTokenを作成できるポリシーが必須）。Parent TokenがRevokeされると、全てのChild tokenと付随しているLeaseはRevokeされます。
-ただし、Orpan tokenはParentなしで、自らのTTLで存在できます。
+ただし、Orphan tokenはParentなしで、自らのTTLで存在できます。
 
 Service tokenには様々な機能があります。非常に豊富なので、ここでは良く使われるものを見ていきます。
 
