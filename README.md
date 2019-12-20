@@ -5,6 +5,7 @@
 * [Secret Engine 1: Key Value](contents/kv.md)
 * [Secret Engine 2: Databases](contents/db.md)
 * [認証とポリシー](contents/policy.md)
+* [トークン](contents/token.md)
 * [Auth Method 1: LDAP](contents/auth_ldap.md)
 * [Auth Method 2: AppRole](contents/approle.md)
 * [Auth Method 3: OIDC](https://learn.hashicorp.com/vault/operations/oidc-auth)
