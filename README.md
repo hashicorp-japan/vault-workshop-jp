@@ -1,4 +1,30 @@
-# Vault Workshop
+# HashiCorp Vault Workshop
+
+[Vault](https://www.vaultproject.io/)はHashiCorpが中心に開発をするOSSのシークレット管理ツールです。Vaultを利用することで既存のStaticなシークレット管理のみならず、クラウド、データベースやSSHなどの様々なシークレットを動的に発行することができます。Vaultはマルチプラットフォームでかつ全ての機能をHTTP APIで提供しているため、環境やクライアントを問わず利用することができます。
+
+本ワークショップはOSSの機能を中心に様々なユースケースに合わせたハンズオンを用意しています。
+
+## Pre-requisite
+
+* 環境
+	* macOS or Linux
+
+* ソフトウェア
+	* Vault
+	* Docker
+	* MySQLクライアント
+	* Java 12(いつか直します...)
+	* jq, watch, wget, curl
+	* vagrant(SSHの章のみ必要)
+	* minikube(Kubernetesの章のみ必要)
+
+* アカウント
+	* GitHub
+	* AWS / Azure / GCP
+
+## 資料
+
+* [Vault Overview](https://docs.google.com/presentation/d/14YmrOLYirdWbDg5AwhuIEqJSrYoroQUQ8ETd6qwxe6M/edit?usp=sharing)
 
 ## アジェンダ
 * [初めてのVault](contents/hello-vault.md)
