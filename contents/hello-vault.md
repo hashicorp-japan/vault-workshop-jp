@@ -6,6 +6,10 @@
 
 [こちら](https://www.vaultproject.io/downloads.html)のWebサイトからご自身のOSに合ったものをダウンロードしてください。
 
+```
+wget https://releases.hashicorp.com/vault/1.3.0/vault_1.3.0_linux_amd64.zip
+```
+
 パスを通します。以下はmacOSの例ですが、OSにあった手順で`vault`コマンドにパスを通します。
 
 ```shell
