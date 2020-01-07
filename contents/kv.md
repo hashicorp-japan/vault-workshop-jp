@@ -8,7 +8,7 @@ Vaultでは各シークレットエンジンを有効化するために`enable`�
 
 ```console
 $ export VAULT_ADDR="http://127.0.0.1:8200"
-$ vault secrets enable -path=kv kv
+$ vault secrets enable -path=kv -version=2 kv
 Success! Enabled the kv secrets engine at: kv/
 
 $ vault secrets list
