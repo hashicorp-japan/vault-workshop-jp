@@ -17,6 +17,7 @@
 	* jq, watch, wget, curl
 	* vagrant(SSHの章のみ必要)
 	* minikube(Kubernetesの章のみ必要)
+	* helm(Kubernetesの章のみ必要)
 
 * アカウント
 	* GitHub
