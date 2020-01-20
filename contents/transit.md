@@ -1,3 +1,15 @@
+Table of Contents
+=================
+
+   * [Table of Contents](#table-of-contents)
+   * [TransitシークレットエンジンでVaultをEncryption as a Seviceとして使う](#transitシークレットエンジンでvaultをencryption-as-a-seviceとして使う)
+      * [Transitを有効化する。](#transitを有効化する)
+      * [初めての暗号化と復号化](#初めての暗号化と復号化)
+         * [キーローテーション](#キーローテーション)
+      * [Convergent暗号化を試す](#convergent暗号化を試す)
+      * [実際のアプリで使ってみる](#実際のアプリで使ってみる)
+      * [参考リンク](#参考リンク)
+
 # TransitシークレットエンジンでVaultをEncryption as a Seviceとして使う
 
 これまでVaultのシークレット管理の機能を扱ってきましたが、Vaultの二つ目のユースケースは`Data Protection`です。その中でもAPIドリブンなEncryptionの機能を使ってVaultを暗号化としてのサービスとして扱う`Encryption as a Service (EaaS)`は非常に多く採用されているユースケースです。
@@ -183,6 +195,99 @@ Code: 400. Errors:
 ```
 
 v1のデータは復号化出来なくなり、v1のキーが無効になっていることがわかります。
+
+## Convergent暗号化を試す
+
+次にConvergent(収束)暗号化を試してみます。Convergentは一般的な暗号化の手法で、特定のキーを利用し同一のプレインテキストで暗号化されたものは毎回同一の暗号文を返すというものです。
+
+Vaultの暗号化はデフォルトでは同じ平文であっても毎回別の暗号文が生成されます。ところが暗号化したいが重複データを避けたい場合や暗号データを検索したいような場合、同じ平文は同じ暗号文で返して欲しい際があります。
+
+Vaultでは暗号化キーを生成する際にこのConvergent暗号化のパラメータを指定することで実現可能です。
+
+まずは新しいキーを生成してみましょう。
+
+```shell
+$ vault write transit/keys/convergent-key type="chacha20-poly1305" convergent_encryption=true derived=true
+```
+
+Convergentに対応しているタイプのアルゴリズムを指定しています。この他にもあるので[こちら](https://www.vaultproject.io/api/secret/transit/index.html#type)で確認してみてください。
+
+```console
+$ vault read transit/keys/convergent-key
+Key                              Value
+---                              -----
+allow_plaintext_backup           false
+convergent_encryption            true
+convergent_encryption_version    -1
+deletion_allowed                 false
+derived                          true
+exportable                       false
+kdf                              hkdf_sha256
+keys                             map[1:1579319629]
+latest_version                   1
+min_available_version            0
+min_decryption_version           1
+min_encryption_version           0
+name                             convergent-key
+supports_decryption              true
+supports_derivation              true
+supports_encryption              true
+supports_signing                 false
+type                             chacha20-poly1305
+```
+
+Converntがtrueになっているキーが生成したことがわかります。`derived`は`Key Derivation Function`を有効化するためのパラメータでVaultではConvergentを有効化する際に必須となります。
+
+これによってクライアントが同一の暗号文を保持したとしても`context`パラメータを指定しないと復号化が不可能となり、より安全にデータを扱うことができます。
+
+```console
+$ vault write transit/encrypt/convergent-key plaintext=$(base64 <<< "myimportantpassword") context=$(base64 <<< "c2FtcGxxxx9udGV4dA")
+
+Key           Value
+---           -----
+ciphertext    vault:v1:NuH3WBB956hNZOnPYZqo5lb86bZ5LN1BTKlmuZ78ZGzB2HYdcl9iAbh5hdxCC/1k
+```
+
+`Value`で出力される暗号文をコピーし、復号化してみましょう。
+
+```console
+$ base64 --decode <<< $(vault write -format=json transit/decrypt/convergent-key ciphertext="vault:v1:NuH3WBB956hNZOnPYZqo5lb86bZ5LN1BTKlmuZ78ZGzB2HYdcl9iAbh5hdxCC/1k" context=$(base64 <<< "c2FtcGxxxx9udGV4dA") | jq -r '.data.plaintext')
+
+myimportantpassword
+```
+
+復号化出来ました。試しに`context`に別の値を入れてみましょう。
+
+```console
+$ base64 --decode <<< $(vault write -format=json transit/decrypt/convergent-key ciphertext="vault:v1:NuH3WBB956hNZOnPYZqo5lb86bZ5LN1BTKlmuZ78ZGzB2HYdcl9iAbh5hdxCC/1k" context=$(base64 <<< "samplecontext") | jq -r '.data.plaintext')
+
+Error writing data to transit/decrypt/convergent-key: Error making API request.
+
+URL: PUT http://127.0.0.1:8200/v1/transit/decrypt/convergent-key
+Code: 400. Errors:
+
+* invalid ciphertext: unable to decrypt
+```
+
+エラーになり、復号化出来ないはずです。このようにキーへのアクセス権や暗号化文を保持していても`context`を持っていないと復号化することが出来ず、データを守ることが出来ます。
+
+最後に試しにConvergentが設定されているか再度同じ平文を暗号化してみます。
+
+```console
+$ vault write transit/encrypt/convergent-key plaintext=$(base64 <<< "myimportantpassword") context=$(base64 <<< "c2FtcGxxxx9udGV4dA")
+
+Key           Value
+---           -----
+ciphertext    vault:v1:NuH3WBB956hNZOnPYZqo5lb86bZ5LN1BTKlmuZ78ZGzB2HYdcl9iAbh5hdxCC/1k
+```
+
+先ほどと同じ暗号文が返されるはずです。
+
+余裕のある方は以下の内容を前の手順を振り返りながら試してみてください。
+
+* `convergent-key`で別の平文を使って暗号化
+* `convergent-key`を`rotate`して同じ平文`myimportantpassword`を暗号化
+* 別のConvergentを生成して同じ平文`myimportantpassword`を暗号化
 
 ## 実際のアプリで使ってみる
 
