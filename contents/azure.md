@@ -61,7 +61,7 @@ $ watch -n az ad sp list --query "[].{id:appId, tenant:appOwnerTenantId}" | grep
 
 >az cliにログイン出来ていない場合、以下のコマンドでログインしてください。
 >
->```console
+>```shell
 >$  az login --service-principal \
 >    -u "${CLIENT_ID}" \
 >    -p "${CLIENT_SECRET}" \
@@ -106,7 +106,7 @@ client_secret      *******************
 
 をそれぞれ入力します。
 
-```console
+```shell
 $  az login --service-principal \
  -u "*****" \
  -p "*****" \
@@ -132,12 +132,13 @@ Roleに設定した通りReadのオペレーションを行うことができま
 
 az cliのユーザを元のユーザに切り替えておきます。`watch`を実行している端末を一度`ctrl+c`で抜けて以下のコマンドでユーザでログインをし直します。
 
-```console
+```shell
 $  az login --service-principal \
     -u "${CLIENT_ID}" \
     -p "${CLIENT_SECRET}" \
     --tenant "${TENANT_ID}"
-
+```
+```console
 $ watch -n az ad sp list --query "[].{id:appId, tenant:appOwnerTenantId}" | grep -B 1 ${TENANT_ID}
 
     "id": "4c4411ee-9654-4acf-b242-*******************",
