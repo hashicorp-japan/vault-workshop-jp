@@ -38,7 +38,7 @@
 * [Auth Method 3: OIDC](https://learn.hashicorp.com/vault/operations/oidc-auth)
 * [Auth Method 4: GitHub](https://learn.hashicorp.com/vault/getting-started/authentication)
 * [Response Rapping](contents/response-wrapping.md)
-* Secret Engine 3: Public Cloud ([AWS](contents/aws.md), Azure, [GCP](contents/gcp.md))
+* Secret Engine 3: Public Cloud ([AWS](contents/aws.md), [Azure](contents/azure.md), [GCP](contents/gcp.md))
 * [Secret Engine 4: PKI Engine](contents/pki.md)
 * [Secret Engine 5: Transit (Encryption as a Service)](contents/transit.md)
 * [Secret Engine 6: SSH](contents/ssh.md)
