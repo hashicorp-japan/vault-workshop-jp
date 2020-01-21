@@ -63,11 +63,22 @@
 * `Select`で`vault-app`と検索し選択
 * `Save`
 
+## Resource Group作成
+
+* [Azure Portal](https://portal.azure.com/#home)にログイン
+* `Resource groups`を検索
+* `Resource groups`画面で`+Add`
+* `Resource group`に`vault-resource-group`を入力
+* `Region`で`(Asia Pacific) Japan East`を選択
+* `Review + create`
+* `create`
+
+
 これで準備は完了です。
 
-* Subscription ID
-* Tenant ID
-* Client ID
-* Client Secret
+* `Subscription ID`
+* `Tenant ID`
+* `Client ID`
+* `Client Secret`
 
 が手元にあることを確認して下さい。
