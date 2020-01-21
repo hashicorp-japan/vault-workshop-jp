@@ -12,7 +12,7 @@ Azureシークレットエンジンではロールの定義に基づいたAzure�
 
 ```shell
 $ export VAULT_ADDR="http://127.0.0.1:8200"
-$ vault secrets enable aws
+$ vault secrets enable azure
 ```
 
 次にVaultがAzureのAPIを実行するために必要なキーを登録します。
@@ -59,7 +59,7 @@ $ watch -n az ad sp list --query "[].{id:appId, tenant:appOwnerTenantId}" | grep
 --
 ```
 
->aws cliにログイン出来ていない場合、以下のコマンドでログインしてください。
+>az cliにログイン出来ていない場合、以下のコマンドでログインしてください。
 >
 >```console
 >$  az login --service-principal \
