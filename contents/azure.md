@@ -1,16 +1,10 @@
 # Azureのシークレットエンジンを試す
 
-AzureシークレットエンジンではIAMポリシーの定義に基づいたAzureのキーを動的に発行することが可能です。AWSのキー発行のワークフローをシンプルにし、TTLなどを設定することでよりセキュアに利用できます。
-
-サポートしているクレデンシャルタイプは下記の三つです。
-
-* IAM user (Access Key & Secret Key)
-* Assumed Role
-* Federation Token
+Azureシークレットエンジンではロールの定義に基づいたAzureのService Principalを動的に発行することが可能です。Azureのキー発行のワークフローをシンプルにし、TTLなどを設定することでよりセキュアに利用できます。
 
 ## Azureのセットアップ
 
-[こちら]()を参考にAzureのセットアップを行なって下さい。
+[こちら](https://github.com/hashicorp-japan/vault-workshop/blob/master/assets/azure-guide.md)を参考にAzureのセットアップを行なって下さい。
 
 ## IAMユーザの動的発行
 
