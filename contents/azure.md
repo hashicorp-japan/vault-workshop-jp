@@ -178,7 +178,7 @@ vault write azure/roles/reader ttl=2m max_ttl=10m azure_roles=-<<EOF
     [
       {
         "role_name": "Reader",
-        "scope": "/subscriptions/6343b729-dfc6-4798-898b-b8eb9c9f4afb/resourceGroups/vault-resource-group"
+        "scope": "/subscriptions/${SUB_ID}/resourceGroups/vault-resource-group"
       }
     ]
 EOF
