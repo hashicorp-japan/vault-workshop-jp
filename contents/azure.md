@@ -49,7 +49,7 @@ EOF
 
 ```console
 $ export TENANT_ID="***********"
-$ watch -n az ad sp list --query "[].{id:appId, tenant:appOwnerTenantId}" | grep -B 1 ${TENANT_ID}
+$ watch -n 1 'az ad sp list --query "[].{id:appId, tenant:appOwnerTenantId}" | grep -B 1 ${TENANT_ID}'
 
     "id": "4c4411ee-9654-4acf-b242-*******************",
     "tenant": "a67e8730-8fe4-453a-a239-e62d4df0a815"
