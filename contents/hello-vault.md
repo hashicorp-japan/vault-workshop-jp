@@ -200,6 +200,9 @@ EOF
 
 ストレージのタイプは複数選択できますが、ここではローカルファイルを使います。実際の運用で可用性などを考慮する場合はConsulなどHAの機能が盛り込まれたストレージを使うべきです。このコンフィグを使ってVaultを再度起動してみましょう。
 
+>下記のコマンドで起動時に"Error initializing core: Failed to lock memory: cannot allocate memory"のエラーが出る場合は以下の1行をvault-local-config.hclに追記してください。
+> `disable_mlock  = true`
+
 ```console
 $ vault server -config vault-local-config.hcl
 WARNING! mlock is not supported on this system! An mlockall(2)-like syscall to
@@ -222,9 +225,6 @@ container.
 ==> Vault server started! Log data will stream in below:
 ```
 今回はプロダクションモードで起動しています。先ほどと違い、`Root Token`, `Unseal Key`は出力されません。Vaultを利用するまでに`init`と`unseal`という処理が必要です。
-
->起動時に"Error initializing core: Failed to lock memory: cannot allocate memory"のエラーが出る場合は以下の1行をvault-local-config.hclに追記してください。
-> `disable_mlock  = true`
 
 ## Vaultの初期化処理
 
