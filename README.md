@@ -34,9 +34,9 @@
 1. 初めてのVault
 2. Databases Secret Engine
 3. 認証とポリシー & トークン
-4. Public Clouds Secret Engineのいずれか
-5. Transit
-6. Auth Methodのいずれか
+4. Auth Methodのいずれか
+5. Public Clouds Secret Engineのいずれか
+6. Transit
 
 ## アジェンダ
 * [初めてのVault](contents/hello-vault.md)
