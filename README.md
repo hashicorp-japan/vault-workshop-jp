@@ -27,6 +27,17 @@
 
 * [Vault Overview](https://docs.google.com/presentation/d/14YmrOLYirdWbDg5AwhuIEqJSrYoroQUQ8ETd6qwxe6M/edit?usp=sharing)
 
+## お勧めの進め方
+
+初めてVaultを扱う人は下記の順番で消化すると一通りのVaultの使い方が掴めるためお勧めです。
+
+1. 初めてのVault
+2. Databases Secret Engine
+3. 認証とポリシー & トークン
+4. Public Clouds Secret Engineのいずれか
+5. Transit
+6. Auth Methodのいずれか
+
 ## アジェンダ
 * [初めてのVault](contents/hello-vault.md)
 * [Secret Engine 1: Key Value](contents/kv.md)
