@@ -6,7 +6,7 @@ Original project: [Vault Agent with AWS](https://learn.hashicorp.com/vault/ident
 ## 概要
 
 VaultのAWSでのAuthenticationのデモになります。
-デモの実行については、このRepoをCloneして[こちらのAsset](asset/auth_aws)をご使用ください。
+デモの実行については、このRepoをCloneして[こちらのAsset](../asset/auth_aws)をご使用ください。
 
 AWS auth methodについては、[こちら](https://www.vaultproject.io/docs/auth/aws.html)を参照ください。
 
