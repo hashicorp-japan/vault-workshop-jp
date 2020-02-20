@@ -13,8 +13,9 @@ wget https://releases.hashicorp.com/vault/1.3.0/vault_1.3.0_linux_amd64.zip
 パスを通します。以下はmacOSの例ですが、OSにあった手順で`vault`コマンドにパスを通します。
 
 ```shell
-mv /path/to/vault /usr/local/bin
-chmod +x /usr/local/bin/vault
+unzip vault*.zip
+chmod +x vault
+mv vault /usr/local/bin
 ```
 
 新しい端末を立ち上げ、Vaultのバージョンを確認します。
@@ -177,14 +178,16 @@ $ vault kv get -format=json -field=password secret/mypassword
 
 一旦Vaultのサーバを停止し、次はVaultのコンフィグレーションを作成し、起動してみます。Vaultのコンフィグレーションは`HashiCorp Configuration Language`で記述します。
 
-デスクトップに任意のフォルダーを作って、以下のファイルを作成します。ファイル名は`vault-local-config.hcl`とします。`path`は書き換えてください。
+デスクトップに任意のフォルダーを作って、以下のファイルを作成します。ファイル名は`vault-local-config.hcl`とします。
 
 ```shell 
 $ mkdir vault-workshop
 $ cd vault-workshop
+
+$ DIR=$(pwd)
 $ cat > vault-local-config.hcl <<EOF
 storage "file" {
-   path = "/path/to/vault-workshop/vaultdata"
+   path = "${DIR}/vaultdata"
 }
 
 listener "tcp" {
