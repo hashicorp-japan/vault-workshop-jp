@@ -69,7 +69,7 @@ Vaultは内部的にこの鍵を使ってGCPのAPIを実行して動的に新し
 
 ```shell
 $ cat << EOF > mybindings.hcl
-resource "//cloudresourcemanager.googleapis.com/projects/<PROJECT_ID> {
+resource "//cloudresourcemanager.googleapis.com/projects/<PROJECT_ID>" {
   roles = ["roles/viewer"]
 }
 EOF
@@ -114,7 +114,7 @@ service_account_email    vaultpj-viewer-1575172760@peak-elevator-237302.iam.gser
 それでは実際にキーを発行してみましょう。
 
 ```console
-$ vault read gcp/key/pj-viewer -format=json | jq -r '.data.private_key_data' > gcp.key.encoded
+$ vault read -format=json gcp/key/pj-viewer | jq -r '.data.private_key_data' > gcp.key.encoded
 ```
 
 `gcp.key.encoded`にエンコードされたキーが出力されているでしょう。
