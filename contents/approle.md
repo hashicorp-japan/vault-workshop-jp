@@ -151,13 +151,11 @@ Code: 403. Errors:
   * permission denied
 ```
 
-よりセキュアにSecret IDを扱う際は`Response Wrapping`という機能を利用しますが、これについては以降の章で扱います。また、以下のようなワークフローに組み込みより安全にIDの発行を行うことができます。
+ロールで定義した通り、AppRoleで発行したトークンはKVに対してのみアクセス権限があることがわかるでしょう。
 
-![](https://learn.hashicorp.com/assets/images/vault-approle-workflow2.png)
+今回はAppRoleの基本的な使い方を試しましたが、より実践的にどのように扱うかは[こちらの記事](https://blog.kabuctl.run/?p=94)に記載しておきましたので、本ハンズオン終了後、一読してみてください。
 
-ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentication](https://learn.hashicorp.com/vault/identity-access-management/iam-authentication)
-
-##　参考リンク
+## 参考リンク
 * [AppRole API Document](https://www.vaultproject.io/api/auth/approle/index.html)
 * [AppRole Auth Method](https://www.vaultproject.io/docs/auth/approle.html)
 * [Auth0を使ったOIDC認証](https://learn.hashicorp.com/vault/operations/oidc-auth)
