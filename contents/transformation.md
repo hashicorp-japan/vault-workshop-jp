@@ -1,22 +1,22 @@
 # Transform Secret Engineを試す
 
-Transform Secret Engineは`Format Preserving Encryption(FPE)`と`Masking`を実現するためのシークレットエンジンです。
+`Transform Secret Engine`は`Format Preserving Encryption(FPE)`と`Masking`を実現するためのシークレットエンジンです。
 
-Transit Secret Engineではランダムな値を用いて暗号化を実現しましたが、
+`Transit Secret Engine`ではランダムな値を用いて暗号化を実現しましたが、
 
-FPEとは、例えば`1234-5678-8765-4321`のような入力値に対して、`ASKT-THN3-KWt9-HHOA`のようにフォーマットを維持したまま暗号化する機能です。
+`FPE`とは、例えば`1234-5678-8765-4321`のような入力値に対して、`ASKT-THN3-KWt9-HHOA`のようにフォーマットを維持したまま暗号化する機能です。
 
-Maskingとは、`1234-5678-8765-4321`のような入力値に対して、`****-****-****-****`のように値をマスキングする機能です。
+`Masking`とは、`1234-5678-8765-4321`のような入力値に対して、`****-****-****-****`のように値をマスキングする機能です。
 
-FPEを利用することで、データサイズを変更やデータベースのスキーマの変更することなく暗号化を実現することが可能となります。
+`FPE`を利用することで、データサイズを変更やデータベースのスキーマの変更することなく暗号化を実現することが可能となります。
 
-Transform Secret EngineはEnterprise版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)やEntperpriseの正式なライセンスで機能をアクティベーションする必要があります。
+`Transform Secret Engine`はEnterprise版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)やEntperpriseの正式なライセンスで機能をアクティベーションする必要があります。
 
 ライセンスのセットの仕方は[こちら](https://www.vaultproject.io/api-docs/system/license)を参考にしてみてください。
 
 ## Transformationの4つのリソース
 
-Transform Secret Engineでは4つのリソースを利用して上記のような機能を実現します。
+`Transform Secret Engine`では4つのリソースを利用して上記のような機能を実現します。
 
 * `Roles`: Transformationを行うためのロール。暗号化する際のエンドポイントとなり、ACLの設定をする際にも利用される。
 * `Alphabets`: 置換される平文、および暗号化された後の暗号文に含まれるUTF-8の文字列の定義する。
@@ -365,7 +365,7 @@ encoded_value    *****@*******.***
 ちなみに、マスキングする文字列は変更できます。`masking_character=#`を追加してみましょう。
 
 ```shell
-vault write transform/transformation/masking-email \                                                kabu@/Users/kabu
+$ vault write transform/transformation/masking-email \
 type=masking \
 template=email-template \
 allowed_roles=my-transform-role \
@@ -384,9 +384,11 @@ encoded_value    #####@#######.###
 
 変更が反映されました。
 
-この機能は例えばWebブラウザやATMの画面に実際の値を出したくない際や、ログにPIIのデータを出力させたくない時に利用できます。正規表現を変更することで一部の値のみマスキングすることも可能です。
+この機能は例えばWebブラウザやATMの画面に実際の値を出したくない際や、ログにPIIのデータを出力させたくない時に利用できます。
 
-最後にこれを試してみましょう。アットマーク前の最初と最後の文字を除いた文字列のみマスキングするような表現をしています。
+正規表現を変更することで一部の値のみマスキングすることも可能です。最後にこれを試してみましょう。
+
+アットマーク前の最初と最後の文字を除いた文字列のみマスキングするような表現をしています。
 
 ```shell
 $ vault write transform/template/email-template \
