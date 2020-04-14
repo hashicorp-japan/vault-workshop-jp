@@ -1,6 +1,6 @@
-# Transformation Secret Engineを試す
+# Transform Secret Engineを試す
 
-Transformation Secret Engineは`Format Preserving Encryption(FPE)`と`Masking`を実現するためのシークレットエンジンです。
+Transform Secret Engineは`Format Preserving Encryption(FPE)`と`Masking`を実現するためのシークレットエンジンです。
 
 Transit Secret Engineではランダムな値を用いて暗号化を実現しましたが、
 
@@ -10,13 +10,13 @@ Maskingとは、`1234-5678-8765-4321`のような入力値に対して、`****-*
 
 FPEを利用することで、データサイズを変更やデータベースのスキーマの変更することなく暗号化を実現することが可能となります。
 
-Transformation Secret EngineはEnterprise版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)やEntperpriseの正式なライセンスで機能をアクティベーションする必要があります。
+Transform Secret EngineはEnterprise版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)やEntperpriseの正式なライセンスで機能をアクティベーションする必要があります。
 
 ライセンスのセットの仕方は[こちら](https://www.vaultproject.io/api-docs/system/license)を参考にしてみてください。
 
 ## Transformationの4つのリソース
 
-Transformation Secret Engineでは4つのリソースを利用して上記のような機能を実現します。
+Transform Secret Engineでは4つのリソースを利用して上記のような機能を実現します。
 
 * `Roles`: Transformationを行うためのロール。暗号化する際のエンドポイントとなり、ACLの設定をする際にも利用される。
 * `Alphabets`: 置換される平文、および暗号化された後の暗号文に含まれるUTF-8の文字列の定義する。
@@ -402,7 +402,7 @@ Key              Value
 encoded_value    t##############i@kabuctl.com
 ```
 
-以上で一通りの`Transformation Secret Engine`の機能を試すことができました。`Alphabets`と`Templates`の`Patterne`の正規表現を利用することで様々なデータのTransformationを実現することができます。
+以上で一通りの`Transform Secret Engine`の機能を試すことができました。`Alphabets`と`Templates`の`Patterne`の正規表現を利用することで様々なデータのTransformationを実現することができます。
 
 また、時間のある方はこちらの[サンプルアプリ](https://github.com/tkaburagi/vault-transformation-demo)で実際のWebアプリから利用することを試してみてください。
 
