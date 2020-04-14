@@ -407,7 +407,7 @@ encoded_value    t##############i@kabuctl.com
 また、時間のある方はこちらの[サンプルアプリ](https://github.com/tkaburagi/vault-transformation-demo)で実際のWebアプリから利用することを試してみてください。
 
 ## 参考リンク
-* [](https://www.vaultproject.io/docs/secrets/transform)
-* [](https://www.vaultproject.io/api-docs/secret/transform)
-* [](https://www.hashicorp.com/blog/transform-secrets-engine/)
-* [](https://learn.hashicorp.com/vault/adp/transform)
+* [Transform Doc](https://www.vaultproject.io/docs/secrets/transform)
+* [Transform API](https://www.vaultproject.io/api-docs/secret/transform)
+* [Blog Post](https://www.hashicorp.com/blog/transform-secrets-engine/)
+* [Tutorial](https://learn.hashicorp.com/vault/adp/transform)
