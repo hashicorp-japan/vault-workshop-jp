@@ -62,20 +62,30 @@ vault policy write apps app_policy.hcl
 
 ここでは、Vault上の`secret/app/*`へ対するCRUDを許可するPolicyを作成しました。
 
+次に、ルートCAもしくは中間CAの証明書を準備してください。認証局を構築したさいに作られているはずです。ちなみにVaultの場合、以下のAPIで取得することができます。
+
+```shell
+curl --header "X-Vault-Token: ${VAULT_TOKEN}" --request GET ${VAULT_ADDR}/v1/pki/ca/pem
+
+```
+
 では、Vaultのauth methodを有効化します。
 
 ```shell
 vault write auth/cert/certs/app display_name=web policies=apps certificate=@rootCA.pem ttl=3600 
 ```
 
-このコマンドにより`app`というロールに対して`web`という表示名で`apps`ポリシーがひも付きました。また、この認証により発行されるトークンのTTL（Time to live）は3600秒=1時間に設定しています。`certificate`の引数にルートCAもしくは中間CAのパブリック証明書を指定します。これにより、このCAにより署名されたクライアント証明書に対して認証を行なうことができます。
+このコマンドにより`app`というロールに対して`web`という表示名で`apps`ポリシーがひも付きました。また、この認証により発行されるトークンのTTL（Time to live）は3600秒=1時間に設定しています。`certificate`の引数にルートCAもしくは中間CAのパブリック証明書（ここでは`rootCA.pem`）を指定します。これにより、このCAにより署名されたクライアント証明書に対して認証を行なうことができます。
 
-ちなみにCAの証明書はVaultの場合、以下のAPIで取得することができます。
+TLS authでは他にも様々な設定を加えることができます。証明書に含まれる情報に対してマッチングを行い、怪しい証明書での認証を防ぐことができます。
 
-```shell
-curl --header "X-Vault-Token: ${VAULT_TOKEN}" --request GET ${VAULT_ADDR}/v1/pki/ca/pem
-
-```
+|                          Parameter                           |                       説明                       |
+| :----------------------------------------------------------: | :----------------------------------------------: |
+| [`allowed_common_names`](https://www.vaultproject.io/api/auth/cert#allowed_common_names) |        CN (Common Name)でマッチングさせる        |
+| [`allowed_dns_sans`](https://www.vaultproject.io/api/auth/cert#allowed_dns_sans) |              DNSでマッチングさせる               |
+| [`allowed_email_sans`](https://www.vaultproject.io/api/auth/cert#allowed_email_sans) |             Emailでマッチングさせる              |
+| [`allowed_uri_sans`](https://www.vaultproject.io/api/auth/cert#allowed_uri_sans) |              URIでマッチングさせる               |
+| [`allowed_organizational_units`](https://www.vaultproject.io/api/auth/cert#allowed_organizational_units) | OU（Organizaitontional Unitt）でマッチングさせる |
 
 
 
