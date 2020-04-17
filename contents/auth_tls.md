@@ -36,11 +36,11 @@ curl -X PUT -H "X-Vault-Request: true" -H "X-Vault-Token: ${VAULT_TOKEN}" -d '{ 
 openssl x509 -in n1_cert.pem -noout -text
 ```
 
-```
+
 <kbd>
   <img src="../assets/auth_tls/tls_cert_check.png">
 </kbd>
-```
+
 
 証明書が準備できたら、プライベートキーと一緒に対象のホストへ配布してください。ここでは割愛しますが、HashiCorpのConsulをVaultと組み合わせることで、Vaultが動的に発行した証明書をConsulが自動的に対象となるノードへ配付する、という事が可能になります。
 
