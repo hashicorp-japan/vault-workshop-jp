@@ -51,6 +51,7 @@
 * [Auth Method 4: GitHub](https://learn.hashicorp.com/vault/getting-started/authentication)
 * [Auth Method 5: AWS](contents/auth_aws.md)
 * [Auth Method 6: Kubernetes](contents/k8s.md)
+* [Auth Method 7: TLS](contents/auth_tls.md)
 * [Response Rapping](contents/response-wrapping.md)
 * Secret Engine 3: Public Cloud ([AWS](contents/aws.md), [Azure](contents/azure.md), [GCP](contents/gcp.md))
 * [Secret Engine 4: PKI Engine](contents/pki.md)
