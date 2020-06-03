@@ -190,7 +190,7 @@ password    passwd
 データの一部を更新してみましょう。
 
 ```console
-$ vault kv patch kv/iam password=passwd
+$ vault kv patch kv/iam password=passwd-2
 $ vault kv get kv/iam
 ====== Metadata ======
 Key              Value
