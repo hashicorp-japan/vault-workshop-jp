@@ -218,7 +218,7 @@ $ echo ${VTOKEN}
 トークンが発行されたはずです。
 
 ```console
-$ vault token lookup
+$ vault token lookup ${VTOKEN}
 Key                 Value
 ---                 -----
 accessor            29wEzEdQ3O3yxgDXqzAfKD8G
