@@ -50,8 +50,8 @@ GCPのコンソールにログインして、`Navigation Menu`から`IAM&Admin` 
 
 `CREATE SERVICE ACCOUNT`をクリックして、名前に`vault-server`と入力してロールの選択に移ります。
 
-* Compute Viewer
-* Service Account Key Admin
+* `Compute Viewer`
+* `Service Account Key Admin`
 
 の二つを選択し、`CREATE`してください。
 
@@ -67,9 +67,9 @@ GCPのコンソールにログインして、`Navigation Menu`から`IAM&Admin` 
 
 `CREATE SERVICE ACCOUNT`をクリックして、名前に`vault-server`と入力してロールの選択に移ります。
 
-* Service Account Token Creator
+* `Service Account Token Creator`
 
-の二つを選択し、`CREATE`してください。
+を選択し、`CREATE`してください。
 
 `CONTIUNE`で進んだら、`CREATE KEY`でJSONのキーを発行します。ダウンロードされたキーは`.gcp-vault-client-key.json`にリネームします。
 
@@ -81,16 +81,11 @@ $ mv /path/to/***********.json ~/.gcp-vault-client-key.json
 
 ## GCP Auth Methodの設定 (IAM編)
 
-こちらがワークフローです。(refer: https://www.vaultproject.io/docs/auth/gcp#iam-login)
-
-<kbd>
-  <img src="https://d33wubrfki0l68.cloudfront.net/663efd308386c18b4de4792670e895c2c52ac23f/6b4b3/img/vault-gcp-iam-auth-workflow.svg">
-</kbd> 
+[こちら](https://www.vaultproject.io/docs/auth/gcp#iam-login)がワークフローです。
 
 最後に`GCP Auth Method`の設定を行います。
 
 GCP認証を有効化し、Vault用のService Accountをセットします。VaultはこのService Accountを利用してGCPへ認証を依頼します。
-
 
 ```sh
 $ vault auth enable gcp
@@ -186,7 +181,7 @@ $ vault write auth/gcp/role/read-cred-gce \
 * `Instance Group`
 * `Region`
 
-各パラメターたをリスト型で設定できるため複数の値を入れることもできます。
+各パラメタータをリスト型で設定できるため複数の値を入れることもできます。
 
 これでVault側の設定は完了です。
 
@@ -203,9 +198,9 @@ $ curl \
   "http://metadata/computeMetadata/v1/instance/service-accounts/default/identity"
 ```
 
-インスタン氏のメタデータサーバからJWTの発行を依頼しています。これはGCEインスタンス上からのみ有効なリクエストです。
+インスタンスのメタデータサーバからJWTの発行を依頼しています。これはGCEインスタンス上からのみ有効なリクエストです。
 
-発行されたJWTをコピーしてローカルの端末に戻ります。先ほど発行されたJWTを使ってログインしてみましょう。(**今回はVaultがローカルマシンで起動している前提のためローカルから実行しますが、通常はGCEからリーチできる所に配置し、CEインスタンスから利用します。**)
+発行されたJWTをコピーしてローカルの端末に戻ります。先ほど発行されたJWTを使ってログインしてみましょう。(**今回はVaultがローカルマシンで起動している前提のためローカルから実行しますが、通常はGCEからリーチできる所に配置しGCEインスタンスから利用します。**)
 
 こちらのワークフローがわかりやすいです。(refer: https://petersouter.xyz/demonstrating-the-gce-auth-method-for-vault/)
 <kbd>
