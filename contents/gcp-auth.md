@@ -7,7 +7,7 @@ GCP Auth MethodではGCPの`IAM Service Account`, `Google Compute Engine Instanc
 
 このハンズオンではGCPアカウントが必要です。[こちら](https://cloud.google.com/free/)からアカウントを作成していください。
 
-##　Vault 事前準備
+## Vault 事前準備
 
 まずはVault上のデータとポリシーを準備します。Root Tokenでログインし、以下のコマンドを実行してください。
 
