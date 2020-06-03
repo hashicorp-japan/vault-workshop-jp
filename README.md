@@ -49,7 +49,7 @@
 * [Auth Method 2: AppRole](contents/approle.md)
 * [Auth Method 3: OIDC](https://learn.hashicorp.com/vault/operations/oidc-auth)
 * [Auth Method 4: GitHub](https://learn.hashicorp.com/vault/getting-started/authentication)
-* [Auth Method 5] Public Cloud ([AWS](contents/auth_aws.md), Azure, [GCP](contents/gcp-auth.md))
+* Auth Method 5: Public Cloud ([AWS](contents/auth_aws.md), Azure, [GCP](contents/gcp-auth.md))
 * [Auth Method 6: Kubernetes](contents/k8s.md)
 * [Auth Method 7: MFA (Enterprise)](contents/mfa.md)
 * Secret Engine 3: Public Cloud ([AWS](contents/aws.md), [Azure](contents/azure.md), [GCP](contents/gcp.md))
