@@ -73,6 +73,12 @@ $ mv /path/to/***********.json ~/.gcp-vault-client-key.json
 
 ## GCP Auth Methodの設定 (IAM編)
 
+こちらがワークフローです。(refer: https://www.vaultproject.io/docs/auth/gcp#iam-login)
+
+<kbd>
+  <img src="https://d33wubrfki0l68.cloudfront.net/663efd308386c18b4de4792670e895c2c52ac23f/6b4b3/img/vault-gcp-iam-auth-workflow.svg">
+</kbd> 
+
 最後に`GCP Auth Method`の設定を行います。
 
 GCP認証を有効化し、Vault用のService Accountをセットします。VaultはこのService Accountを利用してGCPへ認証を依頼します。
