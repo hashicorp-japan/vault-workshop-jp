@@ -65,7 +65,7 @@ $ mv /path/to/***********.json ~/.gcp-vault-auth-config-key.json
 
 GCPのコンソールにログインして、`Navigation Menu`から`IAM&Admin` -> `Service accounts`と進んでください。
 
-`CREATE SERVICE ACCOUNT`をクリックして、名前に`vault-server`と入力してロールの選択に移ります。
+`CREATE SERVICE ACCOUNT`をクリックして、名前に`vault-client`と入力してロールの選択に移ります。
 
 * `Service Account Token Creator`
 
