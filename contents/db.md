@@ -338,7 +338,7 @@ mysql> exit
 Bye¥
 ```
 
-30秒後に再度ログインします。
+120秒後に再度ログインします。
 
 ```console
 $ mysql -u <USERNAME_GEN_BY_VAULT> -h 127.0.0.1 -p        
