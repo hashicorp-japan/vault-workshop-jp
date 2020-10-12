@@ -12,6 +12,8 @@
 
 ```console
 $ export VAULT_ADDR="http://127.0.0.1:8200"
+$ vault secrets enable -path=kv -version=2 kv
+$ vault secrets enable -path=database database
 $ vault list sys/policy
 
 Keys
