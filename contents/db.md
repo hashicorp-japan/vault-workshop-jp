@@ -383,7 +383,7 @@ mysql>
 $ vault lease revoke database/creds/role-handson-2/JSnf6zV2jTrRJmI66Hfz189K
 All revocation operations queued successfully!
 
-$ mysql -u <USERNAME_GEN_BY_VAULT> -p
+$ mysql -u <USERNAME_GEN_BY_VAULT> -p -h 127.0.0.1 -p handson
 Enter password: <PASSWORD__GEN_BY_VAULT>
 ERROR 1045 (28000): Access denied for user 'v-role-jklQMrcJa'@'localhost' (using password: YES)
 ```
