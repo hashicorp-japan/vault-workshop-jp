@@ -414,7 +414,7 @@ $ vault write database/config/mysql-handson-db \
 $ vault write -force database/rotate-root/mysql-handson-db
 Success! Data written to: database/rotate-root/mysql-handson-db
 
-$ mysql -u root -p
+$ mysql -u root -p -h 127.0.0.1
 Enter password: rooooot
 ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
 ```
