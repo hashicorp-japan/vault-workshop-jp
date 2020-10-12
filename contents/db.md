@@ -307,7 +307,7 @@ Success! Data written to: database/roles/role-handson
 このロールを利用してShort Livedなユーザを発行します。
 
 ```console
-vault read database/creds/role-handson-3
+$ vault read database/creds/role-handson-3
 Key                Value
 ---                -----
 lease_id           database/creds/role-handson-3/H3y6DjZBGztisnO3B3DqzgkA
