@@ -236,7 +236,8 @@ container.
 
 ```console
 $ export VAULT_ADDR="http://127.0.0.1:8200"
-$ vault operator init
+$ vault operator init > vault-keys
+$ cat vault-keys
 Unseal Key 1: E9wz16Q+6K8sHdV0G1IZNw4/xBC3b0lm28Hz0K/MyfM1
 Unseal Key 2: FmP/bBJqArQ30wPDYS8GNfFUKKgUu141LtVNThrX8YyT
 Unseal Key 3: K2zppWuRaDcCCCqb8NznfDw1Fp4bRXwslRoR4eTd7igz
