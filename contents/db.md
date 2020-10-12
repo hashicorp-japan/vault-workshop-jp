@@ -320,7 +320,7 @@ username           v-role-bnsYTFQAj
 `lease_duration`が設定したTTLの120秒になっています。これを使ってまずは試しにログインしてみます。
 
 ```console
-$ mysql -u <USERNAME_GEN_BY_VAULT> -p           
+$ mysql -u <USERNAME_GEN_BY_VAULT> -h 127.0.0.1 -p           
 Enter password: <PASSWORD__GEN_BY_VAULT>
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 16
@@ -341,7 +341,7 @@ Bye¥
 30秒後に再度ログインします。
 
 ```console
-$ mysql -u <USERNAME_GEN_BY_VAULT> -p        
+$ mysql -u <USERNAME_GEN_BY_VAULT> -h 127.0.0.1 -p        
 Enter password: <PASSWORD__GEN_BY_VAULT>
 ERROR 1045 (28000): Access denied for user 'v-role-bnsYTFQAj'@'localhost' (using password: YES)
 ```
