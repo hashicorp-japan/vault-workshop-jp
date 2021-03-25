@@ -302,7 +302,7 @@ $ vault write database/roles/role-handson-3 \
 Success! Data written to: database/roles/role-handson
 ```
 
-`max_ttl`のパラメータに120秒を指定しています。`default_ttl`生成した時のTTL、`max_ttl`は`renew`できる最大のTTLです。
+`default_ttl`のパラメータに120秒を指定しています。`default_ttl`は生成した時のTTL、`max_ttl`は`renew`できる最大のTTLです。
 
 このロールを利用してShort Livedなユーザを発行します。
 
