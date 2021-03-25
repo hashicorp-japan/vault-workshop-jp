@@ -23,6 +23,12 @@
 	* GitHub
 	* AWS / Azure / GCP
 
+## Vault概要の学習
+
+* こちらのビデオをご覧ください。
+
+[HashiCorp Vaultで始めるクラウドセキュリティ対策](https://www.youtube.com/watch?v=PJaNVSEXcUA&t=1s)
+
 ## 資料
 
 * [Vault Overview](https://docs.google.com/presentation/d/14YmrOLYirdWbDg5AwhuIEqJSrYoroQUQ8ETd6qwxe6M/edit?usp=sharing)
