@@ -145,14 +145,20 @@ alphabet=localemailaddress
 最後に`Transformation`です。
 
 ```shell
-$ vault write transform/transformation/email \
-type=fpe \
+$ vault write transform/transformations/fpe/email \
 template=email-template \
 allowed_roles=my-transform-role \
 tweak_source=internal
 ```
 
 今回はトランスフォームの名前に`email`、テンプレートに`email-template`をしてしています。
+
+```shell
+vault write transform/role/my-transform-role \
+transformations=first-transform,email
+```
+
+このトランスフォームを`my-transform-role`ロールで利用可能に設定します。
 
 それぞれの設定を確認しておきましょう。
 
@@ -332,8 +338,7 @@ Key              Value
 `Transformation`を以下のように作成します。
 
 ```shell
-$ vault write transform/transformation/masking-email \
-type=masking \
+$ vault write transform/transformations/masking/masking-email \
 template=email-template \
 allowed_roles=my-transform-role \
 tweak_source=internal
@@ -351,6 +356,11 @@ templates            [email-template]
 type                 masking
 ```
 
+```shell
+vault write transform/role/my-transform-role \
+transformations=first-transform,email,masking-email
+```
+
 これを利用してデータをマスキングしてみます。
 
 ```console
@@ -365,8 +375,7 @@ encoded_value    *****@*******.***
 ちなみに、マスキングする文字列は変更できます。`masking_character=#`を追加してみましょう。
 
 ```shell
-$ vault write transform/transformation/masking-email \
-type=masking \
+$ vault write transform/transformations/masking/masking-email \
 template=email-template \
 allowed_roles=my-transform-role \
 tweak_source=internal \
