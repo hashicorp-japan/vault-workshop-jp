@@ -302,12 +302,12 @@ $ vault write database/roles/role-handson-3 \
 Success! Data written to: database/roles/role-handson
 ```
 
-`max_ttl`のパラメータに120秒を指定しています。`default_ttl`生成した時のTTL、`max_ttl`は`renew`できる最大のTTLです。
+`default_ttl`のパラメータに120秒を指定しています。`default_ttl`は生成した時のTTL、`max_ttl`は`renew`できる最大のTTLです。
 
 このロールを利用してShort Livedなユーザを発行します。
 
 ```console
-vault read database/creds/role-handson-3
+$ vault read database/creds/role-handson-3
 Key                Value
 ---                -----
 lease_id           database/creds/role-handson-3/H3y6DjZBGztisnO3B3DqzgkA
@@ -320,7 +320,7 @@ username           v-role-bnsYTFQAj
 `lease_duration`が設定したTTLの120秒になっています。これを使ってまずは試しにログインしてみます。
 
 ```console
-$ mysql -u <USERNAME_GEN_BY_VAULT> -p           
+$ mysql -u <USERNAME_GEN_BY_VAULT> -h 127.0.0.1 -p           
 Enter password: <PASSWORD__GEN_BY_VAULT>
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 16
@@ -338,10 +338,10 @@ mysql> exit
 Bye¥
 ```
 
-30秒後に再度ログインします。
+120秒後に再度ログインします。
 
 ```console
-$ mysql -u <USERNAME_GEN_BY_VAULT> -p        
+$ mysql -u <USERNAME_GEN_BY_VAULT> -h 127.0.0.1 -p        
 Enter password: <PASSWORD__GEN_BY_VAULT>
 ERROR 1045 (28000): Access denied for user 'v-role-bnsYTFQAj'@'localhost' (using password: YES)
 ```
@@ -383,7 +383,7 @@ mysql>
 $ vault lease revoke database/creds/role-handson-2/JSnf6zV2jTrRJmI66Hfz189K
 All revocation operations queued successfully!
 
-$ mysql -u <USERNAME_GEN_BY_VAULT> -p
+$ mysql -u <USERNAME_GEN_BY_VAULT> -p -h 127.0.0.1 -p handson
 Enter password: <PASSWORD__GEN_BY_VAULT>
 ERROR 1045 (28000): Access denied for user 'v-role-jklQMrcJa'@'localhost' (using password: YES)
 ```
@@ -414,7 +414,7 @@ $ vault write database/config/mysql-handson-db \
 $ vault write -force database/rotate-root/mysql-handson-db
 Success! Data written to: database/rotate-root/mysql-handson-db
 
-$ mysql -u root -p
+$ mysql -u root -p -h 127.0.0.1
 Enter password: rooooot
 ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
 ```

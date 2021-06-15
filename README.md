@@ -7,7 +7,7 @@
 ## Pre-requisite
 
 * 環境
-	* macOS or Linux
+	* macOS or Linux(Ubuntu推奨)
 
 * ソフトウェア
 	* Vault
@@ -22,6 +22,12 @@
 * アカウント
 	* GitHub
 	* AWS / Azure / GCP
+
+## Vault概要の学習
+
+* こちらのビデオをご覧ください。
+
+[HashiCorp Vaultで始めるクラウドセキュリティ対策](https://www.youtube.com/watch?v=PJaNVSEXcUA&t=1s)
 
 ## 資料
 
@@ -60,3 +66,4 @@
 * [Response Rapping](contents/response-wrapping.md)
 * [HashiCorp Nomadとの連携機能](https://github.com/hashicorp-japan/nomad-workshop/blob/master/contents/nomad-vault.md)
 * [Enterprise機能の紹介](https://docs.google.com/presentation/d/1dtoRmLxySDL8PTEe_X51BQNIXn19H_910StO2DlFkLI/edit?usp=sharing)
+* [Vault Ops Workshop](https://docs.google.com/document/d/1KWl3Krv3L4A0UQmw5deanXHGKr5Mu8kKoTMGNEyAgTM/edit#heading=h.wr5wzikn620)
