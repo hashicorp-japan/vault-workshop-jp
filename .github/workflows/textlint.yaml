@@ -1,0 +1,30 @@
+name: textlint
+
+on:
+  pull_request:
+    paths:
+    - "README.md"
+    # - "contents/**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  textlint-ja:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install textlint rules
+        run: npm install -D textlint textlint-rule-preset-ja-spacing
+
+      - name: Run textlint
+        run: |
+          export PATH="$PATH:$(npm root)/.bin"
+          textlint README.md
+          # textlint README.md ./contents/**/*.md

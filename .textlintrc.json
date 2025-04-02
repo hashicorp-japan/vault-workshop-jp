@@ -1,0 +1,10 @@
+{
+  "plugins": {},
+  "filters": {},
+  "rules": {
+    "ja-space-between-half-and-full-width": {
+      "space": "always",
+      "lintStyledNode": true
+    }
+  }
+}
