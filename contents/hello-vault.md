@@ -181,6 +181,7 @@ $ vault kv get -format=json -field=password secret/mypassword
 デスクトップに任意のフォルダーを作って、以下のファイルを作成します。ファイル名は`vault-local-config.hcl`とします。
 
 ```shell 
+$ #for MacOS
 $ mkdir vault-workshop
 $ cd vault-workshop
 
@@ -198,6 +199,28 @@ listener "tcp" {
 ui = true
 disable_mlock = true
 EOF
+```
+
+```shell
+$ #for Windows
+$ mkdir vault-workshop
+$ cd vault-workshop
+
+$ $DIR=(pwd).Path
+$ @"
+storage "file" {
+   path = "${DIR}/vaultdata"
+}
+
+listener "tcp" {
+  address     = "127.0.0.1:8200"
+  tls_disable = 1
+}
+
+ui = true
+disable_mlock = true
+"@ | Out-File -FilePath vault-local-config.hcl -Encoding Ascii
+
 ```
 
 ここではストレージ、リスナーとUIの最低限の設定をしています。その他にも[様々な設定](https://www.vaultproject.io/docs/configuration/)が出来ます。
