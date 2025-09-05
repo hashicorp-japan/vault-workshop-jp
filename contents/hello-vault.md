@@ -209,7 +209,7 @@ $ cd vault-workshop
 $ $DIR=(pwd).Path
 $ @"
 storage "file" {
-   path = "${DIR}/vaultdata"
+   path = "${DIR}\vaultdata"
 }
 
 listener "tcp" {
