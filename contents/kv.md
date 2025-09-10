@@ -58,7 +58,7 @@ name        kabu
 password    passwd
 ```
 
-`enable-versionin`をするとメタデータが付与され、バージョン管理されます。データを上書きしてバージョン2を作ってみます。
+`enable-versioning`をするとメタデータが付与され、バージョン管理されます。データを上書きしてバージョン2を作ってみます。
 
 ```console
 $ vault kv put kv/iam name=kabu-2 password=passwd
