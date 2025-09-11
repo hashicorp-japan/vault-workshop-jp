@@ -1,15 +1,15 @@
-# SSHシークレットエンジンを使ってワンタイムSSHパスワードを利用する
+# SSH シークレットエンジンを使ってワンタイム SSH パスワードを利用する
 
-VaultのSSHシークレットエンジンではSSHを使ったマシンへのアクセスのセキュアな認証認可を提供します。Vaultを利用することで複雑なSSHクレデンシャルのライフサイクル管理のワークフローをよりシンプルにセキュアに実施できます。SSHシークレットエンジンの主な機能は以下の二つです。
+Vault の SSH シークレットエンジンでは SSH を使ったマシンへのアクセスのセキュアな認証認可を提供します。Vault を利用することで複雑な SSH クレデンシャルのライフサイクル管理のワークフローをよりシンプルにセキュアに実施できます。SSH シークレットエンジンの主な機能は以下の二つです。
 
 * Singed SSH Certificates
 * One-time SSH Paswords
 
 ここでは両方を簡単に試してみます。
 
-## VagrantでVMを起動
+## Vagrant で VM を起動
 
-Vagrantを使ってUbuntu OSのVMを一つ起動してみましょう。適当なディレクトリを作ります。
+Vagrant を使って Ubuntu OS の VM を一つ起動してみましょう。適当なディレクトリを作ります。
 
 ```shell
 $ mkdir -p ~/vagrant/ubuntu
@@ -82,11 +82,11 @@ Bringing machine 'default' up with 'virtualbox' provider...
     default: /vagrant => /Users/kabu/vagrant/ubuntu
 ```
 
-起動しました。今後このVMのことを「ホスト」、ローカルマシンのことを「クライアント」と呼びます。
+起動しました。今後この VM のことを「ホスト」、ローカルマシンのことを「クライアント」と呼びます。
 
-## Vaultの起動
+## Vault の起動
 
-ローカルに立ち上がっているVaultとホストを通信させるため、Vaultのコンフィグを以下のように変更し再起動します。`Ctrl+C`でVaultの端末を止めて以下のようにファイルを変更してください。
+ローカルに立ち上がっている Vault とホストを通信させるため、Vault のコンフィグを以下のように変更し再起動します。`Ctrl+C`で Vault の端末を止めて以下のようにファイルを変更してください。
 
 ```hcl
 storage "file" {
@@ -108,7 +108,7 @@ api_addr = "http://192.168.11.2:8200"
 ui = true
 ```
 
-`192.168.11.2:8200`のIPはぞれぞれの環境に合わせてください。これで再度起動します。
+`192.168.11.2:8200`の IP はぞれぞれの環境に合わせてください。これで再度起動します。
 
 ```shell
 $ vault server -config=path/to/vault-local-config.hcl start
@@ -118,29 +118,29 @@ $ vault server -config=path/to/vault-local-config.hcl start
 
 ### クライアントキーサイン
 
-公開鍵認証の場合サーバに対する秘密鍵を共有したり、キーペアをそれぞれに持たせて運用が複雑化する課題がありますがCA認証によりこれらを解決でき、かつVaultがCAとして機能することで非常にシンプルなワークフローで実現できます。公開鍵認証とCA認証の一般的な流れは下記の通りです。
+公開鍵認証の場合サーバに対する秘密鍵を共有したり、キーペアをそれぞれに持たせて運用が複雑化する課題がありますが CA 認証によりこれらを解決でき、かつ Vault が CA として機能することで非常にシンプルなワークフローで実現できます。公開鍵認証と CA 認証の一般的な流れは下記の通りです。
 
 [公開鍵認証]
 <kbd>
   <img src="https://github-image-tkaburagi.s3-ap-northeast-1.amazonaws.com/vault-workshop/puflow.png">
 </kbd>
 
-[CA認証]
+[CA 認証]
 <kbd>
   <img src="https://github-image-tkaburagi.s3-ap-northeast-1.amazonaws.com/vault-workshop/caflow-with-number.png">
 </kbd>
 
-まずいつものようにVaultのSSHシークレットエンジンを有効化しましょう。
+まずいつものように Vault の SSH シークレットエンジンを有効化しましょう。
 
 ```shell
 vault secrets enable -path=ssh ssh
 ```
 
-### CAの設定
+### CA の設定
 
 図の①の手順です。
 
-まず、VaultをCAとして設定します。`generate_signing_key`を指定することでこのタイミングでサイン用のキーペアーを発行できます。既存にある場合は`private_key`, `public_key`のパラメータの引数としてセットします。
+まず、Vault を CA として設定します。`generate_signing_key`を指定することでこのタイミングでサイン用のキーペアーを発行できます。既存にある場合は`private_key`, `public_key`のパラメータの引数としてセットします。
 
 ここでは`generate_signing_key`を付与して生成してみます。
 
@@ -148,9 +148,9 @@ vault secrets enable -path=ssh ssh
 vault write ssh/config/ca generate_signing_key=true
 ```
 
-Public Keyのみが出力されるでしょう。
+Public Key のみが出力されるでしょう。
 
-次にVault上に、SSHでログインするユーザに与える権限と認証のタイプを指定します。
+次に Vault 上に、SSH でログインするユーザに与える権限と認証のタイプを指定します。
 
 ```shell
 $ export VAULT_ADDR="http://192.168.11.2:8200"
@@ -179,15 +179,15 @@ EOH
 
 図の②の手順です。
 
-次に、この公開鍵をターゲットとなるホスト(VM)のSSHコンフィグレーションに配布します。(図の②)
+次に、この公開鍵をターゲットとなるホスト(VM)の SSH コンフィグレーションに配布します。(図の②)
 
-ホストに`vagrant ssh`でログインします。以下のコマンドでVaultで生成したpublic_keyを取得します。
+ホストに`vagrant ssh`でログインします。以下のコマンドで Vault で生成した public_key を取得します。
 
 ```shell
 $ sudo curl -o /etc/ssh/trusted-user-ca-keys.pem http://192.168.11.2:8200/v1/ssh/public_key
 ```
 
-`192.168.11.2`はローカルのVaultのアドレスです。
+`192.168.11.2`はローカルの Vault のアドレスです。
 
 ```console
 $ cat /etc/ssh/trusted-user-ca-keys.pem
@@ -201,7 +201,7 @@ $ sudo sed -i '$a TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem' /etc/ssh/
 $ sudo service ssh restart
 ```
 
-今回はVaultサーバとクライアントがローカルマシンで同居しているのでわかりづらいかもしれませんが、Vaultを起動しているローカルマシンで以下を実行します。
+今回は Vault サーバとクライアントがローカルマシンで同居しているのでわかりづらいかもしれませんが、Vault を起動しているローカルマシンで以下を実行します。
 
 ### クライアント側の設定
 
@@ -210,7 +210,7 @@ $ sudo service ssh restart
 $ ssh-keygen -t 
 ```
 
-生成された公開鍵をVault(CA)に渡してサインのリクエストをし、サイン済みの公開鍵(証明書)を発行します。
+生成された公開鍵を Vault(CA)に渡してサインのリクエストをし、サイン済みの公開鍵(証明書)を発行します。
 
 ```shell
 $ vault write -field=signed_key ssh/sign/my-role \
@@ -225,9 +225,9 @@ $ vault write -field=signed_key ssh/sign/my-role \
 ssh-keygen -Lf ~/.ssh/signed-cert.pub
 ```
 
-`Valid`の欄がRoleで指定した30minsのTTLになっているはずです。
+`Valid`の欄が Role で指定した 30mins の TTL になっているはずです。
 
-最後にこれを使ってSSHでサーバにアクセスしてみましょう。
+最後にこれを使って SSH でサーバにアクセスしてみましょう。
 
 ```shell
 ssh -i signed-cert.pub -i ~/.ssh/id_rsa ubuntu@192.168.11.9
@@ -235,24 +235,24 @@ ssh -i signed-cert.pub -i ~/.ssh/id_rsa ubuntu@192.168.11.9
 
 `ubuntu`ユーザでログインできるはずです。
 
-この証明書は30分後に無効となりログインが不可能になります。また、`revoke`を行うことで明示的に無効にできます。
+この証明書は 30 分後に無効となりログインが不可能になります。また、`revoke`を行うことで明示的に無効にできます。
 
-このようにCA認証を簡単に利用することができるため、環境やチームが拡大するにつれて複雑化する運用を効率化することができます。
+このように CA 認証を簡単に利用することができるため、環境やチームが拡大するにつれて複雑化する運用を効率化することができます。
 
 ## One-time SSH Paswords
 
-次はSSHシークレットエンジンの二つ目のユースケースであるワンタイムパスワード(OTP)を扱います。
+次は SSH シークレットエンジンの二つ目のユースケースであるワンタイムパスワード(OTP)を扱います。
 
-クラウド化が進むにつれ、オンラインセキュリティの重要度は増しています。アタッカーがVMへのアクセスを入手するとあらゆるデータやサービスへのアクセスを許すこととなり、SSHキーの扱いは非常に重要です。
+クラウド化が進むにつれ、オンラインセキュリティの重要度は増しています。アタッカーが VM へのアクセスを入手するとあらゆるデータやサービスへのアクセスを許すこととなり、SSH キーの扱いは非常に重要です。
 
 ワークフローは下記の通りです。
 
-* 認証されたVaultのクライアントがVaultに対してOTPの発行を依頼
-* VaultによりOTPの発行と提供
-* クライアントはSSHコネクションの間そのOTPを利用しホストに接続
-* クライアントがホストに接続したことを確認するとVaultがそのパスワードを消去
+* 認証された Vault のクライアントが Vault に対して OTP の発行を依頼
+* Vault により OTP の発行と提供
+* クライアントは SSH コネクションの間その OTP を利用しホストに接続
+* クライアントがホストに接続したことを確認すると Vault がそのパスワードを消去
 
-まずはホスト側の準備をします。VaultのOTPを利用するには全てのホスト側で[`vault-ssh-helper`](https://github.com/hashicorp/vault-ssh-helper)をインストールする必要があります。
+まずはホスト側の準備をします。Vault の OTP を利用するには全てのホスト側で[`vault-ssh-helper`](https://github.com/hashicorp/vault-ssh-helper)をインストールする必要があります。
 
 ホストに`vagrant ssh`でログインして以下のコマンドを実行します。
 
@@ -273,7 +273,7 @@ allowed_roles = "*"
 
 `/etc/pam.d/sshd`を編集します。変更部分は`Standard Un*x authentication.`から数行ですが、ミスを防ぐために[こちらを参照して](https://github.com/tkaburagi/vault-configs/blob/master/sshd)全て上書きしてください。
 
-次に`/etc/ssh/sshd_config`の最後の行に以下を追加してsshdを再起動します。
+次に`/etc/ssh/sshd_config`の最後の行に以下を追加して sshd を再起動します。
 
 ```
 ChallengeResponseAuthentication yes
@@ -285,7 +285,7 @@ UsePAM yes
 $ sudo service ssh restart
 ```
 
-次にVault側の設定です。
+次に Vault 側の設定です。
 
 先ほど有効にした`ssh`エンドポイントを利用します。`ssh/roles/<NAME>`のエンドポイントでロールを作ります。
 
@@ -295,7 +295,7 @@ $ vault write ssh/roles/otp_key_role key_type=otp \
         cidr_list=0.0.0.0/0
 ```
 
-次にクライアントトークンに紐付けるポリシーを設定します。クラアイントは上記で定義したロールのOTPを発行するだけなので、`ssh/roles/otp_key_role`に対する権限だけあればOKです。
+次にクライアントトークンに紐付けるポリシーを設定します。クラアイントは上記で定義したロールの OTP を発行するだけなので、`ssh/roles/otp_key_role`に対する権限だけあれば OK です。
 
 `vault-ssh-otp-policy.hcl`のファイルを作り下記のように編集します。
 
@@ -320,7 +320,7 @@ identity_policies    []
 policies             ["default" "ssh-otp-client-policy"]
 ```
 
-ここからはクライアントの手順です。クライアントは上記のトークンを使って、OTPの発行をVaultに依頼します。
+ここからはクライアントの手順です。クライアントは上記のトークンを使って、OTP の発行を Vault に依頼します。
 
 ```console
 $ VAULT_TOKEN=s.9nifyTTs49Mu73HMZffWBFVU vault write ssh/creds/otp_key_role ip=<HOST's IP>
@@ -337,7 +337,7 @@ port               22
 username           ubuntu
 ```
 
-ubuntuユーザ用のOTPが発行されました。これでログインしてみます。`key`がパスワードです。
+ubuntu ユーザ用の OTP が発行されました。これでログインしてみます。`key`がパスワードです。
 
 ```console
 $ ssh ubuntu@192.168.11.9
@@ -377,10 +377,10 @@ ubuntu@192.168.11.9's password: 49ae44c0-298f-02d2-c8a3-2c1d8fbaee1c
 Permission denied, please try again.
 ```
 
-Vaultにより無効化されました。
+Vault により無効化されました。
 
 ## 参考リンク
 * [SSH Secret Engine](https://www.vaultproject.io/docs/secrets/ssh/index.html)
 * [API Document](https://www.vaultproject.io/api/secret/ssh/index.html)
 * [Vault SSH Helper](https://github.com/hashicorp/vault-ssh-helper)
-* [公開鍵認証とCA認証](http://kontany.net/blog/?p=211)
+* [公開鍵認証と CA 認証](http://kontany.net/blog/?p=211)

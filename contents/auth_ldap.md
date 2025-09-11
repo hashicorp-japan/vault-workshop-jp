@@ -1,27 +1,27 @@
-# LDAPによる認証
+# LDAP による認証
 
-ここではLDAPを用いた認証を行ってみます。
+ここでは LDAP を用いた認証を行ってみます。
 
 
-## LDAPサーバーの準備
+## LDAP サーバーの準備
 
-もし、すでに利用可能なLDAPやADなどがあればそちらをご使用ください。手元にLDAP環境がない場合、[OpenLDAPコンテナ](https://github.com/osixia/docker-openldap)などを準備ください。
+もし、すでに利用可能な LDAP や AD などがあればそちらをご使用ください。手元に LDAP 環境がない場合、[OpenLDAP コンテナ](https://github.com/osixia/docker-openldap)などを準備ください。
 
-ここでは、[AccountなどがセットアップされたLDAP環境](https://github.com/grove-mountain/docker-ldap-server)を用います。
+ここでは、[Account などがセットアップされた LDAP 環境](https://github.com/grove-mountain/docker-ldap-server)を用います。
 ワークショップ内で使用するスクリプトなどは、[準備した環境](https://github.com/hashicorp-japan/vault-workshop/tree/master/assets/auth_ldap)があるのでダウンロードしてください。
 
 
-### OpenLDAPコンテナの起動
+### OpenLDAP コンテナの起動
 
-まず以下のコマンドでLDAPコンテナを起動します。
+まず以下のコマンドで LDAP コンテナを起動します。
 ```shell
 $ ./1.start_ldap_server.sh
 ```
 `docker ps`などでコンテナが起動したことを確認ください。
 
 
-### OpenLDAPコンテナとの通信確認
-LDAPサーバーとの通信を確認するには、以下のコマンドを叩いてエントリーが取得できることを確認ください。以下ではITグループに所属しているユーザー一覧を表示します。
+### OpenLDAP コンテナとの通信確認
+LDAP サーバーとの通信を確認するには、以下のコマンドを叩いてエントリーが取得できることを確認ください。以下では IT グループに所属しているユーザー一覧を表示します。
 
 
 ```console
@@ -51,9 +51,9 @@ result: 0 Success
 ```
 
 
-## LDAP auth methodの設定
+## LDAP auth method の設定
 
-次にVault側でLDAP auth methodを設定します。
+次に Vault 側で LDAP auth method を設定します。
 
 ```shell
 $ ./_2.enable_auth_ldap.sh
@@ -79,10 +79,10 @@ vault write auth/ldap-um/config \
     insecure_tls=true
 ```
 
-まず、`vault auth enable`でAuth methodを有効化します。
-その後`vault write auth/ldap-um/config`で、LDAPサーバーとの通信に必要な設定を行っています。
+まず、`vault auth enable`で Auth method を有効化します。
+その後`vault write auth/ldap-um/config`で、LDAP サーバーとの通信に必要な設定を行っています。
 
-`vault auth list`コマンドでLDAP認証が作成されていることを確認ください。
+`vault auth list`コマンドで LDAP 認証が作成されていることを確認ください。
 
 ```console
 $ vault auth list
@@ -96,15 +96,15 @@ token/       token       auth_token_8c9e5cf0       token based credentials
 
 ## シークレットを準備
 
-次にこのワークショップで用いるシークレットを準備します。Secret engineはKVエンジンを使用します。もし、まだ設定していない場合は以下のコマンドでKVを有効化してください。
+次にこのワークショップで用いるシークレットを準備します。Secret engine は KV エンジンを使用します。もし、まだ設定していない場合は以下のコマンドで KV を有効化してください。
 
 ```shell
 $ vault secrets enable -path=secret kv`
 ```
 
-これにより、Vault上の/secretというPathにKVエンジンがマウントされます。
+これにより、Vault 上の/secret という Path に KV エンジンがマウントされます。
 
-KVエンジンにシークレットを書き込みます。
+KV エンジンにシークレットを書き込みます。
 
 ```shell
 $ ./_4.populage_kvs.sh
@@ -120,18 +120,18 @@ vault write secret/ldap/security password="bar"
 vault write secret/ldap/engineering password="hoge"
 ```
 
-ITグループ向け、Securityグループ向け、Engineeringグループ向けの３つのシークレットが書き込まれました。
+IT グループ向け、Security グループ向け、Engineering グループ向けの３つのシークレットが書き込まれました。
 
 
-## Policyの設定
+## Policy の設定
 
-次に、これらのシークレットへのアクセスを許可するためのPolicyを準備します。
+次に、これらのシークレットへのアクセスを許可するための Policy を準備します。
 
 
-### Policyの中身
-ここでは以下のITグループ向けとSecurityグループ向けの２種類のPolicyを使用します。
+### Policy の中身
+ここでは以下の IT グループ向けと Security グループ向けの２種類の Policy を使用します。
 
-ITグループ向け (it_policy.hcl)：
+IT グループ向け (it_policy.hcl)：
 ```Hashicorp Configuration Language
 # Policy for IT peopld
 
@@ -144,7 +144,7 @@ path "secret/ldap/it" {
 }
 ```
 
-Securityグループ向け (security_policy.hcl)：
+Security グループ向け (security_policy.hcl)：
 ```Hashicorp Configuration Language
 # Policy for security people
 
@@ -157,12 +157,12 @@ path "secret/ldap/security" {
 }
 ```
 
-それぞれのPolicyに、secret/ldap以下のそれぞれのシークレットへのアクセス権限が明示的に記載されています。
+それぞれの Policy に、secret/ldap 以下のそれぞれのシークレットへのアクセス権限が明示的に記載されています。
 
 
-### Policyの設定とグループへの適用
+### Policy の設定とグループへの適用
 
-Policyが準備できたら、そのPolicyをLDAP上のグループと紐付けます。
+Policy が準備できたら、その Policy を LDAP 上のグループと紐付けます。
 
 ```
 $ ./5.write_associate_policy.sh
@@ -180,15 +180,15 @@ vault write auth/ldap-um/groups/it policies=it_policy
 vault write auth/ldap-um/groups/security policies=security_policy
 ```
 
-`vault policy write`でPolicyを書き込み、`vault write auth/ldap-um/groups/<グループ名>`でグループとPolicyを紐付けます。
+`vault policy write`で Policy を書き込み、`vault write auth/ldap-um/groups/<グループ名>`でグループと Policy を紐付けます。
 
 
 
-## LDAP認証をもちいたログイン
+## LDAP 認証をもちいたログイン
 
-これでVaultを通じてLDAP認証を行う準備が整いました。
+これで Vault を通じて LDAP 認証を行う準備が整いました。
 
-まず、ITグループのメンバーでログインしてみます。
+まず、IT グループのメンバーでログインしてみます。
 
 ```console
 $ ./6.login_it_member.sh
@@ -208,12 +208,12 @@ policies               ["default" "it_policy"]
 token_meta_username    deepak
 ```
 
-無事にログインされTokenが返ってきています。token_policiesに"it_policy"が設定されていることを確認ください。
-また、`vault token lookup`で現在のTokenを確認できます。
+無事にログインされ Token が返ってきています。token_policies に"it_policy"が設定されていることを確認ください。
+また、`vault token lookup`で現在の Token を確認できます。
 
-上記のtokenを保管してください。この例では、`s.E9OVOHtCWsCHCxnf0uggkTeOga`がそれに当たります。
+上記の token を保管してください。この例では、`s.E9OVOHtCWsCHCxnf0uggkTeOga`がそれに当たります。
 
-同様にSecurityグループでのログインも行ってください。
+同様に Security グループでのログインも行ってください。
 
 ```console
 $ ./7.login_security_member.sh
@@ -233,14 +233,14 @@ policies               ["default" "security_policy"]
 token_meta_username    eve
 ```
 
-このToken値も保管してください。
-この後の作業では、これらのTokenを切り替えて作業していきます。Tokenの切り替えは、`vault login <Token値>`で行います。
+この Token 値も保管してください。
+この後の作業では、これらの Token を切り替えて作業していきます。Token の切り替えは、`vault login <Token値>`で行います。
 
 ```shell
 $ vault login s.E9OVOHtCWsCHCxnf0uggkTeOga` # 上記のITグループのTokenを使用
 ```
 
-Tokenは環境変数(VAULT_TOKEN)
+Token は環境変数(VAULT_TOKEN)
 )からも設定できます。よって、以下のような切り替えも可能です。
 ```shell
 $ export IT_TOKEN=s.E9OVOHtCWsCHCxnf0uggkTeO  # ITトークンの変数
@@ -255,7 +255,7 @@ $ VAULT_TOKEN=$SECURITY_TOKEN vault <コマンド>  # コマンドをSecurityト
 
 それではシークレットの取得をしてみましょう。
 
-まず、PolicyによればITグループのユーザーはsecret/ldap/itにはアクセスができるはずです。
+まず、Policy によれば IT グループのユーザーは secret/ldap/it にはアクセスができるはずです。
 
 ```console
 $ VAULT_TOKEN=$IT_TOKEN vault read secret/ldap/it
@@ -266,7 +266,7 @@ password            foo
 ```
 
 無事にシークレットを取得できました。
-次にSecurityグループのシークレットの取得も試してみましょう。
+次に Security グループのシークレットの取得も試してみましょう。
 
 ```console
 $ VAULT_TOKEN=$IT_TOKEN vault read secret/ldap/security
@@ -279,9 +279,9 @@ Code: 403. Errors:
 	* permission denied
 ```
 
-ITグループのPolicyではsecret/ldap/securityへのアクセス権限がないので無事にはじかれました。
+IT グループの Policy では secret/ldap/security へのアクセス権限がないので無事にはじかれました。
 
-同様にSecurityグループのTokenでも試してみてください。
+同様に Security グループの Token でも試してみてください。
 
 
 

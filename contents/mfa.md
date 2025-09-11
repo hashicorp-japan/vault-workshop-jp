@@ -3,14 +3,14 @@
 Table of Contents
 =================
 
-  * [Policyの設定を行う](#policyの設定を行う)
-  * [TOTP用のバーコードとURLを発行する](#totp用のバーコードとurlを発行する)
-  * [Vaultを利用してTOTPを発行する](#vaultを利用してtotpを発行する)
-  * [Google Authenticatorを利用してTOTPを発行する](#google-authenticatorを利用してtotpを発行する)
+  * [Policy の設定を行う](#policyの設定を行う)
+  * [TOTP 用のバーコードと URL を発行する](#totp用のバーコードとurlを発行する)
+  * [Vault を利用して TOTP を発行する](#vaultを利用してtotpを発行する)
+  * [Google Authenticator を利用して TOTP を発行する](#google-authenticatorを利用してtotpを発行する)
   * [参考リンク](#参考リンク)
 
-HashiCorp Vault Enterpriseでは`Multi Factor Authentication(MFA)`
-を利用して、VaultのAPIコール時に多要素での認証を設定することが可能です。
+HashiCorp Vault Enterprise では`Multi Factor Authentication(MFA)`
+を利用して、Vault の API コール時に多要素での認証を設定することが可能です。
 
 以下のような認証方式を入れることができます。
 
@@ -19,21 +19,21 @@ HashiCorp Vault Enterpriseでは`Multi Factor Authentication(MFA)`
 * Duo
 * PingID
 
-今回はTOTPを使って時間制限付きのワンタイムパスワードを多要素認証として利用し、「Vault Tokenを作るためのAPIの実行」に対して多要素認証を掛けたいと思います。
+今回は TOTP を使って時間制限付きのワンタイムパスワードを多要素認証として利用し、「Vault Token を作るための API の実行」に対して多要素認証を掛けたいと思います。
 
-* GitHubで認証
-* 認証されたユーザにVault Tokenを作るための権限を付与
-* API実行時に`TOTP`を入力し実行
+* GitHub で認証
+* 認証されたユーザに Vault Token を作るための権限を付与
+* API 実行時に`TOTP`を入力し実行
 
 という流れです。
 
-`Multi Factor Authentication`はEnterprise版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)やEntperpriseの正式なライセンスで機能をアクティベーションする必要があります。
+`Multi Factor Authentication`は Enterprise 版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)や Entperprise の正式なライセンスで機能をアクティベーションする必要があります。
 
 ライセンスのセットの仕方は[こちら](https://www.vaultproject.io/api-docs/system/license)を参考にしてみてください。
 
-## Policyの設定を行う
+## Policy の設定を行う
 
-多要素認証を扱うにはVaultのPolicy設定に`mfa_methods`を付与します。`mfa_methods`で指定する値は多要素認証の方法を定義しますが、こちらを事前に定義します。
+多要素認証を扱うには Vault の Policy 設定に`mfa_methods`を付与します。`mfa_methods`で指定する値は多要素認証の方法を定義しますが、こちらを事前に定義します。
 
 ```sh
 $ vault write sys/mfa/method/totp/my_totp \
@@ -43,12 +43,12 @@ $ vault write sys/mfa/method/totp/my_totp \
     digits=8
 ```
 
-このコマンドを実行することでTOTP MFAの設定が完了です。
+このコマンドを実行することで TOTP MFA の設定が完了です。
 
 * `issuer`は任意の発行者名
-* `period`はTOTPの生存期間
-* `algorithm`はTOTPを生成する際のアルゴリズム
-* `digits`はTOTPの文字列数です。
+* `period`は TOTP の生存期間
+* `algorithm`は TOTP を生成する際のアルゴリズム
+* `digits`は TOTP の文字列数です。
 
 これをポリシーの`mfa_methods`に下記のように指定します。
 
@@ -72,9 +72,9 @@ path "auth/token/create" {
 EOF
 ```
 
-## GitHub認証の設定
+## GitHub 認証の設定
 
-GitHubの認証には`Organization`, `Team`と`GitHub用のAPI Token`が必要です。それぞれ事前に作成してください。
+GitHub の認証には`Organization`, `Team`と`GitHub用のAPI Token`が必要です。それぞれ事前に作成してください。
 
 ここでは
 
@@ -83,7 +83,7 @@ GitHubの認証には`Organization`, `Team`と`GitHub用のAPI Token`が必要�
 
 としています。
 
-以下のコマンドでGitHub認証を有効化します。
+以下のコマンドで GitHub 認証を有効化します。
 
 ```sh
 $ ORG=<YOUR_ORG_NAME>
@@ -102,7 +102,7 @@ $ vault write auth/github/map/teams/vault-token-creation value=totp-policy
 $ vault login -method=github
 ```
 
-GitHubのトークンを入力すると認証が成功し以下のように出力されるはずです。
+GitHub のトークンを入力すると認証が成功し以下のように出力されるはずです。
 
 ```
 GitHub Personal Access Token (will be hidden):
@@ -156,49 +156,49 @@ Code: 403. Errors:
 いずれのリクエストも`permission denied`となるはずです。
 
 * `sys/mounts`にはそもそも権限がないこと
-* `auth/token/create`には権限があるが、MFAがポリシー上要求されているがセットされていないこと
+* `auth/token/create`には権限があるが、MFA がポリシー上要求されているがセットされていないこと
 
 が原因です。
 
-次にTOTPの発行を有効にしMFAを使ってAPIを実行してみましょう。
+次に TOTP の発行を有効にし MFA を使って API を実行してみましょう。
 
-## TOTP用のバーコードとURLを発行する
+## TOTP 用のバーコードと URL を発行する
 
-次にTOTP用のバーコードとURLを発行します。
+次に TOTP 用のバーコードと URL を発行します。
 
-以下のコマンドで先ほど発行したVaultトークンの`entity_id`を取得し、`sys/mfa/method/totp/my_totp/admin-generate`のエンドポイントを実行し`barcode`, `url`を取得します。
+以下のコマンドで先ほど発行した Vault トークンの`entity_id`を取得し、`sys/mfa/method/totp/my_totp/admin-generate`のエンドポイントを実行し`barcode`, `url`を取得します。
 
 ```sh
 $ vault write sys/mfa/method/totp/my_totp/admin-generate \
     entity_id=$(vault token lookup -format=json ${VTOKEN} | jq -r '.data.entity_id')
 ```
 
-ここで出力された`barcode`や`url`は外部のTOTPコードのGneratorにセットすることでTOTPを発行することができます。
+ここで出力された`barcode`や`url`は外部の TOTP コードの Gnerator にセットすることで TOTP を発行することができます。
 
 `barcode`と`url`を保存し、まずは`barcode`を利用して`Google Authenticator`を利用する例を紹介します。
 
 
-## Google Authenticatorを利用してTOTPを発行する
+## Google Authenticator を利用して TOTP を発行する
 
-まずはGoogle Authentiationを試してみます。AppStoreもしくはGoogle Playからインストールをした上で実行してください。
+まずは Google Authentiation を試してみます。AppStore もしくは Google Play からインストールをした上で実行してください。
 
 ```sh
 $ base64 --decode <<< <TOTP_BARCODE> > barcode-totp.png
 ```
 
-以下のようなQRコードが生成されているはずです。
+以下のような QR コードが生成されているはずです。
 
 <kbd>
   <img src="https://blog-kabuctl-run.s3-ap-northeast-1.amazonaws.com/20200426/mfa-2.png">
 </kbd>
 
-これをGoogle Authenticatorでスキャンすると、以下のようにTOTPが発行されていることがわかるでしょう。
+これを Google Authenticator でスキャンすると、以下のように TOTP が発行されていることがわかるでしょう。
 
 <kbd>
   <img src="https://blog-kabuctl-run.s3-ap-northeast-1.amazonaws.com/20200426/mfa-1.jpg">
 </kbd>
 
-この値をメモしてAPIを再度実行してみます。MFAを利用する際は`-mfa my_totp:<TOTP>`のパラメータをセットしAPIを実行します。
+この値をメモして API を再度実行してみます。MFA を利用する際は`-mfa my_totp:<TOTP>`のパラメータをセットし API を実行します。
 
 ```console
 $ VAULT_TOKEN=${VTOKEN} vault write -mfa my_totp:83501485 -f auth/token/create
@@ -214,7 +214,7 @@ identity_policies    []
 policies             ["default" "totp-policy"]
 ```
 
-トークンが発行できるはずです。試しに適当なTOTPをセットしてみます。
+トークンが発行できるはずです。試しに適当な TOTP をセットしてみます。
 
 ```console
 $ VAULT_TOKEN=${VTOKEN} vault write -mfa my_totp:99999999 -f auth/token/create
@@ -242,11 +242,11 @@ Code: 403. Errors:
 	* permission denied
 ```
 
-権限でセットした通り、正しいTOTPを持っていても`auth/token/create`以外のエンドポイントは実行できません。
+権限でセットした通り、正しい TOTP を持っていても`auth/token/create`以外のエンドポイントは実行できません。
 
-## Vaultを利用してTOTPを発行する
+## Vault を利用して TOTP を発行する
 
-ここまでGoogle Autenticatorを利用してきましたが、最後にVault自身をGeneratorとして利用する方法を紹介します。
+ここまで Google Autenticator を利用してきましたが、最後に Vault 自身を Generator として利用する方法を紹介します。
 
 先ほど保存した`url`をコピーしましょう。
 
@@ -256,7 +256,7 @@ $ vault write totp/keys/my-key \
     url="<TOTP_URL>"
 ```
 
-これでVault自体がキーを発行できるようになり、外部のサービスを使う必要がありません。
+これで Vault 自体がキーを発行できるようになり、外部のサービスを使う必要がありません。
 
 ```console
 $ vault read totp/code/my-key
@@ -280,11 +280,11 @@ identity_policies    []
 policies             ["default" "totp-policy"]
 ```
 
-同じようにTOTPを利用することができました。
+同じように TOTP を利用することができました。
 
-以上のように、Vault EnterpriseのMFA機能を利用することで特定のエンドポイントに対してより安全な多要素認証を入れることができます。
+以上のように、Vault Enterprise の MFA 機能を利用することで特定のエンドポイントに対してより安全な多要素認証を入れることができます。
 
-今回はTOTPの例でしたが、Oktaなどその他の認証基盤と連携させることも可能です。
+今回は TOTP の例でしたが、Okta などその他の認証基盤と連携させることも可能です。
 
 ## 参考リンク
 * [Vault Enterprise MFA Support](https://www.vaultproject.io/docs/enterprise/mfa)

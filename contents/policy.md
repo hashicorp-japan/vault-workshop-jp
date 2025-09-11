@@ -1,8 +1,8 @@
-# Vaultのポリシーを使ってアクセス制御する
+# Vault のポリシーを使ってアクセス制御する
 
-ここではVaultがサポートするいくつかの認証プロバイダーとの連携と、ポリシーによるアクセスコントロールを試してみます。これらの機能を使うことでクライアントとなるユーザ、ツールやアプリに対してどのリソースに対して、どの権限を与えるかというアイデンティティベースのセキュリティを設定することが出来ます。
+ここでは Vault がサポートするいくつかの認証プロバイダーとの連携と、ポリシーによるアクセスコントロールを試してみます。これらの機能を使うことでクライアントとなるユーザ、ツールやアプリに対してどのリソースに対して、どの権限を与えるかというアイデンティティベースのセキュリティを設定することが出来ます。
 
-ここまでRoot Tokenを利用して様々なシークレットを扱ってきましたが、実際の運用では強力な権限を持つRoot Tokenは保持をせずに必要な時のみ生成します。通常、最低限の権限のユーザを作成しVaultを利用していきます。また認証も直接トークンで行うのではなく信頼できる認証プロバイダに委託することがベターです。
+ここまで Root Token を利用して様々なシークレットを扱ってきましたが、実際の運用では強力な権限を持つ Root Token は保持をせずに必要な時のみ生成します。通常、最低限の権限のユーザを作成し Vault を利用していきます。また認証も直接トークンで行うのではなく信頼できる認証プロバイダに委託することがベターです。
 
 ここではその一部の方法とポリシーの設定を扱います。
 
@@ -60,7 +60,7 @@ identity_policies    []
 policies             ["default"]
 ```
 
-`default`の権限を持ったトークンを生成しました。このトークンをコピーします。Tokenを環境変数にセットしておきましょう。
+`default`の権限を持ったトークンを生成しました。このトークンをコピーします。Token を環境変数にセットしておきましょう。
 
 ```shell
 $ export DEFAULT_TOKEN=s.acBPCz3lfDryfVr01RgwyTqK
@@ -82,7 +82,7 @@ Code: 403. Errors:
 
 ## ポリシーを作る
 
-ポリシーはVaultのコンフィグレーションと同様`HCL`で記述します。
+ポリシーは Vault のコンフィグレーションと同様`HCL`で記述します。
 
 ```shell
 $ cd /path/to/vault-workshop
@@ -93,7 +93,7 @@ path "database/*" {
 EOF
 ```
 
-作ったら`vault policy write`のコマンドでポリシーを作成します。ポリシーの作成はRoot Tokenで実施します。
+作ったら`vault policy write`のコマンドでポリシーを作成します。ポリシーの作成は Root Token で実施します。
 
 ```console
 $ VAULT_TOKEN=$ROOT_TOKEN vault policy write my-policy my-first-policy.hcl
@@ -125,7 +125,7 @@ identity_policies    []
 policies             ["default" "my-policy"]
 ```
 
-Vaultにこのトークンを使って以下のコマンドを実行してください。
+Vault にこのトークンを使って以下のコマンドを実行してください。
 
 ```shell
 $ export MY_TOKEN=s.bA9M42W41G7tF90REMDCtMeO
@@ -159,9 +159,9 @@ Code: 403. Errors:
 * preflight capability check returned 403, please ensure client's policies grant access to path "kv/"
 ```
 
-Databaseのエンドポイントのread, list出来てきますがkvエンドポイントには権限がないことがわかります。
+Database のエンドポイントの read, list 出来てきますが kv エンドポイントには権限がないことがわかります。
 
-次にDatabaseエンドポイントにwriteの処理をしてみましょう。
+次に Database エンドポイントに write の処理をしてみましょう。
 
 ```shell
 $ VAULT_TOKEN=$MY_TOKEN vault write database/roles/role-handson-4 \
@@ -228,9 +228,9 @@ revocation_statements    []
 rollback_statements      []
 ```
 
-以上のようになればOKです。
+以上のようになれば OK です。
 
-ここまではトークン発行の権限を持つユーザから直接トークンをCLIを使って発行してきました。通常クライアントからVaultを利用する際は信頼する認証プロバイダとVaultを連携させプロバイダで認証をし適切なトークンを発行するといったワークフローを簡単に実現できます。以降の章ではその方法をいくつか紹介していきます。
+ここまではトークン発行の権限を持つユーザから直接トークンを CLI を使って発行してきました。通常クライアントから Vault を利用する際は信頼する認証プロバイダと Vault を連携させプロバイダで認証をし適切なトークンを発行するといったワークフローを簡単に実現できます。以降の章ではその方法をいくつか紹介していきます。
 
 ## 参考リンク
 * [Policy API Document](https://www.vaultproject.io/api/system/policy.html)
