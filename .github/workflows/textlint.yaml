@@ -3,8 +3,7 @@ name: textlint
 on:
   pull_request:
     paths:
-    - "README.md"
-    # - "contents/**/*.md"
+    - "contents/**/*.md"
   workflow_dispatch:
 
 permissions:
@@ -26,5 +25,4 @@ jobs:
       - name: Run textlint
         run: |
           export PATH="$PATH:$(npm root)/.bin"
-          textlint README.md
-          # textlint README.md ./contents/**/*.md
+          textlint README.md ./contents/**/*.md
