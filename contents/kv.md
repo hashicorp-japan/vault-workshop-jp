@@ -1,10 +1,10 @@
 # Secret Engine: KV
 
-ここでは非常にシンプルなKey Value Store型のシークレットエンジンを使ってみます。KVシークレットエンジンは`-dev`モードだとデフォルトでオンになっていますが、プロダクションモードだと明示的にオンにする必要があります。
+ここでは非常にシンプルな Key Value Store 型のシークレットエンジンを使ってみます。KV シークレットエンジンは`-dev`モードだとデフォルトでオンになっていますが、プロダクションモードだと明示的にオンにする必要があります。
 
-## KVシークレットエンジンを有効化
+## KV シークレットエンジンを有効化
 
-Vaultでは各シークレットエンジンを有効化するために`enable`の処理を行います。`enable`は特定の権限を持ったトークンのみが実施できるようにすべきですが、ここではroot tokenを使います。ポリシーについては後ほど扱います。
+Vault では各シークレットエンジンを有効化するために`enable`の処理を行います。`enable`は特定の権限を持ったトークンのみが実施できるようにすべきですが、ここでは root token を使います。ポリシーについては後ほど扱います。
 
 ```console
 $ export VAULT_ADDR="http://127.0.0.1:8200"
@@ -20,11 +20,11 @@ kv/           kv           kv_12159ddb           n/a
 sys/          system       system_ae51ee57       system endpoints used for control, policy and debugging
 ```
 
-`kv`が有効化され、`kv/`がAPIのエンドポイントとしてマウントされました。以降はこのパスを利用してKVデータを扱っていきます。
+`kv`が有効化され、`kv/`が API のエンドポイントとしてマウントされました。以降はこのパスを利用して KV データを扱っていきます。
 
-## KVデータのライフサイクル
+## KV データのライフサイクル
 
-先ほどと同様、データをputしてみましょう。
+先ほどと同様、データを put してみましょう。
 
 ```console
 $ vault kv put kv/iam name=kabu password=passwd
@@ -37,7 +37,7 @@ password    passwd
 ```
 
 ### データの更新
-データの更新には2通りの方法があります。
+データの更新には 2 通りの方法があります。
 
 まずは上書きしてデータのバージョンを上げる方法です。
 ```console
@@ -58,7 +58,7 @@ name        kabu
 password    passwd
 ```
 
-`enable-versioning`をするとメタデータが付与され、バージョン管理されます。データを上書きしてバージョン2を作ってみます。
+`enable-versioning`をするとメタデータが付与され、バージョン管理されます。データを上書きしてバージョン 2 を作ってみます。
 
 ```console
 $ vault kv put kv/iam name=kabu-2 password=passwd
@@ -85,7 +85,7 @@ name        kabu-2
 password    passwd
 ```
 
-データが上書きされてバージョン2のデータが生成されました。古いバージョンのデータは`-version`オプションを付与することで参照できます。
+データが上書きされてバージョン 2 のデータが生成されました。古いバージョンのデータは`-version`オプションを付与することで参照できます。
 
 ```console
 $ vault kv get -version=1 kv/iam

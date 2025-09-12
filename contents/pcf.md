@@ -1,27 +1,27 @@
-# Pivotal Cloud FoundryからVaultのシークレットを扱う
+# Pivotal Cloud Foundry から Vault のシークレットを扱う
 
-Kuberneteと同様Pivotal Cloud Foundry (以下PCF)ともいくつかの連携パターンがあります。
+Kubernete と同様 Pivotal Cloud Foundry (以下 PCF)ともいくつかの連携パターンがあります。
 
-* PCFを利用したVault認証
-* PCF上のアプリからVaultを介したシークレットの利用
+* PCF を利用した Vault 認証
+* PCF 上のアプリから Vault を介したシークレットの利用
 
-## Vault Service Brokerを利用する
+## Vault Service Broker を利用する
 
-PCFからVaultのシークレットを扱う際は[Vault Service Broker](https://github.com/hashicorp/vault-service-broker)を使うと便利です。
+PCF から Vault のシークレットを扱う際は[Vault Service Broker](https://github.com/hashicorp/vault-service-broker)を使うと便利です。
 
-Service Brokerを利用することで`cf cli`でVaultのTokenを払い出し、アプリにセットすることが可能です。
+Service Broker を利用することで`cf cli`で Vault の Token を払い出し、アプリにセットすることが可能です。
 
-ここでは[Pivotal Web Service](https://run.pivotal.io/)(以下PWS)を利用します。無料でも利用できます。
+ここでは[Pivotal Web Service](https://run.pivotal.io/)(以下 PWS)を利用します。無料でも利用できます。
 
-Sign-upが済んだらPWSにログインしましょう。
+Sign-up が済んだら PWS にログインしましょう。
 
 ```shell
 $ cf login -a api.run.pivotal.io -u ********** -p **********
 ```
 
-### VaultをPWS上にデプロイ
+### Vault を PWS 上にデプロイ
 
-PWS上のアプリとService Brokerと通信できるVaultインスタンスが必要なため、VaultをPWS上にデプロイしてしまいます。
+PWS 上のアプリと Service Broker と通信できる Vault インスタンスが必要なため、Vault を PWS 上にデプロイしてしまいます。
 
 [この記事](https://blog.ik.am/entries/423)を参考にしています。
 
@@ -30,7 +30,7 @@ $ mkdir cf-vault
 cd cf-vault
 ```
 
-ここではVaultとStorage BackendとしてPWS上のClearDBを使います。
+ここでは Vault と Storage Backend として PWS 上の ClearDB を使います。
 
 ```shell
 $ cf create-service cleardb spark vault-db
@@ -99,7 +99,7 @@ fi
 ```
 </details>
 
-Vaultをダウンロードして必要な権限を与えます。
+Vault をダウンロードして必要な権限を与えます。
 
 ```console
 $ wget https://releases.hashicorp.com/vault/1.2.2/vault_1.2.2_linux_amd64.zip
@@ -108,7 +108,7 @@ $ chmod +x vault
 $ chmod +x run.sh
 ```
 
-最後にmanifestを作ります。`NAME`は適当に置き換えてください。
+最後に manifest を作ります。`NAME`は適当に置き換えてください。
 
 ```shell
 $ cat <<EOF > manifest.yml
@@ -121,13 +121,13 @@ applications:
   - vault-db
 ```
 
-VaultをPWS上にデプロイしてみましょう。
+Vault を PWS 上にデプロイしてみましょう。
 
 ```shell
 $ cf push
 ```
 
-デプロイが成功したらVaultの初期化の処理を行います。
+デプロイが成功したら Vault の初期化の処理を行います。
 
 ```shell
 $ export VAULT_ADDR="https://cf-vault-NAME.cfapps.io"
@@ -138,11 +138,11 @@ $ vault login <ROOT_TOKEN>
 $ vault status
 ```
 
-これでVaultの準備は完了です。
+これで Vault の準備は完了です。
 
-### Service BrokerをPWS上にデプロイ
+### Service Broker を PWS 上にデプロイ
 
-Service BrokerをPWS上にデプロイします。Service Brokerの実態はGoで書かれているAPIベースのアプリケーションです。
+Service Broker を PWS 上にデプロイします。Service Broker の実態は Go で書かれている API ベースのアプリケーションです。
 
 ```shell
 $ git clone https://github.com/hashicorp/vault-service-broker
@@ -152,9 +152,9 @@ $ cf target -s vault-service-broker
 $ cf push --random-route --no-start
 ```
 
-今回は便宜上PWS上にVault Service Brokerをデプロイしていますが、これはどこにデプロイされていても問題ありません。
+今回は便宜上 PWS 上に Vault Service Broker をデプロイしていますが、これはどこにデプロイされていても問題ありません。
 
-次にデプロイしたService BrokerにVaultの設定を入れていきます。これを使ってService BrokerはVaultのトークンを生成します。
+次にデプロイした Service Broker に Vault の設定を入れていきます。これを使って Service Broker は Vault のトークンを生成します。
 
 ```shell
 $ cf set-env vault-service-broker VAULT_ADDR <YOUR_VAULT_HTTPS_ADDR>
@@ -165,7 +165,7 @@ $ cf restage vault-service-broker
 $ cf start vault-service-broker
 ```
 
-アプリの確認をして、Service Brokerにアクセスしてみます。
+アプリの確認をして、Service Broker にアクセスしてみます。
 
 ```
 $ export BROKER_URL=$(cf app vault-service-broker | grep -E -w 'urls:|routes:' | awk '{print $2}')
@@ -217,11 +217,11 @@ $ curl -s "${AUTH_USERNAME}:${AUTH_PASSWORD}@${BROKER_URL}/v2/catalog"
 ```
 </details>
 
-### Service BrokerでVaultのトークンを払い出す
+### Service Broker で Vault のトークンを払い出す
 
-それではこのService BrokerをCloud FoundryのMarketplaceに登録していきます。Marketplaceに登録することでユーザがオンデマンドでVaultのトークンを発行できるようになります。
+それではこの Service Broker を Cloud Foundry の Marketplace に登録していきます。Marketplace に登録することでユーザがオンデマンドで Vault のトークンを発行できるようになります。
 
-アプリを一つデプロイし、そのアプリにVaultをBindしてトークンをセットします。
+アプリを一つデプロイし、そのアプリに Vault を Bind してトークンをセットします。
 
 ```shell
 $ git clone https://github.com/tkaburagi/pcfdemoapp
@@ -229,13 +229,13 @@ $ cd pcfdemoapp
 $ cf push pcfdemoapp-<NAME> -p pcfdemoapp/target/demo-1.0.0-BUILD-SNAPSHOT.jar
 ```
 
-デプロイが成功したら準備は完了です。VaultをMarketplaceに登録します。
+デプロイが成功したら準備は完了です。Vault を Marketplace に登録します。
 
 ```shell
 $ cf create-service-broker vault-service-broker "${AUTH_USERNAME}" "${AUTH_PASSWORD}" "https://${BROKER_URL}" --space-scoped
 ```
 
-Marketplaceで確認をしてみます。
+Marketplace で確認をしてみます。
 
 ```console
 $ cf marketplace
@@ -246,13 +246,13 @@ service             plans          description
 hashicorp-vault    shared     HashiCorp Vault ServiceBroker
 ```
 
-別の端末でVaultのログをTailしておきましょう。
+別の端末で Vault のログを Tail しておきましょう。
 
 ```shell
 $ cf logs cf-vault-kabu
 ```
 
-それではService Brokerを使ってVaultトークンを払い出し、それをアプリケーションにセットしてみます。
+それでは Service Broker を使って Vault トークンを払い出し、それをアプリケーションにセットしてみます。
 
 ```shell
 $ cf create-service hashicorp-vault shared my-vault
@@ -281,13 +281,13 @@ started:   2019-08-22T09:52:16Z
 updated:   2019-08-22T09:52:16Z
 ```
 
-これをアプリにBindすることでアプリにVaultのトークンとそのトークンが扱うことのできるエンドポイントがセットされます。
+これをアプリに Bind することでアプリに Vault のトークンとそのトークンが扱うことのできるエンドポイントがセットされます。
 
 ```shell
 $ cf bind-service pcfdemoapp-tkaburagi my-vault
 ```
 
-Vaultのログを見ると以下のような出力がされ、Tokenが作られていることがわかります。
+Vault のログを見ると以下のような出力がされ、Token が作られていることがわかります。
 
 <details><summary>ログ出力例</summary>
 
@@ -297,13 +297,13 @@ Vaultのログを見ると以下のような出力がされ、Tokenが作られ�
 ```
 </details>
 
-アプリにセットされているVaultの設定を確認してみましょう。
+アプリにセットされている Vault の設定を確認してみましょう。
 
 ```console
 $ cf env pcfdemoapp-NAME
 ```
 
-以下のようなJsonが返ってくるはずです。
+以下のような Json が返ってくるはずです。
 
 <details><summary>cf env出力例</summary>
 
@@ -386,15 +386,15 @@ No staging env variables have been set
 ```
 </details>
 
-`hashicorp-vault`の欄がVaultに関する設定項目です。Vault APIのエンドポイント、払い出されたTokenやシークレットエンジンのエンドポイントがセットされています。
+`hashicorp-vault`の欄が Vault に関する設定項目です。Vault API のエンドポイント、払い出された Token やシークレットエンジンのエンドポイントがセットされています。
 
-アプリからはこの環境変数を扱うことでVaultのシークレット機能を簡単に利用することができます。
+アプリからはこの環境変数を扱うことで Vault のシークレット機能を簡単に利用することができます。
 
-### Vaultの中を確認する
+### Vault の中を確認する
 
-最後にService Brokerによって生成されたVaultトークンでどのような設定がされているか確認してみましょう。
+最後に Service Broker によって生成された Vault トークンでどのような設定がされているか確認してみましょう。
 
-まずはトークンの確認です。`VAULT_APP_TOKEN`はcf envにセットされているトークンです。
+まずはトークンの確認です。`VAULT_APP_TOKEN`は cf env にセットされているトークンです。
 
 ```console
 $ ROOT_TOKEN=<YOUR_ROOT_TOKEN>
@@ -425,7 +425,7 @@ ttl                  102h29m43s
 type                 service
 ```
 
-TTLやポリシーなどが設定されています。`policies`に`cf-7ecb3781-d8e2-4748-962d-fa798e921e95`がセットされていますが、これが`create-service`を実行した際にトークンと同時に作られるポリシーです。このポリシーを見てみます。
+TTL やポリシーなどが設定されています。`policies`に`cf-7ecb3781-d8e2-4748-962d-fa798e921e95`がセットされていますが、これが`create-service`を実行した際にトークンと同時に作られるポリシーです。このポリシーを見てみます。
 
 ```console
 $ VAULT_TOKEN=$ROO_TOKEN vault policy read "$(VAULT_TOKEN=$ROOT_TOKEN vault token lookup -format json $VAULT_APP_TOKEN | jq -r '.data.policies[0]')"
@@ -479,9 +479,9 @@ cf/dd4b66d4-3809-4060-9449-d8ea266dc56b/secret/     generic      generic_c14141c
 
 アプリの環境変数にセットされている通り、それぞれ`generic`と`transit`のシークレットエンジンを扱うことができます。
 
-## PCF Auth Methodを利用する(WIP)
+## PCF Auth Method を利用する(WIP)
 
-Vault1.2から利用可能となったPCF Auth Methodを利用します。これを利用するとVaultのトークンをPCFのインタスタンスが自動的に取得できるようになります。これはPCFの`Container Identity Assurance`を利用したものです。詳細は[こちら](https://content.pivotal.io/blog/new-in-pcf-2-1-app-container-identity-assurance-via-automatic-cert-rotation)を見てください。
+Vault1.2 から利用可能となった PCF Auth Method を利用します。これを利用すると Vault のトークンを PCF のインタスタンスが自動的に取得できるようになります。これは PCF の`Container Identity Assurance`を利用したものです。詳細は[こちら](https://content.pivotal.io/blog/new-in-pcf-2-1-app-container-identity-assurance-via-automatic-cert-rotation)を見てください。
 
 cf dev bosh env
 export BOSH_GW_HOST="10.144.0.2";

@@ -1,16 +1,16 @@
-# Response Wrappingを使ってシークレットをセキュアに渡して取得する。
+# Response Wrapping を使ってシークレットをセキュアに渡して取得する。
 
-Vaultから生成されたシークレットを利用する際、シークレットの受け渡しは非常にセンシティブな作業です。その際`Cubbyhole Response Wrapping`という機能を利用し、トークンを一回限りのトークンでラップして受け渡すような運用が可能です。
+Vault から生成されたシークレットを利用する際、シークレットの受け渡しは非常にセンシティブな作業です。その際`Cubbyhole Response Wrapping`という機能を利用し、トークンを一回限りのトークンでラップして受け渡すような運用が可能です。
 
 その際重要になってくる`Cubbyhole`というシークレットエンジンをまずは使ってみたいと思います。
 
 ## Cubbyhole
 
-`Cubbyhole`はロッカーや安全な場所という意味で、このシークレットエンジンは他とは違いVaultのトークンに必ず一つ割り当てられ、そのバックエンドは他のいかなる強力な権限を持つトークンからも見ることができません。ルートトークンからも他のCubbyholeは見ることができません。また、Cubbyholeに格納されたデータはトークンのTTLが切れたり、Revokeされると同時に消滅します。
+`Cubbyhole`はロッカーや安全な場所という意味で、このシークレットエンジンは他とは違い Vault のトークンに必ず一つ割り当てられ、そのバックエンドは他のいかなる強力な権限を持つトークンからも見ることができません。ルートトークンからも他の Cubbyhole は見ることができません。また、Cubbyhole に格納されたデータはトークンの TTL が切れたり、Revoke されると同時に消滅します。
 
 まずは試してみましょう。
 
-TTLが15分のトークンを作ってみます。前の手順で作った`my-first-policy.hcl`を以下のように変更してwriteしてトークンを作ります。
+TTL が 15 分のトークンを作ってみます。前の手順で作った`my-first-policy.hcl`を以下のように変更して write してトークンを作ります。
 
 ```hcl
 path "database/roles/+" {
@@ -72,22 +72,22 @@ $ VAULT_TOKEN=$ROOT_TOKEN vault read cubbyhole/my-cubbyhole-secret
 No value found at cubbyhole/my-cubbyhole-secret
 ```
 
-データは参照できません。15分後ログインしようとするとアクセスできずcubbyhole内のデータも抹消されます。
+データは参照できません。15 分後ログインしようとするとアクセスできず cubbyhole 内のデータも抹消されます。
 
-以上がCubbyholeです。`Response Wrapping`は内部的にCubbyholeを使ってセキュアなクレデンシャルの受け渡しを実現します。
+以上が Cubbyhole です。`Response Wrapping`は内部的に Cubbyhole を使ってセキュアなクレデンシャルの受け渡しを実現します。
 
-## Response Wrappingのワークフロー
+## Response Wrapping のワークフロー
 
-Response Wrappingのワークフローは少し複雑です。
+Response Wrapping のワークフローは少し複雑です。
 
 1. 実際に利用するクレデンシャルを発行する際に、一時トークン(Wrapping Token)を同時発行します。
-2. クレデンシャルはWrapping Tokenの`cubbyhole/response`内に保存されます。
-3. クライアントはWapping Tokenを使って`unwrap`という処理を行い、`cubbyhole/response`内のクレデンシャルを取り出します。
-4. 一度利用された`Wrappgin Token`は即座に無効化され2度とクレデンシャルは取得できなくなります。
+2. クレデンシャルは Wrapping Token の`cubbyhole/response`内に保存されます。
+3. クライアントは Wapping Token を使って`unwrap`という処理を行い、`cubbyhole/response`内のクレデンシャルを取り出します。
+4. 一度利用された`Wrappgin Token`は即座に無効化され 2 度とクレデンシャルは取得できなくなります。
 
-このような感じです。試してみましょう。ゆっくりやって欲しいのでTTLは長めの1時間にします。まずクレデンシャルの発行です。クレデンシャルはVaultから発行できるシークレットであればなんでもOKです。
+このような感じです。試してみましょう。ゆっくりやって欲しいので TTL は長めの 1 時間にします。まずクレデンシャルの発行です。クレデンシャルは Vault から発行できるシークレットであればなんでも OK です。
 
-ここでは先ほど使ったAppRoleのシークレットIDを発行してみましょう。まず通常だとこのような結果になります。
+ここでは先ほど使った AppRole のシークレット ID を発行してみましょう。まず通常だとこのような結果になります。
 
 ```console
 $ vault write -f auth/approle/role/my-approle/secret-id
@@ -110,7 +110,7 @@ wrapping_token_creation_time:    2019-07-17 21:43:50.763833 +0900 JST
 wrapping_token_creation_path:    auth/approle/role/my-approle/secret-id
 ```
 
-このラッピングトークンは1時間有効ですが、一度使うと抹消されます。`unwrap`という操作がアンラップし、Secret IDを取り出してみましょう。
+このラッピングトークンは 1 時間有効ですが、一度使うと抹消されます。`unwrap`という操作がアンラップし、Secret ID を取り出してみましょう。
 
 ```console
 $ vault unwrap <WRAPPING_TOKEN>
@@ -120,7 +120,7 @@ secret_id             eb757e5e-fe36-44c6-7b68-f0e19c692a27
 secret_id_accessor    ffe9a83b-9dec-fd86-3d9d-085390d98776
 ```
 
-Secret IDを取得できました。もう一度unwrapしてみます。
+Secret ID を取得できました。もう一度 unwrap してみます。
 
 ```console
 $ vault unwrap <WRAPPING_TOKEN>
@@ -140,7 +140,7 @@ Code: 403. Errors:
 * bad token
 ```
 
-unwrapもできず、トークンをLookupしてもエラーが返りトークンが無効になっていることがわかります。このようにTTL内でも一度利用され、クレデンシャルが取得されると2度と利用できません。
+unwrap もできず、トークンを Lookup してもエラーが返りトークンが無効になっていることがわかります。このように TTL 内でも一度利用され、クレデンシャルが取得されると 2 度と利用できません。
 
 余裕のある方はもう一度同じ手順でラッピングトークンを作り、今度はそのトークンの`cubbyhole/response`にアクセスしてトークンが保存されていることを確認しましょう。
 
@@ -161,7 +161,7 @@ $ VAULT_TOKEN=<WRAPPING_TOKEN> vault read cubbyhole/response -format=json
 }
 ```
 
-JSONのレスポンスでラッピングトークンの`cubbyhole/response`内に`secret_id`が格納されていることがわかります。`read`を行っても`unwrap`と同様、ラッピングトークンが無効になります。
+JSON のレスポンスでラッピングトークンの`cubbyhole/response`内に`secret_id`が格納されていることがわかります。`read`を行っても`unwrap`と同様、ラッピングトークンが無効になります。
 
 ```console
 $ vault token lookup <WRAPPING_TOKEN>
@@ -173,7 +173,7 @@ Code: 403. Errors:
 * bad token
 ```
 
-`Response Wrapping`はAppRole以外にもトークンなど様々なシークレットに利用することができます。これを利用することでアプリなどからシークレットを取得する際も特権ユーザのトークンを記述したり、Secret IDを直で記述することなくセキュアにシークレットを取り出すことができます。また、人にシークレットを渡す際もWrapping Tokenのみを渡して取得してもらうことでより安全なシークレット管理が可能になります。
+`Response Wrapping`は AppRole 以外にもトークンなど様々なシークレットに利用することができます。これを利用することでアプリなどからシークレットを取得する際も特権ユーザのトークンを記述したり、Secret ID を直で記述することなくセキュアにシークレットを取り出すことができます。また、人にシークレットを渡す際も Wrapping Token のみを渡して取得してもらうことでより安全なシークレット管理が可能になります。
 
 ## 参考リンク
 * [Cubbyhole Secret Engine](https://www.vaultproject.io/docs/secrets/cubbyhole/index.html)

@@ -1,6 +1,6 @@
-# AWSのシークレットエンジンを試す
+# AWS のシークレットエンジンを試す
 
-AWSシークレットエンジンではIAMポリシーの定義に基づいたAWSのキーを動的に発行することが可能です。AWSのキー発行のワークフローをシンプルにし、TTLなどを設定することでよりセキュアに利用できます。
+AWS シークレットエンジンでは IAM ポリシーの定義に基づいた AWS のキーを動的に発行することが可能です。AWS のキー発行のワークフローをシンプルにし、TTL などを設定することでよりセキュアに利用できます。
 
 サポートしているクレデンシャルタイプは下記の三つです。
 
@@ -8,16 +8,16 @@ AWSシークレットエンジンではIAMポリシーの定義に基づいたAW
 * Assumed Role
 * Federation Token
 
-## IAMユーザの動的発行
+## IAM ユーザの動的発行
 
-まずシークレットエンジンをenableにします。
+まずシークレットエンジンを enable にします。
 
 ```shell
 $ export VAULT_ADDR="http://127.0.0.1:8200"
 $ vault secrets enable aws
 ```
 
-次にVaultがAWSのAPIを実行するために必要なキーを登録します。
+次に Vault が AWS の API を実行するために必要なキーを登録します。
 
 ```shell
 $ vault write aws/config/root \
@@ -26,9 +26,9 @@ $ vault write aws/config/root \
     region=ap-northeast-1
 ```
 
-`access_key`, `secret_key`, `region`はご自身の環境に合わせたものに書き換えてください。ここでは必ずしもAWSのAadminユーザを登録する必要はなく、ロールやユーザを発行できるユーザであれば大丈夫です。
+`access_key`, `secret_key`, `region`はご自身の環境に合わせたものに書き換えてください。ここでは必ずしも AWS の Aadmin ユーザを登録する必要はなく、ロールやユーザを発行できるユーザであれば大丈夫です。
 
-次にロールを登録します。このロールがVaultから払い出されるユーザの権限と紐付きます。ロールは複数登録することが可能です。今回はまずは`credential_type`に`iam_user`を指定しています。
+次にロールを登録します。このロールが Vault から払い出されるユーザの権限と紐付きます。ロールは複数登録することが可能です。今回はまずは`credential_type`に`iam_user`を指定しています。
 
 ```shell
 $ vault write aws/roles/my-role \
@@ -65,7 +65,7 @@ $ watch -n 1 aws iam list-users
 }
 ```
 
->aws cliにログイン出来ていない場合、以下のコマンドでログインしてください。
+>aws cli にログイン出来ていない場合、以下のコマンドでログインしてください。
 >
 >```console
 >$ aws configure
@@ -75,13 +75,13 @@ $ watch -n 1 aws iam list-users
 >Default output format [json]:
 >```
 
->watchが入っていない場合、以下のコマンドで監視してください。
+>watch が入っていない場合、以下のコマンドで監視してください。
 >```shell
 >while true; do aws iam list-users; echo; sleep 1;done
 >```
->Windowsなどで実行できない場合は手動で実行して下さい。
+>Windows などで実行できない場合は手動で実行して下さい。
 
-ロールを使ってAWSのキーを発行してみましょう。
+ロールを使って AWS のキーを発行してみましょう。
 
 ```console
 $ vault read aws/creds/my-role
@@ -130,7 +130,7 @@ Default region name [ap-northeast-1]:
 Default output format [json]:
 ```
 
-Vaultから払い出されたユーザのシークレットを入力して下さい。新しい端末を立ち上げて以下のコマンドを実行します。
+Vault から払い出されたユーザのシークレットを入力して下さい。新しい端末を立ち上げて以下のコマンドを実行します。
 
 ```console
 $ aws ec2 describe-instances
@@ -143,11 +143,11 @@ $ aws s3 ls
 2019-03-08 21:37:21 web-terraform-state-tykaburagi
 ```
 
-Roleに設定した通りS3に対する操作のみ可能なことがわかります。
+Role に設定した通り S3 に対する操作のみ可能なことがわかります。
 
-## Revokeを試す
+## Revoke を試す
 
-aws cliのユーザを元のユーザに切り替えておきます。
+aws cli のユーザを元のユーザに切り替えておきます。
 
 ```console
 $ aws configure
@@ -179,7 +179,7 @@ $ watch -n 1 aws iam list-users
 }
 ```
 
-シンプルな手順でユーザが発行できることがわかりましたが、次はRevoke(破棄)を試してみます。Revokeにはマニュアルと自動の2通りの方法があります。
+シンプルな手順でユーザが発行できることがわかりましたが、次は Revoke(破棄)を試してみます。Revoke にはマニュアルと自動の 2 通りの方法があります。
 
 まずはマニュアルでの実行手順です。`vault read aws/creds/my-role`を実行した際に発行された`lease_id`をコピーしてください。
 
@@ -203,7 +203,7 @@ $ vault lease revoke aws/creds/my-role/<LEASE_ID>
 }
 ```
 
-次に自動Revokeです。デフォルトではTTLが`765h`になっています。これは数分にしてみましょう。
+次に自動 Revoke です。デフォルトでは TTL が`765h`になっています。これは数分にしてみましょう。
 
 ```shell
 vault write aws/config/lease lease=2m lease_max=10m
@@ -233,7 +233,7 @@ secret_key         ****************
 security_token     <nil>
 ```
 
-`watch`の実行結果を見るとユーザが増えています。今度は2分後にこのユーザは自動で削除されます。
+`watch`の実行結果を見るとユーザが増えています。今度は 2 分後にこのユーザは自動で削除されます。
 
 ```json
 {
@@ -256,7 +256,7 @@ security_token     <nil>
 }
 ```
 
-2分後、再度見てみるとユーザが削除されていることがわかるでしょう。
+2 分後、再度見てみるとユーザが削除されていることがわかるでしょう。
 
 ```json
 {

@@ -2,23 +2,23 @@ Table of Contents
 =================
 
    * [Table of Contents](#table-of-contents)
-   * [TransitシークレットエンジンでVaultをEncryption as a Seviceとして使う](#transitシークレットエンジンでvaultをencryption-as-a-seviceとして使う)
-      * [Transitを有効化する。](#transitを有効化する)
+   * [Transit シークレットエンジンで Vault を Encryption as a Sevice として使う](#transitシークレットエンジンでvaultをencryption-as-a-seviceとして使う)
+      * [Transit を有効化する。](#transitを有効化する)
       * [初めての暗号化と復号化](#初めての暗号化と復号化)
          * [キーローテーション](#キーローテーション)
-      * [Convergent暗号化を試す](#convergent暗号化を試す)
+      * [Convergent 暗号化を試す](#convergent暗号化を試す)
       * [実際のアプリで使ってみる](#実際のアプリで使ってみる)
       * [参考リンク](#参考リンク)
 
-# TransitシークレットエンジンでVaultをEncryption as a Seviceとして使う
+# Transit シークレットエンジンで Vault を Encryption as a Sevice として使う
 
-これまでVaultのシークレット管理の機能を扱ってきましたが、Vaultの二つ目のユースケースは`Data Protection`です。その中でもAPIドリブンなEncryptionの機能を使ってVaultを暗号化としてのサービスとして扱う`Encryption as a Service (EaaS)`は非常に多く採用されているユースケースです。
+これまで Vault のシークレット管理の機能を扱ってきましたが、Vault の二つ目のユースケースは`Data Protection`です。その中でも API ドリブンな Encryption の機能を使って Vault を暗号化としてのサービスとして扱う`Encryption as a Service (EaaS)`は非常に多く採用されているユースケースです。
 
-ここではそれを実現するTransitの機能と、実際のアプリを使った利用イメージを扱います。
+ここではそれを実現する Transit の機能と、実際のアプリを使った利用イメージを扱います。
 
-## Transitを有効化する。
+## Transit を有効化する。
 
-その他のシークレットエンジンと同様、EaaSを利用する際は`Transit`というシークレットエンジンを`enabled`にします。
+その他のシークレットエンジンと同様、EaaS を利用する際は`Transit`というシークレットエンジンを`enabled`にします。
 
 ```console
 $ vault secrets enable -path=transit transit
@@ -35,7 +35,7 @@ sys/          system       system_ae51ee57       system endpoints used for contr
 transit/      transit      transit_ec14846c      n/a
 ```
 
-Transitが有効になりました。Transitには大きく
+Transit が有効になりました。Transit には大きく
 
 * 暗号化
 * 復号化
@@ -45,7 +45,7 @@ Transitが有効になりました。Transitには大きく
 
 ## 初めての暗号化と復号化
 
-早速データを暗号化してみましょう。Transitで暗号化するためにはPlaintextはbase64で暗号化する必要があります。macOSであればターミナルから実行可能ですし、[こちら](https://kujirahand.com/web-tools/Base64.php)のWebサイトでもエンコードができます。
+早速データを暗号化してみましょう。Transit で暗号化するためには Plaintext は base64 で暗号化する必要があります。macOS であればターミナルから実行可能ですし、[こちら](https://kujirahand.com/web-tools/Base64.php)の Web サイトでもエンコードができます。
 
 `myimportantpassword`というパスワードを暗号化してみます。
 
@@ -66,7 +66,7 @@ ciphertext    vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4i
 ```shell
 $ export CTEXT_V1=vault:v1:WputNlwLdegpFARr+OL8Az/UmDRCWsVL3ytVf/AUc9tFHt4YD1NOnfd4iSocUfG5
 ```
-この暗号化の機能はbase64にさえ変換してしまえば画像など様々な形式のデータを暗号化することができます。
+この暗号化の機能は base64 にさえ変換してしまえば画像など様々な形式のデータを暗号化することができます。
 
 次に復号化をしてみます。復号化は`transit/decrypt/`のエンドポイントを使います。
 
@@ -78,7 +78,7 @@ Key          Value
 plaintext    bXlpbXBvcnRhbnRwYXNzd29yZAo=
 ```
 
-`plaintext`としてBase64のコードが表示されました。これをデコードしてパスワードを取り出してみます。
+`plaintext`として Base64 のコードが表示されました。これをデコードしてパスワードを取り出してみます。
 
 ```console
 $ base64 --decode <<< "bXlpbXBvcnRhbnRwYXNzd29yZAo="
@@ -100,7 +100,7 @@ myimportantpassword
 
 暗号化、復号化のキーはどれだけ強力なアルゴリズムを使っても時間をかければ必ず解読出来てしまいます。そのため環境を最大限にセキュアに保つためにはキー自体をローテーションさせ、長く使わず短いサイクルでリニューアルすることが大切です。
 
-Transitでは`transit/keys/<KEYNAME>/rotate`と`transit/rewrap/<KEYNMAME>`というエンドポイントで簡単に実現できます。
+Transit では`transit/keys/<KEYNAME>/rotate`と`transit/rewrap/<KEYNMAME>`というエンドポイントで簡単に実現できます。
 
 `rotate`はキーの更新、`rewarp`は古いデータを新しいキーで再暗号化するためのエンドポイントです。
 
@@ -126,7 +126,7 @@ supports_signing          false
 type                      aes256-gcm96
 ```
 
-バージョンが2に変わりました。`min_decryption_version`はこのデータが復号化できる最小のキーのバージョンを示しています。まずはこの状態で新しいデータを暗号化してみましょう。
+バージョンが 2 に変わりました。`min_decryption_version`はこのデータが復号化できる最小のキーのバージョンを示しています。まずはこの状態で新しいデータを暗号化してみましょう。
 
 ```console
 $ base64 <<< "myimportantpassword-v2"
@@ -143,7 +143,7 @@ ciphertext    vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7Akbi
 $ export CTEXT_V2=vault:v2:93WEsl7Q7UM/eWHGZP+N9PmOEqXPYpnpVeBx21APu7pT1MOCJElJ7AkbiNgdr0gVOALw
 ```
 
-新しいデータはv2のキーで暗号化復号化され、それ以前のデータは古いキーで復号化されます。v1とv2で暗号化したデータをそれぞれ復号化してみます。
+新しいデータは v2 のキーで暗号化復号化され、それ以前のデータは古いキーで復号化されます。v1 と v2 で暗号化したデータをそれぞれ復号化してみます。
 
 ```console
 $ vault write transit/decrypt/my-encrypt-key ciphertext=$CTEXT_V1
@@ -159,7 +159,7 @@ Key          Value
 plaintext    bXlpbXBvcnRhbnRwYXNzd29yZC12Mgo=
 ```
 
-V1, V2のデータ共に複合化可能です。この状態でいずれv2の新しいキーに全てのデータを移行したいです。そのためには`rewrap`という操作を行い、古いデータの更新(再暗号化)を行います。`ciphertext`にはv1のデータを入れてください。
+V1, V2 のデータ共に複合化可能です。この状態でいずれ v2 の新しいキーに全てのデータを移行したいです。そのためには`rewrap`という操作を行い、古いデータの更新(再暗号化)を行います。`ciphertext`には v1 のデータを入れてください。
 
 ```console
 $ vault write transit/rewrap/my-encrypt-key ciphertext=$CTEXT_V1
@@ -168,7 +168,7 @@ Key           Value
 ---           -----
 ciphertext    vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
 ```
-これでv1で暗号化したデータをv2で暗号化しました。次に、`min_decryption_version`を更新しv1のキーを無効化し、利用できないようにします。
+これで v1 で暗号化したデータを v2 で暗号化しました。次に、`min_decryption_version`を更新し v1 のキーを無効化し、利用できないようにします。
 
 ```shell
 export CTEXT_V1_V2=vault:v2:pymUK9PJQ3KYXSw7uNj/lcTMOwfNav2t3pP52jAuQWQ6bTHNd9n/3tX4Zdc/IPLt
@@ -194,15 +194,15 @@ Code: 400. Errors:
 * ciphertext or signature version is disallowed by policy (too old)
 ```
 
-v1のデータは復号化出来なくなり、v1のキーが無効になっていることがわかります。
+v1 のデータは復号化出来なくなり、v1 のキーが無効になっていることがわかります。
 
-## Convergent暗号化を試す
+## Convergent 暗号化を試す
 
-次にConvergent(収束)暗号化を試してみます。Convergentは一般的な暗号化の手法で、特定のキーを利用し同一のプレインテキストで暗号化されたものは毎回同一の暗号文を返すというものです。
+次に Convergent(収束)暗号化を試してみます。Convergent は一般的な暗号化の手法で、特定のキーを利用し同一のプレインテキストで暗号化されたものは毎回同一の暗号文を返すというものです。
 
-Vaultの暗号化はデフォルトでは同じ平文であっても毎回別の暗号文が生成されます。ところが暗号化したいが重複データを避けたい場合や暗号データを検索したいような場合、同じ平文は同じ暗号文で返して欲しい際があります。
+Vault の暗号化はデフォルトでは同じ平文であっても毎回別の暗号文が生成されます。ところが暗号化したいが重複データを避けたい場合や暗号データを検索したいような場合、同じ平文は同じ暗号文で返して欲しい際があります。
 
-Vaultでは暗号化キーを生成する際にこのConvergent暗号化のパラメータを指定することで実現可能です。
+Vault では暗号化キーを生成する際にこの Convergent 暗号化のパラメータを指定することで実現可能です。
 
 まずは新しいキーを生成してみましょう。
 
@@ -210,7 +210,7 @@ Vaultでは暗号化キーを生成する際にこのConvergent暗号化のパ�
 $ vault write transit/keys/convergent-key type="chacha20-poly1305" convergent_encryption=true derived=true
 ```
 
-Convergentに対応しているタイプのアルゴリズムを指定しています。この他にもあるので[こちら](https://www.vaultproject.io/api/secret/transit/index.html#type)で確認してみてください。
+Convergent に対応しているタイプのアルゴリズムを指定しています。この他にもあるので[こちら](https://www.vaultproject.io/api/secret/transit/index.html#type)で確認してみてください。
 
 ```console
 $ vault read transit/keys/convergent-key
@@ -236,7 +236,7 @@ supports_signing                 false
 type                             chacha20-poly1305
 ```
 
-Converntがtrueになっているキーが生成したことがわかります。`derived`は`Key Derivation Function`を有効化するためのパラメータでVaultではConvergentを有効化する際に必須となります。
+Convernt が true になっているキーが生成したことがわかります。`derived`は`Key Derivation Function`を有効化するためのパラメータで Vault では Convergent を有効化する際に必須となります。
 
 これによってクライアントが同一の暗号文を保持したとしても`context`パラメータを指定しないと復号化が不可能となり、より安全にデータを扱うことができます。
 
@@ -271,7 +271,7 @@ Code: 400. Errors:
 
 エラーになり、復号化出来ないはずです。このようにキーへのアクセス権や暗号化文を保持していても`context`を持っていないと復号化することが出来ず、データを守ることが出来ます。
 
-最後に試しにConvergentが設定されているか再度同じ平文を暗号化してみます。
+最後に試しに Convergent が設定されているか再度同じ平文を暗号化してみます。
 
 ```console
 $ vault write transit/encrypt/convergent-key plaintext=$(base64 <<< "myimportantpassword") context=$(base64 <<< "c2FtcGxxxx9udGV4dA")
@@ -287,13 +287,13 @@ ciphertext    vault:v1:NuH3WBB956hNZOnPYZqo5lb86bZ5LN1BTKlmuZ78ZGzB2HYdcl9iAbh5h
 
 * `convergent-key`で別の平文を使って暗号化
 * `convergent-key`を`rotate`して同じ平文`myimportantpassword`を暗号化
-* 別のConvergentを生成して同じ平文`myimportantpassword`を暗号化
+* 別の Convergent を生成して同じ平文`myimportantpassword`を暗号化
 
 ## 実際のアプリで使ってみる
 
-次に利用イメージをもう少し理解しやすくするため、SpringのアプリでTransitを利用してみます。アプリのレポジトリをcloneし起動します。
+次に利用イメージをもう少し理解しやすくするため、Spring のアプリで Transit を利用してみます。アプリのレポジトリを clone し起動します。
 
-まずデータベースにテーブルを作ります。MySQLにログインし、以下のコマンドを発行します。
+まずデータベースにテーブルを作ります。MySQL にログインし、以下のコマンドを発行します。
 
 この手順を完了するには[Java 12](https://www.oracle.com/technetwork/java/javase/downloads/jdk12-downloads-5295953.html)が必要です。
 
@@ -304,8 +304,8 @@ create table users (id varchar(50), username varchar(50), password varchar(200),
 
 次にロールの設定をします。ロールは二つ作成します。
 
-* MySQLデータベースとやりとりしてデータのselect, insertをするための`database/*`配下のロール
-* VaultとやりとりしてTransitで暗号化復号化をするための`auth/*`配下のロール
+* MySQL データベースとやりとりしてデータの select, insert をするための`database/*`配下のロール
+* Vault とやりとりして Transit で暗号化復号化をするための`auth/*`配下のロール
 
 まずはデータベース側です。コンフィグをアップデートし、`role-demoapp`というロールを許可します。
 
@@ -342,7 +342,7 @@ password           A1a-4VU2FVBp5HdIJGvz
 username           v-role-FWRN0zpOp
 ```
 
-次にVault認証用のロールです。ここで作るポリシーは`AppRole`の認証で付与されるトークンの権限となります。以下のようにポリシーの定義ファイルを作成してください。
+次に Vault 認証用のロールです。ここで作るポリシーは`AppRole`の認証で付与されるトークンの権限となります。以下のようにポリシーの定義ファイルを作成してください。
 
 ```hcl
 $ cat > policy-vault.hcl <<EOF
@@ -363,7 +363,7 @@ path "transit/*" {
 EOF
 ```
 
-AppRoleが有効になっていない方は下記のコマンドで有効化しましょう。
+AppRole が有効になっていない方は下記のコマンドで有効化しましょう。
 ```shell
 $ vault auth enable approle
 ```
@@ -373,7 +373,7 @@ $ vault policy write vault-policy policy-vault.hcl
 $ vault write auth/approle/role/vault-approle policies=vault-policy period=1h
 ```
 
-これで準備は完了です。アプリをクローンして、起動してみましょう。`YOUR_ROOT_TOKEN`はご自身のRoot Tokenです。
+これで準備は完了です。アプリをクローンして、起動してみましょう。`YOUR_ROOT_TOKEN`はご自身の Root Token です。
 
 ```console
 $ export ROOT_TOKEN=<YOUR_ROOT_TOKEN>
@@ -396,7 +396,7 @@ $ java -jar target/demo-0.0.1-SNAPSHOT.jar
 2019-07-15 21:50:19.741  INFO 7226 --- [           main] com.example.demo.VaultDemoApplication    : No active profile set, falling back to default profiles: default
 ```
 
-コードの説明は後ほどしますが、このアプリには4つのエンドポイントがあります。
+コードの説明は後ほどしますが、このアプリには 4 つのエンドポイントがあります。
 
 まずはパラメータで渡された文字列を暗号化、復号化する単純なエンドポイントです。
 
@@ -408,7 +408,7 @@ $ curl -G http://localhost:8080/api/v1/transit/decrypt --data-urlencode "ctext=v
 hellotransit                            
 ```
 
-次にデータを暗号化し、データベースにデータを保存するエンドポイントです。`api/v1/encrypt/add-user`に平文でデータを渡すと暗号化され、データベースに暗号刺されたデータがinsertされます。
+次にデータを暗号化し、データベースにデータを保存するエンドポイントです。`api/v1/encrypt/add-user`に平文でデータを渡すと暗号化され、データベースに暗号刺されたデータが insert されます。
 
 ```console
 $ curl http://localhost:8080/api/v1/encrypt/add-user -d username="Takayuki Kaburagi" -d password="PqssWOrd" -d address="Yokohama" --data-urlencode creditcard="9999-8888-6666-6666" --data-urlencode email="t.kaburagi@me.com"
@@ -441,7 +441,7 @@ $ curl -G "http://localhost:8080/api/v1/non-decrypt/get-user" -d uuid=d87b7a21-0
   "creditcard": "vault:v1:LYpkecFI4bY6c7I8a3fB47d0oHNf6bPL/6VTc14g+zgEVg47EoRjKWTJeYeaisw="
 ```
 
-この場合、データは暗号化されたままなのでアプリ側で復号の処理を実装する必要があります。Vaultの場合、それをVaultに委託することが可能です。`api/v1/decrypt/get-user`を使います。
+この場合、データは暗号化されたままなのでアプリ側で復号の処理を実装する必要があります。Vault の場合、それを Vault に委託することが可能です。`api/v1/decrypt/get-user`を使います。
 
 ```console
 $ curl -G "http://localhost:8080/api/v1/decrypt/get-user" -d uuid=db0bbb62-fdfd-4e2e-a4db-1e5e32e36761 | jq
@@ -455,10 +455,10 @@ $ curl -G "http://localhost:8080/api/v1/decrypt/get-user" -d uuid=db0bbb62-fdfd-
   "creditcard": "9999-8888-6666-6666"
   ```
 
-Vaultに復号化し、アプリのデータとして利用することが出来るようになりました。このようにVaultではシークレット管理だけでなく暗号化の処理をサービスとして扱えるようにするような使い方をすることができます。
+Vault に復号化し、アプリのデータとして利用することが出来るようになりました。このように Vault ではシークレット管理だけでなく暗号化の処理をサービスとして扱えるようにするような使い方をすることができます。
 
 
-最後にキーのローテーションとRewrapをしてみます。`get-keys`のエンドポイントでアプリからキーの情報が取り出せるようになっています。
+最後にキーのローテーションと Rewrap をしてみます。`get-keys`のエンドポイントでアプリからキーの情報が取り出せるようになっています。
 
 ```console
 $ curl -G http://localhost:8080/api/v1/get-keys | jq
@@ -495,25 +495,25 @@ $ curl -G http://localhost:8080/api/v1/get-keys | jq
 curl http://localhost:8080/api/v1/encrypt/add-user -d username="Yusuke Kaburagi" -d password="PqssWOrd" -d address="Tokyo" --data-urlencode creditcard="9999-8888-6666-6666" --data-urlencode email="yusuke@locahost"
 ```
 
-v1, v2のデータが両方入っていることがわかります。
+v1, v2 のデータが両方入っていることがわかります。
 
 ```shell
 mysql> select * from users;
 ```
 
-v1のデータをv2にRewrapしてみます。このアプリでは`api/v1/rewrap`のエンドポイントで実現しています。
+v1 のデータを v2 に Rewrap してみます。このアプリでは`api/v1/rewrap`のエンドポイントで実現しています。
 
 ```shell
 curl -G http://localhost:8080/api/v1/rewrap -d uuid=<OLD DATA'S UUID> | jq
 ```
 
-データを見るとv2に更新されているでしょう。
+データを見ると v2 に更新されているでしょう。
 
 ```shell
 mysql> select * from users;
 ```
 
-あとは同様に`min_decryption_version`をbumpすれば完了です。
+あとは同様に`min_decryption_version`を bump すれば完了です。
 
 ```shell
 $ vault write  transit/keys/springdemo/config min_decryption_version=2

@@ -1,10 +1,10 @@
-## AppRoleによる認証
+## AppRole による認証
 
-ここまではトークン発行の権限を持つユーザ(今回の場合はroot)を使ってトークンを発行してきました。
+ここまではトークン発行の権限を持つユーザ(今回の場合は root)を使ってトークンを発行してきました。
 
-Vaultでは信頼する認証プロバイダで認証をし適切なトークンを発行するといったワークフローを簡単に実現できます。
+Vault では信頼する認証プロバイダで認証をし適切なトークンを発行するといったワークフローを簡単に実現できます。
 
-Vaultでは以下のような認証プロバイダに対応しています。
+Vault では以下のような認証プロバイダに対応しています。
 
 * AppRole
 * AliCloud
@@ -17,7 +17,7 @@ Vaultでは以下のような認証プロバイダに対応しています。
 * Okta
 * LDAP
 
-GitHubとOIDCを試してみたい方はすでに丁寧なインストラクションがあるので参考リンクを確認してみてください。ここではAppRoleを試してみます。AppRoleは他の認証メソッド同様トークンを取得するための手段です。LDAPや他の認証方法が人による操作を前提としている一方AppRoleはマシンやアプリによる操作が前提とされており、自動化のワークフローに組み込みやすくなっています。
+GitHub と OIDC を試してみたい方はすでに丁寧なインストラクションがあるので参考リンクを確認してみてください。ここでは AppRole を試してみます。AppRole は他の認証メソッド同様トークンを取得するための手段です。LDAP や他の認証方法が人による操作を前提としている一方 AppRole はマシンやアプリによる操作が前提とされており、自動化のワークフローに組み込みやすくなっています。
 
 ワークフローの例は以下のようなイメージです。
 
@@ -25,7 +25,7 @@ GitHubとOIDCを試してみたい方はすでに丁寧なインストラクシ�
 
 ref: [https://learn.hashicorp.com/vault/identity-access-management/iam-authentication](https://learn.hashicorp.com/vault/identity-access-management/iam-authentication)
 
-AppRoleで認証するためには`Role ID`と`Secret ID`という二つの値が必要で、usernameとpasswordのようなイメージです。各AppRoleはポリシーに紐付き、AppRoleで承認されるとクライアントにポリシーに基づいた権限のトークンが発行されます。
+AppRole で認証するためには`Role ID`と`Secret ID`という二つの値が必要で、username と password のようなイメージです。各 AppRole はポリシーに紐付き、AppRole で承認されるとクライアントにポリシーに基づいた権限のトークンが発行されます。
 
 まずはポリシーを作ってみましょう。今回は先ほど作った`kv`のデータにアクセスできるようなポリシーを作ってみます。
 
@@ -41,7 +41,7 @@ EOF
 $ VAULT_TOKEN=$ROOT_TOKEN vault policy write my-approle path/to/my-approle-policy.hcl
 ```
 
-`approle`を`enable`にし、`my-approle`のポリシーに基づいたAppRoleを一つ作成します。
+`approle`を`enable`にし、`my-approle`のポリシーに基づいた AppRole を一つ作成します。
 
 ```console
 $ VAULT_TOKEN=$ROOT_TOKEN vault auth enable approle
@@ -65,7 +65,7 @@ token_ttl                0s
 token_type               default
 ```
 
-これでAppRoleの作成は完了です。次に`Role ID`を取得します。
+これで AppRole の作成は完了です。次に`Role ID`を取得します。
 
 ```console
 $ VAULT_TOKEN=$ROOT_TOKEN vault read auth/approle/role/my-approle/role-id
@@ -86,7 +86,7 @@ secret_id             ZeCletlb
 secret_id_accessor    c2b12a4a-0fbf-45ce-b135-be2c1d829b06
 ```
 
-push型はカスタムの値をして出来ますが、Vault以外のサーバ、アプリやツールなどSecret IDを発行する側にSecret IDを知らせてしまうことになるため、通常使用しません。`pull`と呼ばれる方法が一般的です。
+push 型はカスタムの値をして出来ますが、Vault 以外のサーバ、アプリやツールなど Secret ID を発行する側に Secret ID を知らせてしまうことになるため、通常使用しません。`pull`と呼ばれる方法が一般的です。
 
 ```console
 $ VAULT_TOKEN=$ROOT_TOKEN vault write -f auth/approle/role/my-approle/secret-id
@@ -96,7 +96,7 @@ secret_id             1cef3c1e-feca-99d8-ecd4-7a17ca997919
 secret_id_accessor    f620512c-e9e9-4f84-bbf6-9f4d484ff2bc
 ```
 
-この場合、クライアントに値を持たせることがなくSecret IDの発行が可能となりよりセキュアです。
+この場合、クライアントに値を持たせることがなく Secret ID の発行が可能となりよりセキュアです。
 
 これらを使って認証し、トークンを取得してみましょう。
 
@@ -114,7 +114,7 @@ policies                ["default" "my-approle"]
 token_meta_role_name    my-approle-policy
 ```
 
-AppRoleにより認証され、発行されたトークンを試してみましょう。
+AppRole により認証され、発行されたトークンを試してみましょう。
 
 ```shell
 $ export MY_TOKEN=s.nEolH5Pjqf3207KljT9xoamS
@@ -151,12 +151,12 @@ Code: 403. Errors:
   * permission denied
 ```
 
-ロールで定義した通り、AppRoleで発行したトークンはKVに対してのみアクセス権限があることがわかるでしょう。
+ロールで定義した通り、AppRole で発行したトークンは KV に対してのみアクセス権限があることがわかるでしょう。
 
-今回はAppRoleの基本的な使い方を試しましたが、より実践的にどのように扱うかは[こちらの記事](https://blog.kabuctl.run/?p=94)に記載しておきましたので、本ハンズオン終了後、一読してみてください。
+今回は AppRole の基本的な使い方を試しましたが、より実践的にどのように扱うかは[こちらの記事](https://blog.kabuctl.run/?p=94)に記載しておきましたので、本ハンズオン終了後、一読してみてください。
 
 ## 参考リンク
 * [AppRole API Document](https://www.vaultproject.io/api/auth/approle/index.html)
 * [AppRole Auth Method](https://www.vaultproject.io/docs/auth/approle.html)
-* [Auth0を使ったOIDC認証](https://learn.hashicorp.com/vault/operations/oidc-auth)
-* [GitHubを使った認証](https://learn.hashicorp.com/vault/getting-started/authentication)
+* [Auth0 を使った OIDC 認証](https://learn.hashicorp.com/vault/operations/oidc-auth)
+* [GitHub を使った認証](https://learn.hashicorp.com/vault/getting-started/authentication)

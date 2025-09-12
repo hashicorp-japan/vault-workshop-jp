@@ -1,23 +1,23 @@
-# GCP Auth Methodを利用してクライアントを認証する
+# GCP Auth Method を利用してクライアントを認証する
 
 Table of Contents                                                                                                          
 =================                                                                                                                                                                                
   * [Vault 事前準備](#vault-事前準備)                                                
-  * [GCP事前準備](#gcp事前準備)
-  * [GCP Auth Methodの設定 (IAM編)](#gcp-auth-methodの設定-iam編)
-  * [GCP Auth Methodの設定 (GCE編)](#gcp-auth-methodの設定-gce編)
+  * [GCP 事前準備](#gcp事前準備)
+  * [GCP Auth Method の設定 (IAM 編)](#gcp-auth-methodの設定-iam編)
+  * [GCP Auth Method の設定 (GCE 編)](#gcp-auth-methodの設定-gce編)
   * [参考リンク](#参考リンク)
 
-GCP Auth MethodではGCPの`IAM Service Account`, `Google Compute Engine Instances`を利用してクライアントを認証することができます。
+GCP Auth Method では GCP の`IAM Service Account`, `Google Compute Engine Instances`を利用してクライアントを認証することができます。
 
-* `Service Account`はIAM Service Accountを利用しての認証
-* `Google Compute Engine Instances`はGCEインスタンスのメタデータを利用して認証
+* `Service Account`は IAM Service Account を利用しての認証
+* `Google Compute Engine Instances`は GCE インスタンスのメタデータを利用して認証
 
-このハンズオンではGCPアカウントが必要です。[こちら](https://cloud.google.com/free/)からアカウントを作成していください。
+このハンズオンでは GCP アカウントが必要です。[こちら](https://cloud.google.com/free/)からアカウントを作成していください。
 
 ## Vault 事前準備
 
-まずはVault上のデータとポリシーを準備します。Root Tokenでログインし、以下のコマンドを実行してください。
+まずは Vault 上のデータとポリシーを準備します。Root Token でログインし、以下のコマンドを実行してください。
 
 ```sh
 $ vault kv put kv/cred-1 name=user-1 password=passwd
@@ -34,19 +34,19 @@ path "kv/cred-1" {
 EOF
 ```
 
-このポリシーは後ほどクライアントが利用するGCP Service Accountとの紐付けを行い、GCP Authでログインしたユーザに与えるVaultの権限になります。
+このポリシーは後ほどクライアントが利用する GCP Service Account との紐付けを行い、GCP Auth でログインしたユーザに与える Vault の権限になります。
 
-ここでは`KV Secret Engine`の`kv/cred-1`のreadのみ出来る権限として設定しています。
+ここでは`KV Secret Engine`の`kv/cred-1`の read のみ出来る権限として設定しています。
 
-## GCP事前準備
+## GCP 事前準備
 
-GCP側の設定です。
+GCP 側の設定です。
 
-まず、トップ画面の検索ボックスから`IAM Service Account Credentials API`と検索し`Enable`をクリックしてAPIを有効化します。
+まず、トップ画面の検索ボックスから`IAM Service Account Credentials API`と検索し`Enable`をクリックして API を有効化します。
 
-次にGCPを使って認証をするためにVault側に設定するService Accountの発行です。Vaultはこのシークレットを利用してGCPへ認証を依頼します。
+次に GCP を使って認証をするために Vault 側に設定する Service Account の発行です。Vault はこのシークレットを利用して GCP へ認証を依頼します。
 
-GCPのコンソールにログインして、`Navigation Menu`から`IAM&Admin` -> `Service accounts`と進んでください。
+GCP のコンソールにログインして、`Navigation Menu`から`IAM&Admin` -> `Service accounts`と進んでください。
 
 `CREATE SERVICE ACCOUNT`をクリックして、名前に`vault-server`と入力してロールの選択に移ります。
 
@@ -55,15 +55,15 @@ GCPのコンソールにログインして、`Navigation Menu`から`IAM&Admin` 
 
 の二つを選択し、`CREATE`してください。
 
-`CONTIUNE`で進んだら、`CREATE KEY`でJSONのキーを発行します。ダウンロードされたキーは`.gcp-vault-auth-config-key.json`にリネームします。
+`CONTIUNE`で進んだら、`CREATE KEY`で JSON のキーを発行します。ダウンロードされたキーは`.gcp-vault-auth-config-key.json`にリネームします。
 
 ```sh
 $ mv /path/to/***********.json ~/.gcp-vault-auth-config-key.json
 ```
 
-次にVaultにログインするクライアント側のService Accountを発行します。
+次に Vault にログインするクライアント側の Service Account を発行します。
 
-GCPのコンソールにログインして、`Navigation Menu`から`IAM&Admin` -> `Service accounts`と進んでください。
+GCP のコンソールにログインして、`Navigation Menu`から`IAM&Admin` -> `Service accounts`と進んでください。
 
 `CREATE SERVICE ACCOUNT`をクリックして、名前に`vault-client`と入力してロールの選択に移ります。
 
@@ -71,30 +71,30 @@ GCPのコンソールにログインして、`Navigation Menu`から`IAM&Admin` 
 
 を選択し、`CREATE`してください。
 
-`CONTIUNE`で進んだら、`CREATE KEY`でJSONのキーを発行します。ダウンロードされたキーは`.gcp-vault-client-key.json`にリネームします。
+`CONTIUNE`で進んだら、`CREATE KEY`で JSON のキーを発行します。ダウンロードされたキーは`.gcp-vault-client-key.json`にリネームします。
 
 ```sh
 $ mv /path/to/***********.json ~/.gcp-vault-client-key.json
 ```
 
-これでGCP側の準備は完了です。
+これで GCP 側の準備は完了です。
 
-## GCP Auth Methodの設定 (IAM編)
+## GCP Auth Method の設定 (IAM 編)
 
 [こちら](https://www.vaultproject.io/docs/auth/gcp#iam-login)がワークフローです。
 
 最後に`GCP Auth Method`の設定を行います。
 
-GCP認証を有効化し、Vault用のService Accountをセットします。VaultはこのService Accountを利用してGCPへ認証を依頼します。
+GCP 認証を有効化し、Vault 用の Service Account をセットします。Vault はこの Service Account を利用して GCP へ認証を依頼します。
 
 ```sh
 $ vault auth enable gcp
 $ vault write auth/gcp/config credentials=@.gcp-vault-auth-config-key.json
 ```
 
-`role`を作成します。`read-cred-1`のポリシーを先ほど発行したService Accountにバインドします。これでこのService Accountを使ってログインしたユーザに`read-cred-1`で設定したVaultの権限を与えることができます。
+`role`を作成します。`read-cred-1`のポリシーを先ほど発行した Service Account にバインドします。これでこの Service Account を使ってログインしたユーザに`read-cred-1`で設定した Vault の権限を与えることができます。
 
-`GCP_PRJ`にご自身のGCPプロジェクト名をセットしてください。
+`GCP_PRJ`にご自身の GCP プロジェクト名をセットしてください。
 
 ```sh
 $ GCP_PRJ=se-kabu
@@ -106,11 +106,11 @@ $ vault write auth/gcp/role/read-cred \
 
 これで設定は完了です。ログインしてみましょう。ログインには
 
-* CLI Helperを使って認証に必要なJWTを取得してVaultにリクエストする(IAMのみ有効)
-* CLI使って別で生成したJWTを使ってリクエストする
-* APIを実行する
+* CLI Helper を使って認証に必要な JWT を取得して Vault にリクエストする(IAM のみ有効)
+* CLI 使って別で生成した JWT を使ってリクエストする
+* API を実行する
 
-の3パターンがあります。今回はCLI Helperを使ってみます。
+の 3 パターンがあります。今回は CLI Helper を使ってみます。
 
 ```sh
 $ vault login -method=gcp \
@@ -141,28 +141,28 @@ Code: 403. Errors:
 	* permission denied
 ```
 
-ロールとポリシーで設定したように今回作成したService Accountでは`kv/cred-1`をreadするためのポリシーがバインドされているため設定通りに動作していることがわかります。
+ロールとポリシーで設定したように今回作成した Service Account では`kv/cred-1`を read するためのポリシーがバインドされているため設定通りに動作していることがわかります。
 
-## GCP Auth Methodの設定 (GCE編)
+## GCP Auth Method の設定 (GCE 編)
 
-次にGCEのメタデータを利用して認証するパターンを試してみます。
+次に GCE のメタデータを利用して認証するパターンを試してみます。
 
-手順の前に以下のGCEインスタンスを立ち上げてください。
+手順の前に以下の GCE インスタンスを立ち上げてください。
 
 * Service Account: `vault-client`
 * Zone: `asia-northeast1-b`
 * Label: `foo:bar`
-* SSHログインが有効
-* curlコマンドが利用可能
+* SSH ログインが有効
+* curl コマンドが利用可能
 * インターネットアクセス可能
 
-GCEインスタンスが立ち上がったら、Vault側の設定を加えます。まずはRoot Tokenでログインし直してください。
+GCE インスタンスが立ち上がったら、Vault 側の設定を加えます。まずは Root Token でログインし直してください。
 
 ```sh
 $ vault login
 ```
 
-次にGCE認証用のロールを定義します。
+次に GCE 認証用のロールを定義します。
 
 ```sh
 $ ZONES=asia-northeast1-b
@@ -175,17 +175,17 @@ $ vault write auth/gcp/role/read-cred-gce \
     bound_labels=${LABELS}
 ```
 
-先ほどはService Accountで認証しましたが、今回はGCEのメタデータを利用します。その他にも以下のメタデータをセットできます。
+先ほどは Service Account で認証しましたが、今回は GCE のメタデータを利用します。その他にも以下のメタデータをセットできます。
 
-* GCEインスタンスに付与される`Service Account`
+* GCE インスタンスに付与される`Service Account`
 * `Instance Group`
 * `Region`
 
 各パラメタータをリスト型で設定できるため複数の値を入れることもできます。
 
-これでVault側の設定は完了です。
+これで Vault 側の設定は完了です。
 
-次にGCEインスタンスにSSHで入り、次のコマンドを実行してください。
+次に GCE インスタンスに SSH で入り、次のコマンドを実行してください。
 
 ```sh
 $ ROLE=read-cred-gce
@@ -198,9 +198,9 @@ $ curl \
   "http://metadata/computeMetadata/v1/instance/service-accounts/default/identity"
 ```
 
-インスタンスのメタデータサーバからJWTの発行を依頼しています。これはGCEインスタンス上からのみ有効なリクエストです。
+インスタンスのメタデータサーバから JWT の発行を依頼しています。これは GCE インスタンス上からのみ有効なリクエストです。
 
-発行されたJWTをコピーしてローカルの端末に戻ります。先ほど発行されたJWTを使ってログインしてみましょう。(**今回はVaultがローカルマシンで起動している前提のためローカルから実行しますが、通常はGCEからリーチできる所に配置しGCEインスタンスから利用します。**)
+発行された JWT をコピーしてローカルの端末に戻ります。先ほど発行された JWT を使ってログインしてみましょう。(**今回は Vault がローカルマシンで起動している前提のためローカルから実行しますが、通常は GCE からリーチできる所に配置し GCE インスタンスから利用します。**)
 
 こちらのワークフローがわかりやすいです。(refer: https://petersouter.xyz/demonstrating-the-gce-auth-method-for-vault/)
 <kbd>
@@ -265,9 +265,9 @@ Code: 403. Errors:
 
 設定した通りの権限となっているでしょう。
 
-このようにGCEインスタンスが`GCE Metadata Server`と連携をしSigned JWTを取得し、それを利用してVaultの認証することができます。
+このように GCE インスタンスが`GCE Metadata Server`と連携をし Signed JWT を取得し、それを利用して Vault の認証することができます。
 
-これを利用することでGCEインスタンスのメタ情報をもとにGCEインスタンスにVaultのアクセス権限を付与することが可能です。
+これを利用することで GCE インスタンスのメタ情報をもとに GCE インスタンスに Vault のアクセス権限を付与することが可能です。
 
 ## 参考リンク
 * [GCP Auth Method](https://www.vaultproject.io/docs/auth/gcp)

@@ -1,4 +1,4 @@
-# Transform Secret Engineを試す
+# Transform Secret Engine を試す
 
 `Transform Secret Engine`は`Format Preserving Encryption(FPE)`と`Masking`を実現するためのシークレットエンジンです。
 
@@ -10,26 +10,26 @@
 
 `FPE`を利用することで、データサイズを変更やデータベースのスキーマの変更することなく暗号化を実現することが可能となります。
 
-`Transform Secret Engine`はEnterprise版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)やEntperpriseの正式なライセンスで機能をアクティベーションする必要があります。
+`Transform Secret Engine`は Enterprise 版のみ有効な機能です。利用の際は[トライアルのライセンス](https://www.hashicorp.com/products/vault/trial/)や Entperprise の正式なライセンスで機能をアクティベーションする必要があります。
 
 ライセンスのセットの仕方は[こちら](https://www.vaultproject.io/api-docs/system/license)を参考にしてみてください。
 
-## Transformationの4つのリソース
+## Transformation の 4 つのリソース
 
-`Transform Secret Engine`では4つのリソースを利用して上記のような機能を実現します。
+`Transform Secret Engine`では 4 つのリソースを利用して上記のような機能を実現します。
 
-* `Roles`: Transformationを行うためのロール。暗号化する際のエンドポイントとなり、ACLの設定をする際にも利用される。
-* `Alphabets`: 置換される平文、および暗号化された後の暗号文に含まれるUTF-8の文字列の定義する。
+* `Roles`: Transformation を行うためのロール。暗号化する際のエンドポイントとなり、ACL の設定をする際にも利用される。
+* `Alphabets`: 置換される平文、および暗号化された後の暗号文に含まれる UTF-8 の文字列の定義する。
 * `Templates`: 実際に入力値を暗号化する際に利用するテンプレート。暗号化で使用する`Alphabets`や暗号する値の`Parttern`(フォーマット)などを指定する。
 * `Transformation`: 利用可能な`Roles`, 利用する`Templates`, `Type`などを定義する。
 
 また暗号化のアルゴリズムには`NIST`によって認定されている、`AES-FF3-1`を採用しています。
 
-## FPEを実際に使ってみる
+## FPE を実際に使ってみる
 
-4つのリソースを意識しながら実際にまずはあらかじめ用意されているパターンで試してみたいと思います。
+4 つのリソースを意識しながら実際にまずはあらかじめ用意されているパターンで試してみたいと思います。
 
-まずは有効化しましょう。Secret Engineの名前は`transform`です。
+まずは有効化しましょう。Secret Engine の名前は`transform`です。
 
 ```shell
 $ vault secrets enable transform
@@ -66,7 +66,7 @@ transformations=first-transform \
 
 この`my-transform-role`が暗号化をするときのエンドポイントの末尾となります。
 
-`builtin/creditcardnumber`を利用したTransformationを作成してみましょう。`transform/transformation/<Transform Name>`がエンドポイントです。
+`builtin/creditcardnumber`を利用した Transformation を作成してみましょう。`transform/transformation/<Transform Name>`がエンドポイントです。
 
 ```shell
 $ vault write transform/transformation/first-transform \
@@ -102,7 +102,7 @@ Key              Value
 encoded_value    1166-5682-8535-1071
 ```
 
-以上のようにランダムな数字に暗号化されました。このとき、Vaultが特定の値と値をマッピングしているわけではなく、常に`AES-FF3-1`アルゴリズムを利用して暗号化がなされています。
+以上のようにランダムな数字に暗号化されました。このとき、Vault が特定の値と値をマッピングしているわけではなく、常に`AES-FF3-1`アルゴリズムを利用して暗号化がなされています。
 
 次に複合化してみます。
 
@@ -116,9 +116,9 @@ decoded_value    1234-4321-5678-8765
 
 正しい値が取り出せるでしょう。
 
-## 自作のTransformationを利用する
+## 自作の Transformation を利用する
 
-次に自作の`Alphabet`と`Template`を作って暗号化をしてみましょう。ここではEmailアドレスを暗号化する`Transformation`を作ってみます。
+次に自作の`Alphabet`と`Template`を作って暗号化をしてみましょう。ここでは Email アドレスを暗号化する`Transformation`を作ってみます。
 
 まず`Alphabet`を作成します。ここでは置換する文字列と暗号で利用する文字列両方を指定します。
 
@@ -137,7 +137,7 @@ alphabet=localemailaddress
 ```
 テンプレートに設定する項目は下記の通りです。
 
-* `type`: 現状はregrexのみサポート
+* `type`: 現状は regrex のみサポート
 * `pattern`: フォーマットの正規表現
 * `alphabet`: 利用するアルファベット
 
@@ -240,9 +240,9 @@ Key              Value
 decoded_value    takayuki@kabucorp.com
 ```
 
-## Tweak値を利用する
+## Tweak 値を利用する
 
-ここまでTweak値を利用せず暗号化を実施してきました。より安全にデータを守るためにはツイーク値というランダムの値を暗号文とセットで持たせることができます。
+ここまで Tweak 値を利用せず暗号化を実施してきました。より安全にデータを守るためにはツイーク値というランダムの値を暗号文とセットで持たせることができます。
 
 ツイーク値を利用することで複合化の際に、暗号キーへのアクセスに合わせてツイーク値を要求することができます。
 
@@ -268,7 +268,7 @@ decoded_value    1111-2222-3333-4444
 
 暗号化された値は同一の値を返し、複合化可能です。
 
-次にTweak値を生成するモードに変更します。`tweak_source=generated`です。
+次に Tweak 値を生成するモードに変更します。`tweak_source=generated`です。
 
 ```shell
 $ vault write transform/transformation/first-transform \
@@ -294,10 +294,10 @@ encoded_value    5776-7465-2375-4346
 tweak            Jv/kQc9YuQ==
 ```
 
-実行ごとに別々の値が生成され、それぞれにTweak値が生成されていることがわかるでしょう。
-このモードの際、正しく値を取り出すに暗号文に合わせてTweak値が必ず必要です。
+実行ごとに別々の値が生成され、それぞれに Tweak 値が生成されていることがわかるでしょう。
+このモードの際、正しく値を取り出すに暗号文に合わせて Tweak 値が必ず必要です。
 
-まずTweak値を入力せずに試してみます。`value`には上の2回目に生成された`encoded_value`を入れてください。
+まず Tweak 値を入力せずに試してみます。`value`には上の 2 回目に生成された`encoded_value`を入れてください。
 
 ```console
 $ vault write transform/decode/my-transform-role value=5776-7465-2375-4346
@@ -309,7 +309,7 @@ Code: 400. Errors:
 * incorrect tweak size provided: 0
 ```
 
-次にTweak値を入れて試してみます。`tweak`には上の2回目に生成された`tweak`を入れてください。
+次に Tweak 値を入れて試してみます。`tweak`には上の 2 回目に生成された`tweak`を入れてください。
 
 ```console
 $ vault write transform/decode/my-transform-role value=5776-7465-2375-4346 tweak=Jv/kQc9YuQ==
@@ -318,7 +318,7 @@ Key              Value
 decoded_value    1111-2222-3333-4444
 ```
 
-正しく復元できました。最後にTweak値に不正確な値を入れてみましょう。`tweak`には上の1回目に生成された`tweak`を入れてください。
+正しく復元できました。最後に Tweak 値に不正確な値を入れてみましょう。`tweak`には上の 1 回目に生成された`tweak`を入れてください。
 
 ```console
 $ vault write transform/decode/my-transform-role value=5776-7465-2375-4346 tweak=3T+WJ0yG9Q==
@@ -327,9 +327,9 @@ Key              Value
 8534-4499-6272-2127
 ```
 
-正しい値が返ってこないはずです。このようにTweakを利用することでより高度にデータの暗号化を行うことが可能です。
+正しい値が返ってこないはずです。このように Tweak を利用することでより高度にデータの暗号化を行うことが可能です。
 
-## Maskingを試す
+## Masking を試す
 
 最後に`Masking`を試してみましょう。`Masking`は`one-way encryption`と呼んでいますが、その名の通り、マスキングしたデータは複合化することはできません。
 
@@ -393,7 +393,7 @@ encoded_value    #####@#######.###
 
 変更が反映されました。
 
-この機能は例えばWebブラウザやATMの画面に実際の値を出したくない際や、ログにPIIのデータを出力させたくない時に利用できます。
+この機能は例えば Web ブラウザや ATM の画面に実際の値を出したくない際や、ログに PII のデータを出力させたくない時に利用できます。
 
 正規表現を変更することで一部の値のみマスキングすることも可能です。最後にこれを試してみましょう。
 
@@ -413,9 +413,9 @@ Key              Value
 encoded_value    t##############i@kabuctl.com
 ```
 
-以上で一通りの`Transform Secret Engine`の機能を試すことができました。`Alphabets`と`Templates`の`Patterne`の正規表現を利用することで様々なデータのTransformationを実現することができます。
+以上で一通りの`Transform Secret Engine`の機能を試すことができました。`Alphabets`と`Templates`の`Patterne`の正規表現を利用することで様々なデータの Transformation を実現することができます。
 
-また、時間のある方はこちらの[サンプルアプリ](https://github.com/tkaburagi/vault-transformation-demo)で実際のWebアプリから利用することを試してみてください。
+また、時間のある方はこちらの[サンプルアプリ](https://github.com/tkaburagi/vault-transformation-demo)で実際の Web アプリから利用することを試してみてください。
 
 ## 参考リンク
 * [Transform Doc](https://www.vaultproject.io/docs/secrets/transform)
