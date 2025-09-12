@@ -45,7 +45,7 @@ $ docker run --name mysql -e MYSQL_ROOT_PASSWORD=rooooot -p 3306:3306 -d mysql:5
 rootでログインをしたら、サンプルのデータを投入します。パスワードは`rooooot`です。
 
 ```shell
-$ mysql -u root -p -h127.0.0.1
+$ mysql -u root -p -h 127.0.0.1 --ssl-mode=DISABLED
 ```
 
 ```mysql
