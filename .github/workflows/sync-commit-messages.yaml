@@ -1,0 +1,29 @@
+name: Sync commit diff to PRs
+
+on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+    - reopened
+    - edited
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  sync-commit-messages:
+    runs-on: ubuntu-24.04
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # https://github.com/technote-space/pr-commit-body-action/tree/main
+      - name: Pull Request Body
+        uses: technote-space/pr-commit-body-action@v1
